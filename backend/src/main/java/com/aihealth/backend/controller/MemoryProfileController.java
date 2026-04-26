@@ -1,7 +1,11 @@
 package com.aihealth.backend.controller;
 
+import com.aihealth.backend.dto.MemoryProfileRequest;
+import com.aihealth.backend.dto.MemoryProfileResponse;
 import com.aihealth.backend.model.MemoryProfile;
 import com.aihealth.backend.service.MemoryProfileService;
+
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,25 +19,53 @@ public class MemoryProfileController {
         this.memoryProfileService = memoryProfileService;
     }
 
-    // Create or update memory profile
+    // Create or update
     @PostMapping("/{userId}")
-    public ResponseEntity<MemoryProfile> createOrUpdateProfile(
+    public ResponseEntity<MemoryProfileResponse> createOrUpdateProfile(
             @PathVariable Long userId,
-            @RequestBody MemoryProfile profileData) {
+            @RequestBody @Valid MemoryProfileRequest request) {
 
-        MemoryProfile savedProfile =
-                memoryProfileService.saveOrUpdateMemoryProfile(userId, profileData);
+        MemoryProfile profile = new MemoryProfile();
 
-        return ResponseEntity.ok(savedProfile);
+        profile.setFavoritePeople(request.getFavoritePeople());
+        profile.setFavoritePlaces(request.getFavoritePlaces());
+        profile.setCalmingMemories(request.getCalmingMemories());
+        profile.setFavoriteMusic(request.getFavoriteMusic());
+        profile.setComfortingActivities(request.getComfortingActivities());
+        profile.setTriggersToAvoid(request.getTriggersToAvoid());
+
+        MemoryProfile saved =
+                memoryProfileService.saveOrUpdateMemoryProfile(userId, profile);
+
+        MemoryProfileResponse response = mapToResponse(saved);
+
+        return ResponseEntity.ok(response);
     }
 
-    // Get memory profile by user
+    // Get profile
     @GetMapping("/{userId}")
-    public ResponseEntity<MemoryProfile> getProfile(@PathVariable Long userId) {
+    public ResponseEntity<MemoryProfileResponse> getProfile(@PathVariable Long userId) {
 
         MemoryProfile profile =
                 memoryProfileService.getMemoryProfileByUserId(userId);
 
-        return ResponseEntity.ok(profile);
+        MemoryProfileResponse response = mapToResponse(profile);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Mapping method
+    private MemoryProfileResponse mapToResponse(MemoryProfile profile) {
+        return new MemoryProfileResponse(
+                profile.getId(),
+                profile.getUser().getId(),
+                profile.getFavoritePeople(),
+                profile.getFavoritePlaces(),
+                profile.getCalmingMemories(),
+                profile.getFavoriteMusic(),
+                profile.getComfortingActivities(),
+                profile.getTriggersToAvoid(),
+                profile.getCreatedAt()
+        );
     }
 }

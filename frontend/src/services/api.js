@@ -30,3 +30,22 @@ export const getJournalEntries = async (userId) => {
   const response = await fetch(`${BASE_URL}/journal/${userId}`);
   return response.json();
 };
+
+// ===== MEMORY PROFILE =====
+export const saveMemoryProfile = async (userId, data) => {
+  const response = await fetch(`${BASE_URL}/memory-profile/${userId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  return response.json();
+};
+
+export const getMemoryProfile = async (userId) => {
+  const response = await fetch(`${BASE_URL}/memory-profile/${userId}`);
+
+  return response.json();
+};

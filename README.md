@@ -2,6 +2,8 @@
 
 A full-stack AI-powered cognitive wellness platform designed to support users through journaling, memory reinforcement, and routine assistance.
 
+---
+
 ## Overview
 
 This application helps users maintain cognitive engagement and daily structure through:
@@ -13,7 +15,7 @@ This application helps users maintain cognitive engagement and daily structure t
 * Cognitive game tracking (planned)
 * AI-generated supportive responses (planned)
 
-The AI is designed to act as a supportive companion and assistant. It does **not** diagnose medical conditions or provide medical advice.
+The AI is designed to act as a supportive companion and assistant. It does **not** diagnose medical conditions, prescribe medication, or provide unsafe medical advice.
 
 ---
 
@@ -44,12 +46,12 @@ Controller → Service → Repository → Database
 
 ### Packages
 
-* model → database entities
-* repository → data access layer
-* service → business logic
-* controller → API endpoints
-* dto → request/response validation
-* exception → global error handling
+* **model** → database entities
+* **repository** → data access layer
+* **service** → business logic
+* **controller** → API endpoints
+* **dto** → request/response validation
+* **exception** → global error handling
 
 ---
 
@@ -87,7 +89,7 @@ Controller → Service → Repository → Database
 
 ## Database Design
 
-Tables:
+### Tables
 
 * users
 * memory_profiles
@@ -97,10 +99,28 @@ Tables:
 * game_results
 * ai_analyses
 
-Relationships:
+### Relationships
 
-* One-to-One: User → MemoryProfile, DietaryProfile
-* One-to-Many: User → JournalEntry, MedicationReminder, GameResult, AIAnalysis
+* One-to-One:
+
+  * User → MemoryProfile
+  * User → DietaryProfile
+
+* One-to-Many:
+
+  * User → JournalEntry
+  * User → MedicationReminder
+  * User → GameResult
+  * User → AIAnalysis
+
+---
+
+## Frontend Progress
+
+* React (Vite) initialized
+* Project structure created
+* Connecting frontend to backend APIs
+* Journal feature integrated with backend
 
 ---
 
@@ -108,14 +128,20 @@ Relationships:
 
 Backend MVP complete with working APIs and security foundations.
 
-Frontend (React) is now being developed and connected to backend services.
+Frontend (React + Vite) has been initialized and is now being connected to backend services.
 
 ---
 
 ## Next Steps
 
-* Build React frontend UI
-* Add authentication (Clerk or JWT)
-* Implement AI integration
-* Add rate limiting and advanced security
+* Build full frontend UI (Journal, Memory Profile, Navigation)
+* Implement authentication (Clerk or JWT)
+* Add AI integration for journal analysis and companion responses
+* Implement rate limiting and advanced security measures
 * Expand analytics and dashboard features
+
+---
+
+## Future Vision
+
+This platform aims to provide a safe, supportive environment for users to maintain cognitive engagement and emotional well-being through technology-assisted routines and AI companionship.

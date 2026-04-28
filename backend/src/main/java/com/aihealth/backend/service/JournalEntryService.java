@@ -4,6 +4,7 @@ import com.aihealth.backend.dto.JournalEntryRequest;
 import com.aihealth.backend.dto.JournalEntryResponse;
 import com.aihealth.backend.model.JournalEntry;
 import com.aihealth.backend.model.User;
+import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -17,16 +18,18 @@ public class JournalEntryService {
 
     private final JournalEntryRepository journalEntryRepository;
     private final UserRepository userRepository;
+    private final AIAnalysisRepository aiAnalysisRepository;
 
     public JournalEntryService(JournalEntryRepository journalEntryRepository,
-            UserRepository userRepository) {
+                               UserRepository userRepository,
+                               AIAnalysisRepository aiAnalysisRepository) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
+        this.aiAnalysisRepository = aiAnalysisRepository;
     }
 
     // Create journal entry
     public JournalEntryResponse createEntry(Long userId, JournalEntryRequest request) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -47,7 +50,6 @@ public class JournalEntryService {
 
     // Get all entries for a user
     public List<JournalEntryResponse> getEntriesByUser(Long userId) {
-
         return journalEntryRepository.findByUserId(userId)
                 .stream()
                 .map(this::mapToResponse)
@@ -55,6 +57,14 @@ public class JournalEntryService {
     }
 
     private JournalEntryResponse mapToResponse(JournalEntry entry) {
+        String aiResponse = null;
+
+        var aiAnalysisList = aiAnalysisRepository.findByJournalEntryId(entry.getId());
+
+        if (!aiAnalysisList.isEmpty()) {
+            aiResponse = aiAnalysisList.get(0).getSupportiveResponse();
+        }
+
         return new JournalEntryResponse(
                 entry.getId(),
                 entry.getUser().getId(),
@@ -63,6 +73,8 @@ public class JournalEntryService {
                 entry.getMood(),
                 entry.getIsPublic(),
                 entry.getCreatedAt(),
-                entry.getUpdatedAt());
+                entry.getUpdatedAt(),
+                aiResponse
+        );
     }
 }

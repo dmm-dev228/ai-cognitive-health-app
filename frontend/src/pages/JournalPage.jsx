@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { createJournalEntry, getJournalEntries } from "../services/api";
+import { createJournalEntry, getJournalEntries, generateJournalReflection } from "../services/api";
+
 const moodEmojis = {
     happy: "😊",
     excited: "🤩",
@@ -37,12 +38,14 @@ function JournalPage() {
             return;
         }
 
-        await createJournalEntry(userId, {
+        const savedEntry = await createJournalEntry(userId, {
             title,
             content,
             mood,
             isPublic: false
         });
+
+        await generateJournalReflection(savedEntry.id);
 
         setTitle("");
         setContent("");
@@ -94,9 +97,19 @@ function JournalPage() {
                 <article key={entry.id}>
                     <h4>{entry.title}</h4>
                     <p>{entry.content}</p>
+
                     <small>
                         Mood: {entry.mood} {moodEmojis[entry.mood]}
                     </small>
+
+                    {/* AI Response */}
+                    {entry.aiResponse && (
+                        <div>
+                            <strong>CogniCare:</strong>
+                            <p>{entry.aiResponse}</p>
+                        </div>
+                    )}
+
                     <hr />
                 </article>
             ))}

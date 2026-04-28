@@ -12,15 +12,17 @@ public class JournalEntryResponse {
     private Boolean isPublic;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String aiResponse;
 
     public JournalEntryResponse(Long id,
-            Long userId,
-            String title,
-            String content,
-            String mood,
-            Boolean isPublic,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
+                                Long userId,
+                                String title,
+                                String content,
+                                String mood,
+                                Boolean isPublic,
+                                LocalDateTime createdAt,
+                                LocalDateTime updatedAt,
+                                String aiResponse) {
         this.id = id;
         this.userId = userId;
         this.title = title;
@@ -29,6 +31,7 @@ public class JournalEntryResponse {
         this.isPublic = isPublic;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.aiResponse = aiResponse;
     }
 
     public Long getId() {
@@ -61,5 +64,9 @@ public class JournalEntryResponse {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public String getAiResponse() {
+        return aiResponse;
     }
 }

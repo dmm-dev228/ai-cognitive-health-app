@@ -1,3 +1,4 @@
+import "../styles/journal.css";
 import { useEffect, useState } from "react";
 import { createJournalEntry, getJournalEntries, generateJournalReflection } from "../services/api";
 
@@ -23,6 +24,7 @@ function JournalPage() {
     const [title, setTitle] = useState("");
     const [entries, setEntries] = useState([]);
     const [mood, setMood] = useState("neutral");
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         fetchEntries();
@@ -34,10 +36,11 @@ function JournalPage() {
     };
 
     const handleSubmit = async () => {
-        if (!content.trim()) {
-            return;
-        }
+        if (!content.trim()) return;
 
+        setIsSaving(true);
+
+        // Step 1: Save journal entry
         const savedEntry = await createJournalEntry(userId, {
             title,
             content,
@@ -45,74 +48,96 @@ function JournalPage() {
             isPublic: false
         });
 
-        await generateJournalReflection(savedEntry.id);
+        // Step 2: Immediately add to UI with "thinking..."
+        const tempEntry = {
+            ...savedEntry,
+            aiResponse: "CogniCare is thinking..."
+        };
+
+        setEntries((prev) => [tempEntry, ...prev]);
+
+        // Step 3: Generate AI response
+        const aiResult = await generateJournalReflection(savedEntry.id);
+
+        // Step 4: Replace "thinking..." with real response
+        setEntries((prev) =>
+            prev.map((entry) =>
+                entry.id === savedEntry.id
+                    ? { ...entry, aiResponse: aiResult.supportiveResponse }
+                    : entry
+            )
+        );
 
         setTitle("");
         setContent("");
-        fetchEntries();
+        setMood("neutral");
+
+        setIsSaving(false);
     };
 
     return (
         <section>
             <h2>Journal</h2>
-            <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Title (optional)"
-            />
-            <label>Mood:</label>
 
-            <select value={mood} onChange={(e) => setMood(e.target.value)}>
-                <option value="happy">Happy 😊</option>
-                <option value="excited">Excited 🤩</option>
-                <option value="calm">Calm 😌</option>
-                <option value="grateful">Grateful 🙏</option>
-                <option value="proud">Proud 😎</option>
+            <div className="form-container">
+                <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Title"
+                />
 
-                <option value="neutral">Neutral 😐</option>
-                <option value="tired">Tired 😴</option>
+                <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Write your thoughts..."
+                    rows="6"
+                />
 
-                <option value="sad">Sad 😢</option>
-                <option value="anxious">Anxious 😟</option>
-                <option value="stressed">Stressed 😫</option>
-                <option value="frustrated">Frustrated 😤</option>
-                <option value="overwhelmed">Overwhelmed 😰</option>
-                <option value="angry">Angry 😠</option>
-            </select>
-            <textarea
-                value={content}
-                onChange={(event) => setContent(event.target.value)}
-                placeholder="Write your thoughts..."
-                rows="6"
-            />
+                <label>Mood:</label>
+                <select value={mood} onChange={(e) => setMood(e.target.value)}>
+                    <option value="happy">Happy 😊</option>
+                    <option value="excited">Excited 🤩</option>
+                    <option value="calm">Calm 😌</option>
+                    <option value="grateful">Grateful 🙏</option>
+                    <option value="proud">Proud 😎</option>
+                    <option value="neutral">Neutral 😐</option>
+                    <option value="tired">Tired 😴</option>
+                    <option value="sad">Sad 😢</option>
+                    <option value="anxious">Anxious 😟</option>
+                    <option value="stressed">Stressed 😫</option>
+                    <option value="frustrated">Frustrated 😤</option>
+                    <option value="overwhelmed">Overwhelmed 😰</option>
+                    <option value="angry">Angry 😠</option>
+                </select>
 
-            <br />
-
-            <button onClick={handleSubmit}>Save Entry</button>
+                <button onClick={handleSubmit} disabled={isSaving}>
+                    {isSaving ? "CogniCare is thinking..." : "Save Entry"}
+                </button>
+            </div>
 
             <h3>Previous Entries</h3>
 
-            {entries.map((entry) => (
-                <article key={entry.id}>
-                    <h4>{entry.title}</h4>
-                    <p>{entry.content}</p>
-
-                    <small>
-                        Mood: {entry.mood} {moodEmojis[entry.mood]}
-                    </small>
-
-                    {/* AI Response */}
-                    {entry.aiResponse && (
-                        <div>
-                            <strong>CogniCare:</strong>
-                            <p>{entry.aiResponse}</p>
+            <div className="journal-container">
+                {entries.map((entry) => (
+                    <div key={entry.id} className="entry">
+                        <div className="user-bubble">
+                            <h4>{entry.title}</h4>
+                            <p>{entry.content}</p>
+                            <small>
+                                Mood: {entry.mood} {moodEmojis[entry.mood]}
+                            </small>
                         </div>
-                    )}
 
-                    <hr />
-                </article>
-            ))}
+                        {entry.aiResponse && (
+                            <div className="ai-bubble">
+                                <strong>CogniCare</strong>
+                                <p>{entry.aiResponse}</p>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
         </section>
     );
 }

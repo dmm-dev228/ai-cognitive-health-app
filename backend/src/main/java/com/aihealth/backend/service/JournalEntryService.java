@@ -21,8 +21,8 @@ public class JournalEntryService {
     private final AIAnalysisRepository aiAnalysisRepository;
 
     public JournalEntryService(JournalEntryRepository journalEntryRepository,
-                               UserRepository userRepository,
-                               AIAnalysisRepository aiAnalysisRepository) {
+            UserRepository userRepository,
+            AIAnalysisRepository aiAnalysisRepository) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
@@ -74,7 +74,6 @@ public class JournalEntryService {
                 entry.getIsPublic(),
                 entry.getCreatedAt(),
                 entry.getUpdatedAt(),
-                aiResponse
-        );
+                aiResponse);
     }
 }

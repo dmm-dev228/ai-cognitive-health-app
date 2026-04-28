@@ -15,14 +15,14 @@ public class MemoryProfileResponse {
     private LocalDateTime createdAt;
 
     public MemoryProfileResponse(Long id,
-                                 Long userId,
-                                 String favoritePeople,
-                                 String favoritePlaces,
-                                 String calmingMemories,
-                                 String favoriteMusic,
-                                 String comfortingActivities,
-                                 String triggersToAvoid,
-                                 LocalDateTime createdAt) {
+            Long userId,
+            String favoritePeople,
+            String favoritePlaces,
+            String calmingMemories,
+            String favoriteMusic,
+            String comfortingActivities,
+            String triggersToAvoid,
+            LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.favoritePeople = favoritePeople;

@@ -19,7 +19,7 @@ public class JournalEntryService {
     private final UserRepository userRepository;
 
     public JournalEntryService(JournalEntryRepository journalEntryRepository,
-                               UserRepository userRepository) {
+            UserRepository userRepository) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
     }
@@ -63,7 +63,6 @@ public class JournalEntryService {
                 entry.getMood(),
                 entry.getIsPublic(),
                 entry.getCreatedAt(),
-                entry.getUpdatedAt()
-        );
+                entry.getUpdatedAt());
     }
 }

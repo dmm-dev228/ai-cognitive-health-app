@@ -14,13 +14,13 @@ public class JournalEntryResponse {
     private LocalDateTime updatedAt;
 
     public JournalEntryResponse(Long id,
-                                Long userId,
-                                String title,
-                                String content,
-                                String mood,
-                                Boolean isPublic,
-                                LocalDateTime createdAt,
-                                LocalDateTime updatedAt) {
+            Long userId,
+            String title,
+            String content,
+            String mood,
+            Boolean isPublic,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
         this.title = title;

@@ -37,7 +37,8 @@ public class MemoryProfile {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public MemoryProfile() {}
+    public MemoryProfile() {
+    }
 
     public Long getId() {
         return id;

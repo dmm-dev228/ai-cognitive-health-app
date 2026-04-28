@@ -35,7 +35,8 @@ public class GameResult {
     @Column(name = "played_at")
     private LocalDateTime playedAt;
 
-    public GameResult() {}
+    public GameResult() {
+    }
 
     public Long getId() {
         return id;

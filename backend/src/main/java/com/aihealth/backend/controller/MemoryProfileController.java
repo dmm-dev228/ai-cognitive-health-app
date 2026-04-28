@@ -35,8 +35,7 @@ public class MemoryProfileController {
         profile.setComfortingActivities(request.getComfortingActivities());
         profile.setTriggersToAvoid(request.getTriggersToAvoid());
 
-        MemoryProfile saved =
-                memoryProfileService.saveOrUpdateMemoryProfile(userId, profile);
+        MemoryProfile saved = memoryProfileService.saveOrUpdateMemoryProfile(userId, profile);
 
         MemoryProfileResponse response = mapToResponse(saved);
 
@@ -47,8 +46,7 @@ public class MemoryProfileController {
     @GetMapping("/{userId}")
     public ResponseEntity<MemoryProfileResponse> getProfile(@PathVariable Long userId) {
 
-        MemoryProfile profile =
-                memoryProfileService.getMemoryProfileByUserId(userId);
+        MemoryProfile profile = memoryProfileService.getMemoryProfileByUserId(userId);
 
         MemoryProfileResponse response = mapToResponse(profile);
 
@@ -66,7 +64,6 @@ public class MemoryProfileController {
                 profile.getFavoriteMusic(),
                 profile.getComfortingActivities(),
                 profile.getTriggersToAvoid(),
-                profile.getCreatedAt()
-        );
+                profile.getCreatedAt());
     }
 }

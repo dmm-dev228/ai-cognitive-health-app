@@ -11,10 +11,10 @@ public class UserResponse {
     private LocalDateTime createdAt;
 
     public UserResponse(Long id,
-                        String username,
-                        String email,
-                        String role,
-                        LocalDateTime createdAt) {
+            String username,
+            String email,
+            String role,
+            LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;

@@ -14,8 +14,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleRuntimeException(RuntimeException ex) {
         ApiErrorResponse error = new ApiErrorResponse(
                 ex.getMessage(),
-                HttpStatus.NOT_FOUND.value()
-        );
+                HttpStatus.NOT_FOUND.value());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
@@ -30,8 +29,7 @@ public class GlobalExceptionHandler {
 
         ApiErrorResponse error = new ApiErrorResponse(
                 message,
-                HttpStatus.BAD_REQUEST.value()
-        );
+                HttpStatus.BAD_REQUEST.value());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }

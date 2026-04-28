@@ -37,7 +37,8 @@ public class JournalEntry {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public JournalEntry() {}
+    public JournalEntry() {
+    }
 
     public Long getId() {
         return id;

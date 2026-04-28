@@ -27,8 +27,7 @@ public class JournalEntryController {
             @PathVariable Long userId,
             @RequestBody @Valid JournalEntryRequest request) {
 
-        JournalEntryResponse response =
-                journalEntryService.createEntry(userId, request);
+        JournalEntryResponse response = journalEntryService.createEntry(userId, request);
 
         return ResponseEntity.ok(response);
     }
@@ -38,8 +37,7 @@ public class JournalEntryController {
     public ResponseEntity<List<JournalEntryResponse>> getEntries(
             @PathVariable Long userId) {
 
-        List<JournalEntryResponse> responses =
-                journalEntryService.getEntriesByUser(userId);
+        List<JournalEntryResponse> responses = journalEntryService.getEntriesByUser(userId);
 
         return ResponseEntity.ok(responses);
     }

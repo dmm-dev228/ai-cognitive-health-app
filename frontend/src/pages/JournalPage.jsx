@@ -51,7 +51,7 @@ function JournalPage() {
         // Step 2: Immediately add to UI with "thinking..."
         const tempEntry = {
             ...savedEntry,
-            aiResponse: "CogniCare is thinking..."
+            aiResponse: "CogniHaven is thinking..."
         };
 
         setEntries((prev) => [tempEntry, ...prev]);
@@ -112,7 +112,7 @@ function JournalPage() {
                 </select>
 
                 <button onClick={handleSubmit} disabled={isSaving}>
-                    {isSaving ? "CogniCare is thinking..." : "Save Entry"}
+                    {isSaving ? "CogniHaven is thinking..." : "Save Entry"}
                 </button>
             </div>
 
@@ -131,7 +131,7 @@ function JournalPage() {
 
                         {entry.aiResponse && (
                             <div className="ai-bubble">
-                                <strong>CogniCare</strong>
+                                <strong>CogniHaven</strong>
                                 <p>{entry.aiResponse}</p>
                             </div>
                         )}

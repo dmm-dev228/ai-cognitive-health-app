@@ -5,7 +5,8 @@ import MemoryProfilePage from "./pages/MemoryProfilePage";
 function App() {
   return (
     <main>
-      <h1>CogniCare</h1>
+      <h1>CogniHaven</h1>
+      <p>A safe, AI-powered space for cognitive wellness, reflection, and daily support.</p>
 
       {/* Navigation */}
       <nav>

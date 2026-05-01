@@ -1,4 +1,4 @@
-# AI Cognitive Health App
+# CogniHaven
 
 A full-stack AI-powered cognitive wellness platform designed to support users through journaling, memory reinforcement, and routine assistance.
 

@@ -17,7 +17,7 @@ function App() {
 
       {/* Routes */}
       <Routes>
-        <Route path="/" element={<p>Welcome to CogniCare</p>} />
+        <Route path="/" element={<p>Welcome to CogniHaven</p>} />
         <Route path="/journal" element={<JournalPage />} />
         <Route path="/memory" element={<MemoryProfilePage />} />
       </Routes>

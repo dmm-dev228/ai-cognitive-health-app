@@ -1,7 +1,6 @@
 # CogniHaven
 
-A full-stack AI-powered cognitive wellness platform designed to support users through journaling, memory reinforcement, and routine assistance.
-
+A safe, AI-powered space for cognitive wellness, reflection, and daily support.
 ---
 
 ## Overview

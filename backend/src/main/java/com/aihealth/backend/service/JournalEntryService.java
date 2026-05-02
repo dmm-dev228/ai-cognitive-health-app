@@ -7,6 +7,7 @@ import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.UserRepository;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,15 +22,20 @@ public class JournalEntryService {
     private final AIAnalysisRepository aiAnalysisRepository;
 
     public JournalEntryService(JournalEntryRepository journalEntryRepository,
-            UserRepository userRepository,
-            AIAnalysisRepository aiAnalysisRepository) {
+                               UserRepository userRepository,
+                               AIAnalysisRepository aiAnalysisRepository) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
     }
 
-    // Create journal entry
-    public JournalEntryResponse createEntry(Long userId, JournalEntryRequest request) {
+    /**
+     * Creates a new journal entry for a given user.
+     * Ensures userId is non-null and maps the saved entity to a response DTO.
+     */
+    public JournalEntryResponse createEntry(@NonNull Long userId,
+                                            @NonNull JournalEntryRequest request) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -48,15 +54,24 @@ public class JournalEntryService {
         return mapToResponse(saved);
     }
 
-    // Get all entries for a user
-    public List<JournalEntryResponse> getEntriesByUser(Long userId) {
+    /**
+     * Retrieves all journal entries for a given user.
+     * Ensures userId is non-null before querying the repository.
+     */
+    public List<JournalEntryResponse> getEntriesByUser(@NonNull Long userId) {
+
         return journalEntryRepository.findByUserId(userId)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    private JournalEntryResponse mapToResponse(JournalEntry entry) {
+    /**
+     * Converts a JournalEntry entity into a response DTO.
+     * Also attaches AI response if it exists for the entry.
+     */
+    private JournalEntryResponse mapToResponse(@NonNull JournalEntry entry) {
+
         String aiResponse = null;
 
         var aiAnalysisList = aiAnalysisRepository.findByJournalEntryId(entry.getId());
@@ -74,6 +89,7 @@ public class JournalEntryService {
                 entry.getIsPublic(),
                 entry.getCreatedAt(),
                 entry.getUpdatedAt(),
-                aiResponse);
+                aiResponse
+        );
     }
 }

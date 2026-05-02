@@ -5,6 +5,8 @@ import com.aihealth.backend.model.AIAnalysis;
 import com.aihealth.backend.model.JournalEntry;
 import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,7 +44,7 @@ public class AIAnalysisService {
      * 4. Save AIAnalysis to database
      * 5. Return DTO for frontend
      */
-    public AIAnalysisResponse generateJournalReflection(Long journalEntryId) {
+    public AIAnalysisResponse generateJournalReflection(@NonNull Long journalEntryId) {
         JournalEntry journalEntry = journalEntryRepository.findById(journalEntryId)
                 .orElseThrow(() -> new RuntimeException("Journal entry not found"));
 

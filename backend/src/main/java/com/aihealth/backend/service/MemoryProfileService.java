@@ -4,6 +4,8 @@ import com.aihealth.backend.model.MemoryProfile;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.MemoryProfileRepository;
 import com.aihealth.backend.repository.UserRepository;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,7 +23,7 @@ public class MemoryProfileService {
     }
 
     // Create or update memory profile
-    public MemoryProfile saveOrUpdateMemoryProfile(Long userId, MemoryProfile profileData) {
+    public MemoryProfile saveOrUpdateMemoryProfile(@NonNull Long userId, MemoryProfile profileData) {
 
         // Find user
         User user = userRepository.findById(userId)

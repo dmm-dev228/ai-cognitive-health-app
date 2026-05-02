@@ -7,6 +7,7 @@ import com.aihealth.backend.service.MemoryProfileService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -23,7 +24,7 @@ public class MemoryProfileController {
     // Create or update
     @PostMapping("/{userId}")
     public ResponseEntity<MemoryProfileResponse> createOrUpdateProfile(
-            @PathVariable Long userId,
+            @PathVariable @NonNull Long userId,
             @RequestBody @Valid MemoryProfileRequest request) {
 
         MemoryProfile profile = new MemoryProfile();

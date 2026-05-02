@@ -6,6 +6,7 @@ import com.aihealth.backend.service.JournalEntryService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,8 @@ public class JournalEntryController {
     // Create journal entry
     @PostMapping("/{userId}")
     public ResponseEntity<JournalEntryResponse> createEntry(
-            @PathVariable Long userId,
-            @RequestBody @Valid JournalEntryRequest request) {
+            @PathVariable @NonNull Long userId,
+            @RequestBody @Valid @NonNull JournalEntryRequest request) {
 
         JournalEntryResponse response = journalEntryService.createEntry(userId, request);
 
@@ -35,7 +36,7 @@ public class JournalEntryController {
     // Get all journal entries for a user
     @GetMapping("/{userId}")
     public ResponseEntity<List<JournalEntryResponse>> getEntries(
-            @PathVariable Long userId) {
+            @PathVariable @NonNull Long userId) {
 
         List<JournalEntryResponse> responses = journalEntryService.getEntriesByUser(userId);
 

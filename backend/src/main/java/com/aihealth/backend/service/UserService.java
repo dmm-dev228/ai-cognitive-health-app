@@ -4,6 +4,8 @@ import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.UserRepository;
+
+import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +40,7 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
-    public UserResponse getUserById(Long userId) {
+    public UserResponse getUserById(@NonNull Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

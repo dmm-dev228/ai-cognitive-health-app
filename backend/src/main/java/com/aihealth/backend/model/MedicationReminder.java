@@ -50,7 +50,8 @@ public class MedicationReminder {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public MedicationReminder() {}
+    public MedicationReminder() {
+    }
 
     // Getters and Setters
 

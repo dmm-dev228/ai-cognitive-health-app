@@ -1,56 +1,26 @@
-package com.aihealth.backend.model;
+package com.aihealth.backend.dto;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.Size;
 
-@Entity
-@Table(name = "memory_profiles")
-public class MemoryProfile {
+public class MemoryProfileRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    // One-to-one realtionship with User
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
-
-    @Column(name = "favorite_people", columnDefinition = "TEXT")
+    @Size(max = 1000)
     private String favoritePeople;
 
-    @Column(name = "favorite_places", columnDefinition = "TEXT")
+    @Size(max = 1000)
     private String favoritePlaces;
 
-    @Column(name = "calming_memories", columnDefinition = "TEXT")
+    @Size(max = 2000)
     private String calmingMemories;
 
-    @Column(name = "favorite_music", columnDefinition = "TEXT")
+    @Size(max = 500)
     private String favoriteMusic;
 
-    @Column(name = "comforting_activities", columnDefinition = "TEXT")
+    @Size(max = 1000)
     private String comfortingActivities;
 
-    @Column(name = "triggers_to_avoid", columnDefinition = "TEXT")
+    @Size(max = 1000)
     private String triggersToAvoid;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    public MemoryProfile() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 
     public String getFavoritePeople() {
         return favoritePeople;
@@ -98,13 +68,5 @@ public class MemoryProfile {
 
     public void setTriggersToAvoid(String triggersToAvoid) {
         this.triggersToAvoid = triggersToAvoid;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

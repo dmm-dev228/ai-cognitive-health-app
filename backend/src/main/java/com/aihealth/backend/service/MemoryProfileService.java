@@ -15,7 +15,7 @@ public class MemoryProfileService {
     private final UserRepository userRepository;
 
     public MemoryProfileService(MemoryProfileRepository memoryProfileRepository,
-                                UserRepository userRepository) {
+            UserRepository userRepository) {
         this.memoryProfileRepository = memoryProfileRepository;
         this.userRepository = userRepository;
     }
@@ -28,8 +28,7 @@ public class MemoryProfileService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Check if profile already exists
-        Optional<MemoryProfile> existingProfile =
-                memoryProfileRepository.findByUserId(userId);
+        Optional<MemoryProfile> existingProfile = memoryProfileRepository.findByUserId(userId);
 
         if (existingProfile.isPresent()) {
             // Update existing profile

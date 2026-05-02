@@ -144,3 +144,10 @@ Frontend (React + Vite) has been initialized and is now being connected to backe
 ## Future Vision
 
 This platform aims to provide a safe, supportive environment for users to maintain cognitive engagement and emotional well-being through technology-assisted routines and AI companionship.
+
+## 🎥 Demo
+
+Click below to watch a quick demo of CogniHaven:
+
+[![Watch Demo](./assets/JournalDemo.png)](https://www.youtube.com/watch?v=wLBaWi6hfa8)
+

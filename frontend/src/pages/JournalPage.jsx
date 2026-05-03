@@ -1,6 +1,10 @@
 import "../styles/journal.css";
 import { useEffect, useState } from "react";
-import { createJournalEntry, getJournalEntries, generateJournalReflection } from "../services/api";
+import {
+    createJournalEntry,
+    getJournalEntries,
+    generateJournalReflection
+} from "../services/api";
 
 const moodEmojis = {
     happy: "😊",
@@ -17,67 +21,116 @@ const moodEmojis = {
     overwhelmed: "😰",
     angry: "😠"
 };
+
 function JournalPage() {
-    const userId = 1; // Temporary test user until authentication is added
+    const storedUserId = localStorage.getItem("userId");
 
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
     const [entries, setEntries] = useState([]);
     const [mood, setMood] = useState("neutral");
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         fetchEntries();
     }, []);
 
     const fetchEntries = async () => {
-        const data = await getJournalEntries(userId);
-        setEntries(data);
+        try {
+            setIsLoading(true);
+            setError("");
+
+            if (!storedUserId) {
+                setError("No user found. Please log in again.");
+                setIsLoading(false);
+                return;
+            }
+
+            const data = await getJournalEntries();
+
+            console.log("Fetched journal entries:", data);
+
+            setEntries(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error("Failed to fetch journal entries:", err);
+            setError("Could not load journal entries.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleSubmit = async () => {
-        if (!content.trim()) return;
+        if (!title.trim() || !content.trim()) {
+            setError("Please enter both a title and journal content.");
+            return;
+        }
 
-        setIsSaving(true);
+        if (!storedUserId) {
+            setError("No user found. Please log in again.");
+            return;
+        }
 
-        // Step 1: Save journal entry
-        const savedEntry = await createJournalEntry(userId, {
-            title,
-            content,
-            mood,
-            isPublic: false
-        });
+        try {
+            setIsSaving(true);
+            setError("");
 
-        // Step 2: Immediately add to UI with "thinking..."
-        const tempEntry = {
-            ...savedEntry,
-            aiResponse: "CogniHaven is thinking..."
-        };
+            const savedEntry = await createJournalEntry({
+                title,
+                content,
+                mood,
+                isPublic: false
+            });
 
-        setEntries((prev) => [tempEntry, ...prev]);
+            console.log("Saved journal entry:", savedEntry);
 
-        // Step 3: Generate AI response
-        const aiResult = await generateJournalReflection(savedEntry.id);
+            const tempEntry = {
+                ...savedEntry,
+                title: savedEntry.title || title,
+                content: savedEntry.content || content,
+                mood: savedEntry.mood || mood,
+                aiResponse: "CogniHaven is thinking..."
+            };
 
-        // Step 4: Replace "thinking..." with real response
-        setEntries((prev) =>
-            prev.map((entry) =>
-                entry.id === savedEntry.id
-                    ? { ...entry, aiResponse: aiResult.supportiveResponse }
-                    : entry
-            )
-        );
+            setEntries((prev) => [tempEntry, ...prev]);
 
-        setTitle("");
-        setContent("");
-        setMood("neutral");
+            const aiResult = await generateJournalReflection(savedEntry.id);
 
-        setIsSaving(false);
+            console.log("AI reflection result:", aiResult);
+
+            setEntries((prev) =>
+                prev.map((entry) =>
+                    entry.id === savedEntry.id
+                        ? {
+                            ...entry,
+                            aiResponse:
+                                aiResult.supportiveResponse ||
+                                aiResult.response ||
+                                aiResult.message ||
+                                aiResult.data?.supportiveResponse ||
+                                "No AI response returned."
+                        }
+                        : entry
+                )
+            );
+
+            setTitle("");
+            setContent("");
+            setMood("neutral");
+        } catch (err) {
+            console.error("Failed to save journal entry:", err);
+            setError("Could not save journal entry.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
         <section>
             <h2>Journal</h2>
+
+            {error && <p className="error-message">{error}</p>}
 
             <div className="form-container">
                 <input
@@ -95,6 +148,7 @@ function JournalPage() {
                 />
 
                 <label>Mood:</label>
+
                 <select value={mood} onChange={(e) => setMood(e.target.value)}>
                     <option value="happy">Happy 😊</option>
                     <option value="excited">Excited 🤩</option>
@@ -118,26 +172,41 @@ function JournalPage() {
 
             <h3>Previous Entries</h3>
 
-            <div className="journal-container">
-                {entries.map((entry) => (
-                    <div key={entry.id} className="entry">
-                        <div className="user-bubble">
-                            <h4>{entry.title}</h4>
-                            <p>{entry.content}</p>
-                            <small>
-                                Mood: {entry.mood} {moodEmojis[entry.mood]}
-                            </small>
-                        </div>
+            {isLoading ? (
+                <p>Loading journal entries...</p>
+            ) : entries.length === 0 ? (
+                <p>No journal entries yet.</p>
+            ) : (
+                <div className="journal-container">
+                    {entries.map((entry) => (
+                        <div key={entry.id} className="entry">
+                            <div className="user-bubble">
+                                <h4>{entry.title || "Untitled Entry"}</h4>
 
-                        {entry.aiResponse && (
+                                <p>
+                                    {entry.content ||
+                                        "No journal content found."}
+                                </p>
+
+                                <small>
+                                    Mood: {entry.mood || "neutral"}{" "}
+                                    {moodEmojis[entry.mood] || "😐"}
+                                </small>
+                            </div>
+
                             <div className="ai-bubble">
                                 <strong>CogniHaven</strong>
-                                <p>{entry.aiResponse}</p>
+                                <p>
+                                    {entry.aiResponse ||
+                                        entry.supportiveResponse ||
+                                        entry.aiAnalysis?.supportiveResponse ||
+                                        "No AI reflection yet."}
+                                </p>
                             </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </section>
     );
 }

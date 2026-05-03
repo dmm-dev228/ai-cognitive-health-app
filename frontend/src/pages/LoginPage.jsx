@@ -8,21 +8,25 @@ function LoginPage() {
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
 
-
     const handleLogin = async () => {
         const data = await loginUser({
             email,
             password
         });
 
-        console.log("LOGIN DATA:", data); // RIGHT HERE
+        console.log("LOGIN DATA:", data);
 
         if (data.token) {
             localStorage.setItem("token", data.token);
+
+            if (data.userId) {
+                localStorage.setItem("userId", data.userId);
+            }
+
             setMessage("Login successful.");
-            navigate("/journal");
+            window.location.href = "/journal";
         } else {
-            setMessage(data.message || "Login failed.");
+            setMessage(data.message || "Login failed. Missing token or user ID.");
         }
     };
 

@@ -39,8 +39,8 @@ export const createUser = async (data) => {
 };
 
 // ===== JOURNAL =====
-export const createJournalEntry = async (userId, data) => {
-    const response = await fetch(`${BASE_URL}/journal/${userId}`, {
+export const createJournalEntry = async (data) => {
+    const response = await fetch(`${BASE_URL}/journal`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(data)
@@ -49,8 +49,8 @@ export const createJournalEntry = async (userId, data) => {
     return response.json();
 };
 
-export const getJournalEntries = async (userId) => {
-    const response = await fetch(`${BASE_URL}/journal/${userId}`, {
+export const getJournalEntries = async () => {
+    const response = await fetch(`${BASE_URL}/journal`, {
         method: "GET",
         headers: getAuthHeaders()
     });
@@ -100,6 +100,7 @@ const handleResponse = async (response) => {
 
 export const logoutUser = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
 };
 
 export const isLoggedIn = () => {

@@ -7,6 +7,8 @@ import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.UserRepository;
+import com.aihealth.backend.security.SecurityUtils;
+
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -29,15 +31,12 @@ public class JournalEntryService {
         this.aiAnalysisRepository = aiAnalysisRepository;
     }
 
-    /**
-     * Creates a new journal entry for a given user.
-     * Ensures userId is non-null and maps the saved entity to a response DTO.
+    /*
+     * Creates a new journal entry for the currently authenticated user.
+     * The user's email is extracted from the JWT security context.
      */
-    public JournalEntryResponse createEntry(@NonNull Long userId,
-                                            @NonNull JournalEntryRequest request) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public JournalEntryResponse createEntry(@NonNull JournalEntryRequest request) {
+        User user = getCurrentAuthenticatedUser();
 
         JournalEntry entry = new JournalEntry();
 
@@ -54,24 +53,33 @@ public class JournalEntryService {
         return mapToResponse(saved);
     }
 
-    /**
-     * Retrieves all journal entries for a given user.
-     * Ensures userId is non-null before querying the repository.
+    /*
+     * Retrieves all journal entries for the currently authenticated user.
      */
-    public List<JournalEntryResponse> getEntriesByUser(@NonNull Long userId) {
+    public List<JournalEntryResponse> getEntriesByCurrentUser() {
+        User user = getCurrentAuthenticatedUser();
 
-        return journalEntryRepository.findByUserId(userId)
+        return journalEntryRepository.findByUserId(user.getId())
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    /**
+    /*
+     * Loads the currently authenticated user from the JWT email stored in the security context.
+     */
+    private User getCurrentAuthenticatedUser() {
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+    }
+
+    /*
      * Converts a JournalEntry entity into a response DTO.
-     * Also attaches AI response if it exists for the entry.
+     * Also attaches AI response if one exists for the entry.
      */
     private JournalEntryResponse mapToResponse(@NonNull JournalEntry entry) {
-
         String aiResponse = null;
 
         var aiAnalysisList = aiAnalysisRepository.findByJournalEntryId(entry.getId());

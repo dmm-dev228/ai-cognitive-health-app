@@ -24,7 +24,7 @@ public class AuthController {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    /**
+    /*
      * Authenticates a user by email/password and returns a JWT if valid.
      */
     @PostMapping("/login")
@@ -34,8 +34,7 @@ public class AuthController {
 
         boolean passwordMatches = passwordEncoder.matches(
                 request.getPassword(),
-                user.getPassword()
-        );
+                user.getPassword());
 
         if (!passwordMatches) {
             throw new RuntimeException("Invalid email or password");
@@ -43,6 +42,6 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(user.getEmail());
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(new AuthResponse(token, user.getId()));
     }
 }

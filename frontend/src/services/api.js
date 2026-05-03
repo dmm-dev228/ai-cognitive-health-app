@@ -1,5 +1,30 @@
 const BASE_URL = "http://localhost:8080/api";
 
+// Gets JWT from browser storage and adds it to protected backend requests
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+    };
+};
+
+// ===== AUTH =====
+export const loginUser = async (data) => {
+    
+    const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+        
+    });
+
+    return handleResponse(response);
+};
+
 // ===== USER =====
 export const createUser = async (data) => {
     const response = await fetch(`${BASE_URL}/users`, {
@@ -17,9 +42,7 @@ export const createUser = async (data) => {
 export const createJournalEntry = async (userId, data) => {
     const response = await fetch(`${BASE_URL}/journal/${userId}`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
 
@@ -27,7 +50,11 @@ export const createJournalEntry = async (userId, data) => {
 };
 
 export const getJournalEntries = async (userId) => {
-    const response = await fetch(`${BASE_URL}/journal/${userId}`);
+    const response = await fetch(`${BASE_URL}/journal/${userId}`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
     return response.json();
 };
 
@@ -35,9 +62,7 @@ export const getJournalEntries = async (userId) => {
 export const saveMemoryProfile = async (userId, data) => {
     const response = await fetch(`${BASE_URL}/memory-profile/${userId}`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
 
@@ -45,7 +70,10 @@ export const saveMemoryProfile = async (userId, data) => {
 };
 
 export const getMemoryProfile = async (userId) => {
-    const response = await fetch(`${BASE_URL}/memory-profile/${userId}`);
+    const response = await fetch(`${BASE_URL}/memory-profile/${userId}`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
 
     return response.json();
 };
@@ -53,8 +81,27 @@ export const getMemoryProfile = async (userId) => {
 // ===== AI ANALYSIS =====
 export const generateJournalReflection = async (journalEntryId) => {
     const response = await fetch(`${BASE_URL}/ai-analysis/journal/${journalEntryId}`, {
-        method: "POST"
+        method: "POST",
+        headers: getAuthHeaders()
     });
 
     return response.json();
+};
+
+const handleResponse = async (response) => {
+    const data = await response.json();
+
+    if (!response.ok) {
+        console.error("API error:", response.status, data);
+    }
+
+    return data;
+};
+
+export const logoutUser = () => {
+    localStorage.removeItem("token");
+};
+
+export const isLoggedIn = () => {
+    return Boolean(localStorage.getItem("token"));
 };

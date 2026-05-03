@@ -6,6 +6,7 @@ import com.aihealth.backend.service.UserService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,7 +31,7 @@ public class UserController {
 
     // Get user by ID
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable Long userId) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable @NonNull Long userId) {
 
         UserResponse response = userService.getUserById(userId);
 

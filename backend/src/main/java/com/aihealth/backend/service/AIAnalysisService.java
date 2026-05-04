@@ -3,7 +3,6 @@ package com.aihealth.backend.service;
 import com.aihealth.backend.dto.AIAnalysisResponse;
 import com.aihealth.backend.model.AIAnalysis;
 import com.aihealth.backend.model.JournalEntry;
-import com.aihealth.backend.model.MemoryProfile;
 import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 
@@ -24,15 +23,19 @@ public class AIAnalysisService {
     private final JournalEntryRepository journalEntryRepository;
     private final MemoryProfileService memoryProfileService;
     private final OpenAIService openAIService;
+    private final ConversationMessageService conversationMessageService;
 
-    public AIAnalysisService(AIAnalysisRepository aiAnalysisRepository,
+    public AIAnalysisService(
+            AIAnalysisRepository aiAnalysisRepository,
             JournalEntryRepository journalEntryRepository,
             MemoryProfileService memoryProfileService,
-            OpenAIService openAIService) {
+            OpenAIService openAIService,
+            ConversationMessageService conversationMessageService) {
         this.aiAnalysisRepository = aiAnalysisRepository;
         this.journalEntryRepository = journalEntryRepository;
         this.memoryProfileService = memoryProfileService;
         this.openAIService = openAIService;
+        this.conversationMessageService = conversationMessageService;
     }
 
     /*
@@ -68,6 +71,12 @@ public class AIAnalysisService {
         analysis.setCreatedAt(LocalDateTime.now());
 
         AIAnalysis saved = aiAnalysisRepository.save(analysis);
+        // Save the AI reflection into the conversation thread.
+        // This allows the journal to behave like a chat later.
+        conversationMessageService.saveMessage(
+                journalEntry,
+                "AI",
+                aiResponse);
 
         return mapToResponse(saved);
     }

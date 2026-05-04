@@ -1,5 +1,6 @@
 package com.aihealth.backend.service;
 
+import com.aihealth.backend.dto.AIAnalysisResponse;
 import com.aihealth.backend.dto.JournalEntryRequest;
 import com.aihealth.backend.dto.JournalEntryResponse;
 import com.aihealth.backend.model.JournalEntry;
@@ -22,13 +23,17 @@ public class JournalEntryService {
     private final JournalEntryRepository journalEntryRepository;
     private final UserRepository userRepository;
     private final AIAnalysisRepository aiAnalysisRepository;
+    private final ConversationMessageService conversationMessageService;
 
-    public JournalEntryService(JournalEntryRepository journalEntryRepository,
+    public JournalEntryService(
+            JournalEntryRepository journalEntryRepository,
             UserRepository userRepository,
-            AIAnalysisRepository aiAnalysisRepository) {
+            AIAnalysisRepository aiAnalysisRepository,
+            ConversationMessageService conversationMessageService) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
+        this.conversationMessageService = conversationMessageService;
     }
 
     /*
@@ -48,7 +53,14 @@ public class JournalEntryService {
         entry.setCreatedAt(LocalDateTime.now());
         entry.setUpdatedAt(LocalDateTime.now());
 
+        // Save journal first so it gets an ID
         JournalEntry saved = journalEntryRepository.save(entry);
+
+        // Save the user's journal content as the first conversation message
+        conversationMessageService.saveMessage(
+                saved,
+                "USER",
+                saved.getContent());
 
         return mapToResponse(saved);
     }

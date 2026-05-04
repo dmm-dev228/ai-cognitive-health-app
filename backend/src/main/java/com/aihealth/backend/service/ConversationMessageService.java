@@ -71,11 +71,13 @@ public class ConversationMessageService {
 
         String currentUserEmail = SecurityUtils.getCurrentUserEmail();
 
-        // Prevents one user from adding messages to another user's journal thread
         if (!journalEntry.getUser().getEmail().equals(currentUserEmail)) {
             throw new RuntimeException("You are not authorized to access this journal thread");
         }
 
+        // Save only the user's follow-up message here.
+        // AI response generation stays in AIAnalysisService to avoid circular
+        // dependency.
         return saveMessage(
                 journalEntry,
                 "USER",

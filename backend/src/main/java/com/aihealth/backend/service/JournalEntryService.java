@@ -24,8 +24,8 @@ public class JournalEntryService {
     private final AIAnalysisRepository aiAnalysisRepository;
 
     public JournalEntryService(JournalEntryRepository journalEntryRepository,
-                               UserRepository userRepository,
-                               AIAnalysisRepository aiAnalysisRepository) {
+            UserRepository userRepository,
+            AIAnalysisRepository aiAnalysisRepository) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
@@ -59,14 +59,15 @@ public class JournalEntryService {
     public List<JournalEntryResponse> getEntriesByCurrentUser() {
         User user = getCurrentAuthenticatedUser();
 
-        return journalEntryRepository.findByUserId(user.getId())
+        return journalEntryRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     /*
-     * Loads the currently authenticated user from the JWT email stored in the security context.
+     * Loads the currently authenticated user from the JWT email stored in the
+     * security context.
      */
     private User getCurrentAuthenticatedUser() {
         String email = SecurityUtils.getCurrentUserEmail();
@@ -97,7 +98,6 @@ public class JournalEntryService {
                 entry.getIsPublic(),
                 entry.getCreatedAt(),
                 entry.getUpdatedAt(),
-                aiResponse
-        );
+                aiResponse);
     }
 }

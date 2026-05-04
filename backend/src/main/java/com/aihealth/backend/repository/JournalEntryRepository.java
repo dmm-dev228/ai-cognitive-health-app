@@ -6,5 +6,5 @@ import com.aihealth.backend.model.JournalEntry;
 
 public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long> {
 
-    List<JournalEntry> findByUserId(Long userId);
+    List<JournalEntry> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

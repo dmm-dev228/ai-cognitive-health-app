@@ -1,11 +1,12 @@
 import "../styles/journal.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     createJournalEntry,
     getJournalEntries,
-    generateJournalReflection
+    generateJournalReflection,
+    getConversationMessages,
+    addConversationMessage
 } from "../services/api";
-import { getConversationMessages } from "../services/api";
 
 const moodEmojis = {
     happy: "😊",
@@ -34,11 +35,27 @@ function JournalPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const [conversationMap, setConversationMap] = useState({}); // Stores messages per journal entry (threaded chat)
+    // Stores messages grouped by journal entry ID
+    const [conversationMap, setConversationMap] = useState({});
+
+    // Stores follow-up input text grouped by journal entry ID
+    const [followUpMap, setFollowUpMap] = useState({});
+
+    // Tracks which journal thread is waiting for AI response
+    const [loadingMap, setLoadingMap] = useState({});
+
+    // Used to scroll to the newest message
+    const bottomRef = useRef(null);
 
     useEffect(() => {
         fetchEntries();
     }, []);
+
+    const scrollToBottom = () => {
+        setTimeout(() => {
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+    };
 
     const fetchEntries = async () => {
         try {
@@ -55,7 +72,29 @@ function JournalPage() {
 
             console.log("Fetched journal entries:", data);
 
-            setEntries(Array.isArray(data) ? data : []);
+            const journalEntries = Array.isArray(data) ? data : [];
+
+            setEntries(journalEntries);
+
+            // Fetch conversation messages for each existing journal entry
+            const conversationData = {};
+
+            for (const entry of journalEntries) {
+                try {
+                    const messages = await getConversationMessages(entry.id);
+                    conversationData[entry.id] = messages;
+                } catch (err) {
+                    console.error(
+                        `Failed to fetch conversation messages for entry ${entry.id}:`,
+                        err
+                    );
+
+                    conversationData[entry.id] = [];
+                }
+            }
+
+            // Store all loaded conversations by journal entry ID
+            setConversationMap(conversationData);
         } catch (err) {
             console.error("Failed to fetch journal entries:", err);
             setError("Could not load journal entries.");
@@ -99,6 +138,25 @@ function JournalPage() {
             setEntries((prev) => [tempEntry, ...prev]);
 
             const aiResult = await generateJournalReflection(savedEntry.id);
+
+            console.log("AI reflection result:", aiResult);
+
+            setEntries((prev) =>
+                prev.map((entry) =>
+                    entry.id === savedEntry.id
+                        ? {
+                              ...entry,
+                              aiResponse:
+                                  aiResult.supportiveResponse ||
+                                  aiResult.response ||
+                                  aiResult.message ||
+                                  aiResult.data?.supportiveResponse ||
+                                  "No AI response returned."
+                          }
+                        : entry
+                )
+            );
+
             // Fetch full conversation thread after AI response is generated
             const messages = await getConversationMessages(savedEntry.id);
 
@@ -108,32 +166,64 @@ function JournalPage() {
                 [savedEntry.id]: messages
             }));
 
-            console.log("AI reflection result:", aiResult);
-
-            setEntries((prev) =>
-                prev.map((entry) =>
-                    entry.id === savedEntry.id
-                        ? {
-                            ...entry,
-                            aiResponse:
-                                aiResult.supportiveResponse ||
-                                aiResult.response ||
-                                aiResult.message ||
-                                aiResult.data?.supportiveResponse ||
-                                "No AI response returned."
-                        }
-                        : entry
-                )
-            );
-
             setTitle("");
             setContent("");
             setMood("neutral");
+
+            scrollToBottom();
         } catch (err) {
             console.error("Failed to save journal entry:", err);
             setError("Could not save journal entry.");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleFollowUpSubmit = async (entryId) => {
+        const message = followUpMap[entryId];
+
+        if (!message || !message.trim()) {
+            setError("Please enter a follow-up message.");
+            return;
+        }
+
+        try {
+            setError("");
+
+            // Show typing/loading state for this specific journal thread
+            setLoadingMap((prev) => ({
+                ...prev,
+                [entryId]: true
+            }));
+
+            // Backend saves USER message, generates AI reply, and returns full thread
+            const updatedMessages = await addConversationMessage(
+                entryId,
+                message
+            );
+
+            // Replace only this journal's conversation thread
+            setConversationMap((prev) => ({
+                ...prev,
+                [entryId]: updatedMessages
+            }));
+
+            // Clear only this journal's input box
+            setFollowUpMap((prev) => ({
+                ...prev,
+                [entryId]: ""
+            }));
+
+            scrollToBottom();
+        } catch (err) {
+            console.error("Failed to send follow-up message:", err);
+            setError("Could not send follow-up message.");
+        } finally {
+            // Turn off typing/loading state for this journal thread
+            setLoadingMap((prev) => ({
+                ...prev,
+                [entryId]: false
+            }));
         }
     };
 
@@ -229,12 +319,48 @@ function JournalPage() {
                                         <p>
                                             {entry.aiResponse ||
                                                 entry.supportiveResponse ||
-                                                entry.aiAnalysis?.supportiveResponse ||
+                                                entry.aiAnalysis
+                                                    ?.supportiveResponse ||
                                                 "No AI reflection yet."}
                                         </p>
                                     </div>
                                 </>
                             )}
+
+                            {loadingMap[entry.id] && (
+                                <div className="ai-bubble typing">
+                                    <strong>CogniHaven</strong>
+                                    <p>Typing...</p>
+                                </div>
+                            )}
+
+                            <div ref={bottomRef}></div>
+
+                            <div className="follow-up-container">
+                                <input
+                                    type="text"
+                                    value={followUpMap[entry.id] || ""}
+                                    onChange={(e) =>
+                                        setFollowUpMap((prev) => ({
+                                            ...prev,
+                                            [entry.id]: e.target.value
+                                        }))
+                                    }
+                                    placeholder="Continue this conversation..."
+                                    disabled={loadingMap[entry.id]}
+                                />
+
+                                <button
+                                    onClick={() =>
+                                        handleFollowUpSubmit(entry.id)
+                                    }
+                                    disabled={loadingMap[entry.id]}
+                                >
+                                    {loadingMap[entry.id]
+                                        ? "Thinking..."
+                                        : "Send"}
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

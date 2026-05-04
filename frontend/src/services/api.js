@@ -130,3 +130,22 @@ export const getConversationMessages = async (journalEntryId) => {
     // Return parsed JSON (array of messages)
     return response.json();
 };
+
+// Sends a follow-up message to a specific journal thread.
+// Backend saves USER message, generates AI reply, and returns full updated thread.
+export const addConversationMessage = async (journalEntryId, message) => {
+    const response = await fetch(
+        `${BASE_URL}/conversation-messages/journal/${journalEntryId}`,
+        {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ message })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to send conversation message");
+    }
+
+    return response.json();
+};

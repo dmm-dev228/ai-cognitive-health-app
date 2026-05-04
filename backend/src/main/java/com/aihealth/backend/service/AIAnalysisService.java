@@ -3,6 +3,7 @@ package com.aihealth.backend.service;
 import com.aihealth.backend.dto.AIAnalysisResponse;
 import com.aihealth.backend.model.AIAnalysis;
 import com.aihealth.backend.model.JournalEntry;
+import com.aihealth.backend.model.MemoryProfile;
 import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 
@@ -80,8 +81,7 @@ public class AIAnalysisService {
     private String buildMemoryContext(Long userId) {
         // Structured context improves AI understanding compared to raw text
         try {
-            var memoryProfile = memoryProfileService.getMemoryProfileByUserId(userId);
-
+            var memoryProfile = memoryProfileService.getMemoryProfileEntityByUserId(userId);
             return """
                     Favorite people: %s
                     Favorite places: %s

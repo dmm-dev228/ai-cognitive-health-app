@@ -1,13 +1,16 @@
 package com.aihealth.backend.service;
 
+import com.aihealth.backend.dto.MemoryProfileRequest;
+import com.aihealth.backend.dto.MemoryProfileResponse;
 import com.aihealth.backend.model.MemoryProfile;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.MemoryProfileRepository;
 import com.aihealth.backend.repository.UserRepository;
+import com.aihealth.backend.security.SecurityUtils;
 
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -22,38 +25,60 @@ public class MemoryProfileService {
         this.userRepository = userRepository;
     }
 
-    // Create or update memory profile
-    public MemoryProfile saveOrUpdateMemoryProfile(@NonNull Long userId, MemoryProfile profileData) {
+    public MemoryProfileResponse saveOrUpdateMemoryProfile(MemoryProfileRequest request) {
+        User user = getCurrentAuthenticatedUser();
 
-        // Find user
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Optional<MemoryProfile> existingProfile = memoryProfileRepository.findByUserId(user.getId());
 
-        // Check if profile already exists
-        Optional<MemoryProfile> existingProfile = memoryProfileRepository.findByUserId(userId);
+        MemoryProfile profile = existingProfile.orElseGet(MemoryProfile::new);
 
-        if (existingProfile.isPresent()) {
-            // Update existing profile
-            MemoryProfile profile = existingProfile.get();
+        profile.setUser(user);
+        profile.setFavoritePeople(request.getFavoritePeople());
+        profile.setFavoritePlaces(request.getFavoritePlaces());
+        profile.setCalmingMemories(request.getCalmingMemories());
+        profile.setFavoriteMusic(request.getFavoriteMusic());
+        profile.setComfortingActivities(request.getComfortingActivities());
+        profile.setTriggersToAvoid(request.getTriggersToAvoid());
 
-            profile.setFavoritePeople(profileData.getFavoritePeople());
-            profile.setFavoritePlaces(profileData.getFavoritePlaces());
-            profile.setCalmingMemories(profileData.getCalmingMemories());
-            profile.setFavoriteMusic(profileData.getFavoriteMusic());
-            profile.setComfortingActivities(profileData.getComfortingActivities());
-            profile.setTriggersToAvoid(profileData.getTriggersToAvoid());
-
-            return memoryProfileRepository.save(profile);
-
-        } else {
-            // Create new profile
-            profileData.setUser(user);
-            return memoryProfileRepository.save(profileData);
+        if (profile.getCreatedAt() == null) {
+            profile.setCreatedAt(LocalDateTime.now());
         }
+
+        MemoryProfile saved = memoryProfileRepository.save(profile);
+
+        return mapToResponse(saved);
     }
 
-    // Get memory profile by user
-    public MemoryProfile getMemoryProfileByUserId(Long userId) {
+    public MemoryProfileResponse getMemoryProfileForCurrentUser() {
+        User user = getCurrentAuthenticatedUser();
+
+        MemoryProfile profile = memoryProfileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Memory profile not found"));
+
+        return mapToResponse(profile);
+    }
+
+    private User getCurrentAuthenticatedUser() {
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+    }
+
+    private MemoryProfileResponse mapToResponse(MemoryProfile profile) {
+        return new MemoryProfileResponse(
+                profile.getId(),
+                profile.getUser().getId(),
+                profile.getFavoritePeople(),
+                profile.getFavoritePlaces(),
+                profile.getCalmingMemories(),
+                profile.getFavoriteMusic(),
+                profile.getComfortingActivities(),
+                profile.getTriggersToAvoid(),
+                profile.getCreatedAt());
+    }
+
+    public MemoryProfile getMemoryProfileEntityByUserId(Long userId) {
         return memoryProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Memory profile not found"));
     }

@@ -106,3 +106,27 @@ export const logoutUser = () => {
 export const isLoggedIn = () => {
     return Boolean(localStorage.getItem("token"));
 };
+
+// Fetches all conversation messages (USER + AI) for a specific journal entry
+// This powers the chat-style UI for each journal
+export const getConversationMessages = async (journalEntryId) => {
+
+    // Send GET request to backend endpoint using journalEntryId
+    const response = await fetch(
+        `${BASE_URL}/conversation-messages/journal/${journalEntryId}`,
+        {
+            method: "GET",
+
+            // Include JWT token for authentication
+            headers: getAuthHeaders()
+        }
+    );
+
+    // If request fails, throw error for debugging
+    if (!response.ok) {
+        throw new Error("Failed to fetch conversation messages");
+    }
+
+    // Return parsed JSON (array of messages)
+    return response.json();
+};

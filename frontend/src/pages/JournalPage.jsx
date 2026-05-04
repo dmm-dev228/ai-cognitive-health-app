@@ -5,6 +5,7 @@ import {
     getJournalEntries,
     generateJournalReflection
 } from "../services/api";
+import { getConversationMessages } from "../services/api";
 
 const moodEmojis = {
     happy: "😊",
@@ -32,6 +33,8 @@ function JournalPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const [conversationMap, setConversationMap] = useState({}); // Stores messages per journal entry (threaded chat)
 
     useEffect(() => {
         fetchEntries();
@@ -96,6 +99,14 @@ function JournalPage() {
             setEntries((prev) => [tempEntry, ...prev]);
 
             const aiResult = await generateJournalReflection(savedEntry.id);
+            // Fetch full conversation thread after AI response is generated
+            const messages = await getConversationMessages(savedEntry.id);
+
+            // Store messages mapped by journal ID
+            setConversationMap((prev) => ({
+                ...prev,
+                [savedEntry.id]: messages
+            }));
 
             console.log("AI reflection result:", aiResult);
 
@@ -180,29 +191,50 @@ function JournalPage() {
                 <div className="journal-container">
                     {entries.map((entry) => (
                         <div key={entry.id} className="entry">
-                            <div className="user-bubble">
-                                <h4>{entry.title || "Untitled Entry"}</h4>
+                            <h4>{entry.title || "Untitled Entry"}</h4>
 
-                                <p>
-                                    {entry.content ||
-                                        "No journal content found."}
-                                </p>
+                            <small>
+                                Mood: {entry.mood || "neutral"}{" "}
+                                {moodEmojis[entry.mood] || "😐"}
+                            </small>
 
-                                <small>
-                                    Mood: {entry.mood || "neutral"}{" "}
-                                    {moodEmojis[entry.mood] || "😐"}
-                                </small>
-                            </div>
+                            {(conversationMap[entry.id] || []).length > 0 ? (
+                                (conversationMap[entry.id] || []).map((msg) => (
+                                    <div
+                                        key={msg.id}
+                                        className={
+                                            msg.senderType === "USER"
+                                                ? "user-bubble"
+                                                : "ai-bubble"
+                                        }
+                                    >
+                                        {msg.senderType === "AI" && (
+                                            <strong>CogniHaven</strong>
+                                        )}
 
-                            <div className="ai-bubble">
-                                <strong>CogniHaven</strong>
-                                <p>
-                                    {entry.aiResponse ||
-                                        entry.supportiveResponse ||
-                                        entry.aiAnalysis?.supportiveResponse ||
-                                        "No AI reflection yet."}
-                                </p>
-                            </div>
+                                        <p>{msg.message}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <>
+                                    <div className="user-bubble">
+                                        <p>
+                                            {entry.content ||
+                                                "No journal content found."}
+                                        </p>
+                                    </div>
+
+                                    <div className="ai-bubble">
+                                        <strong>CogniHaven</strong>
+                                        <p>
+                                            {entry.aiResponse ||
+                                                entry.supportiveResponse ||
+                                                entry.aiAnalysis?.supportiveResponse ||
+                                                "No AI reflection yet."}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>

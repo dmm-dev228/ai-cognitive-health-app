@@ -5,6 +5,9 @@ import com.aihealth.backend.model.ConversationMessage;
 import com.aihealth.backend.model.JournalEntry;
 import com.aihealth.backend.repository.ConversationMessageRepository;
 import org.springframework.stereotype.Service;
+import com.aihealth.backend.dto.ConversationMessageRequest;
+import com.aihealth.backend.repository.JournalEntryRepository;
+import com.aihealth.backend.security.SecurityUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,9 +16,13 @@ import java.util.stream.Collectors;
 public class ConversationMessageService {
 
     private final ConversationMessageRepository conversationMessageRepository;
+    private final JournalEntryRepository journalEntryRepository;
 
-    public ConversationMessageService(ConversationMessageRepository conversationMessageRepository) {
+    public ConversationMessageService(
+            ConversationMessageRepository conversationMessageRepository,
+            JournalEntryRepository journalEntryRepository) {
         this.conversationMessageRepository = conversationMessageRepository;
+        this.journalEntryRepository = journalEntryRepository;
     }
 
     // Saves a single message into a journal thread.
@@ -23,16 +30,14 @@ public class ConversationMessageService {
     public ConversationMessageResponse saveMessage(
             JournalEntry journalEntry,
             String senderType,
-            String message
-    ) {
+            String message) {
         ConversationMessage conversationMessage = new ConversationMessage();
 
         conversationMessage.setJournalEntry(journalEntry);
         conversationMessage.setSenderType(senderType);
         conversationMessage.setMessage(message);
 
-        ConversationMessage savedMessage =
-                conversationMessageRepository.save(conversationMessage);
+        ConversationMessage savedMessage = conversationMessageRepository.save(conversationMessage);
 
         return mapToResponse(savedMessage);
     }
@@ -53,7 +58,27 @@ public class ConversationMessageService {
                 message.getJournalEntry().getId(),
                 message.getSenderType(),
                 message.getMessage(),
-                message.getCreatedAt()
-        );
+                message.getCreatedAt());
+    }
+
+    // Adds a user follow-up message to an existing journal thread.
+    // Security check makes sure the logged-in user owns the journal entry.
+    public ConversationMessageResponse addUserMessageToJournal(
+            Long journalEntryId,
+            ConversationMessageRequest request) {
+        JournalEntry journalEntry = journalEntryRepository.findById(journalEntryId)
+                .orElseThrow(() -> new RuntimeException("Journal entry not found"));
+
+        String currentUserEmail = SecurityUtils.getCurrentUserEmail();
+
+        // Prevents one user from adding messages to another user's journal thread
+        if (!journalEntry.getUser().getEmail().equals(currentUserEmail)) {
+            throw new RuntimeException("You are not authorized to access this journal thread");
+        }
+
+        return saveMessage(
+                journalEntry,
+                "USER",
+                request.getMessage());
     }
 }

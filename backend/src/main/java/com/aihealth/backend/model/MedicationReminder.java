@@ -4,6 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/*
+ * MedicationReminder
+ * ------------------
+ * Stores medication reminder information for a user.
+ * Each reminder belongs to one authenticated user and can be enabled/disabled.
+ */
 @Entity
 @Table(name = "medication_reminders")
 public class MedicationReminder {
@@ -13,47 +19,44 @@ public class MedicationReminder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Many reminders → One user
+    // Many medication reminders belong to one user
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Core fields
-    @Column(name = "medication_name", nullable = false, length = 100)
+    // Medication details
+    @Column(name = "medication_name", nullable = false, length = 150)
     private String medicationName;
 
-    @Column(name = "dosage_text", length = 100)
-    private String dosageText;
+    @Column(length = 100)
+    private String dosage;
 
-    // 🆕 Visual identification fields
-    @Column(name = "pill_shape", length = 100)
-    private String pillShape;
-
-    @Column(name = "pill_color", length = 100)
-    private String pillColor;
-
-    @Column(name = "pill_size", length = 100)
-    private String pillSize;
+    @Column(name = "reminder_time", nullable = false)
+    private LocalTime reminderTime;
 
     @Column(length = 50)
     private String frequency;
 
-    @Column(name = "reminder_time")
-    private LocalTime reminderTime;
-
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    // Allows user to disable a reminder without deleting it
     @Column(name = "is_active")
     private Boolean isActive;
 
+    // Future notification preference: IN_APP, EMAIL, SMS
+    @Column(name = "notification_method", length = 50)
+    private String notificationMethod;
+
+    // Timestamps
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     public MedicationReminder() {
     }
-
-    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -75,44 +78,12 @@ public class MedicationReminder {
         this.medicationName = medicationName;
     }
 
-    public String getDosageText() {
-        return dosageText;
+    public String getDosage() {
+        return dosage;
     }
 
-    public void setDosageText(String dosageText) {
-        this.dosageText = dosageText;
-    }
-
-    public String getPillShape() {
-        return pillShape;
-    }
-
-    public void setPillShape(String pillShape) {
-        this.pillShape = pillShape;
-    }
-
-    public String getPillColor() {
-        return pillColor;
-    }
-
-    public void setPillColor(String pillColor) {
-        this.pillColor = pillColor;
-    }
-
-    public String getPillSize() {
-        return pillSize;
-    }
-
-    public void setPillSize(String pillSize) {
-        this.pillSize = pillSize;
-    }
-
-    public String getFrequency() {
-        return frequency;
-    }
-
-    public void setFrequency(String frequency) {
-        this.frequency = frequency;
+    public void setDosage(String dosage) {
+        this.dosage = dosage;
     }
 
     public LocalTime getReminderTime() {
@@ -121,6 +92,14 @@ public class MedicationReminder {
 
     public void setReminderTime(LocalTime reminderTime) {
         this.reminderTime = reminderTime;
+    }
+
+    public String getFrequency() {
+        return frequency;
+    }
+
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
     }
 
     public String getNotes() {
@@ -139,11 +118,27 @@ public class MedicationReminder {
         this.isActive = isActive;
     }
 
+    public String getNotificationMethod() {
+        return notificationMethod;
+    }
+
+    public void setNotificationMethod(String notificationMethod) {
+        this.notificationMethod = notificationMethod;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

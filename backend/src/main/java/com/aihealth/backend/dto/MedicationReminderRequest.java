@@ -5,17 +5,22 @@ import java.time.LocalTime;
 /*
  * MedicationReminderRequest
  * -------------------------
- * Incoming data from frontend when creating/updating a reminder.
+ * Incoming data from frontend when creating/updating a medication reminder.
  */
 public class MedicationReminderRequest {
 
     private String medicationName;
     private String dosage;
+    private String pillShape;
+    private String pillColor;
+    private String pillSize;
     private LocalTime reminderTime;
     private String frequency;
     private String notes;
     private Boolean isActive;
-    private String notificationMethod;
+    private Boolean inAppReminderEnabled;
+    private Boolean emailReminderEnabled;
+    private Boolean smsReminderEnabled;
 
     public String getMedicationName() {
         return medicationName;
@@ -31,6 +36,30 @@ public class MedicationReminderRequest {
 
     public void setDosage(String dosage) {
         this.dosage = dosage;
+    }
+
+    public String getPillShape() {
+        return pillShape;
+    }
+
+    public void setPillShape(String pillShape) {
+        this.pillShape = pillShape;
+    }
+
+    public String getPillColor() {
+        return pillColor;
+    }
+
+    public void setPillColor(String pillColor) {
+        this.pillColor = pillColor;
+    }
+
+    public String getPillSize() {
+        return pillSize;
+    }
+
+    public void setPillSize(String pillSize) {
+        this.pillSize = pillSize;
     }
 
     public LocalTime getReminderTime() {
@@ -65,11 +94,27 @@ public class MedicationReminderRequest {
         this.isActive = isActive;
     }
 
-    public String getNotificationMethod() {
-        return notificationMethod;
+    public Boolean getInAppReminderEnabled() {
+        return inAppReminderEnabled;
     }
 
-    public void setNotificationMethod(String notificationMethod) {
-        this.notificationMethod = notificationMethod;
+    public void setInAppReminderEnabled(Boolean inAppReminderEnabled) {
+        this.inAppReminderEnabled = inAppReminderEnabled;
+    }
+
+    public Boolean getEmailReminderEnabled() {
+        return emailReminderEnabled;
+    }
+
+    public void setEmailReminderEnabled(Boolean emailReminderEnabled) {
+        this.emailReminderEnabled = emailReminderEnabled;
+    }
+
+    public Boolean getSmsReminderEnabled() {
+        return smsReminderEnabled;
+    }
+
+    public void setSmsReminderEnabled(Boolean smsReminderEnabled) {
+        this.smsReminderEnabled = smsReminderEnabled;
     }
 }

@@ -172,3 +172,57 @@ export const getDietaryProfile = async () => {
 
     return response.json();
 };
+
+// ===== MEDICATION REMINDERS =====
+
+// Create reminder
+export const createMedicationReminder = async (data) => {
+    const response = await fetch(`${BASE_URL}/medication-reminders`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    return response.json();
+};
+
+// Get all reminders
+export const getMedicationReminders = async () => {
+    const response = await fetch(`${BASE_URL}/medication-reminders`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    return response.json();
+};
+
+// Update reminder
+export const updateMedicationReminder = async (id, data) => {
+    const response = await fetch(`${BASE_URL}/medication-reminders/${id}`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    return response.json();
+};
+
+// Delete reminder
+export const deleteMedicationReminder = async (id) => {
+    const response = await fetch(`${BASE_URL}/medication-reminders/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+    });
+
+    return response;
+};
+
+// Toggle active
+export const toggleMedicationReminder = async (id) => {
+    const response = await fetch(`${BASE_URL}/medication-reminders/${id}/toggle`, {
+        method: "PATCH",
+        headers: getAuthHeaders()
+    });
+
+    return response.json();
+};

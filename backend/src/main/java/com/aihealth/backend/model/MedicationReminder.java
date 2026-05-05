@@ -14,7 +14,6 @@ import java.time.LocalTime;
 @Table(name = "medication_reminders")
 public class MedicationReminder {
 
-    // Primary key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,12 +23,20 @@ public class MedicationReminder {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Medication details
     @Column(name = "medication_name", nullable = false, length = 150)
     private String medicationName;
 
     @Column(length = 100)
     private String dosage;
+
+    @Column(name = "pill_shape", length = 100)
+    private String pillShape;
+
+    @Column(name = "pill_color", length = 100)
+    private String pillColor;
+
+    @Column(name = "pill_size", length = 100)
+    private String pillSize;
 
     @Column(name = "reminder_time", nullable = false)
     private LocalTime reminderTime;
@@ -40,15 +47,17 @@ public class MedicationReminder {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    // Allows user to disable a reminder without deleting it
     @Column(name = "is_active")
     private Boolean isActive;
 
-    // Future notification preference: IN_APP, EMAIL, SMS
-    @Column(name = "notification_method", length = 50)
-    private String notificationMethod;
+    @Column(name = "in_app_reminder_enabled")
+    private Boolean inAppReminderEnabled;
 
-    // Timestamps
+    @Column(name = "email_reminder_enabled")
+    private Boolean emailReminderEnabled;
+
+    @Column(name = "sms_reminder_enabled")
+    private Boolean smsReminderEnabled;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -86,6 +95,30 @@ public class MedicationReminder {
         this.dosage = dosage;
     }
 
+    public String getPillShape() {
+        return pillShape;
+    }
+
+    public void setPillShape(String pillShape) {
+        this.pillShape = pillShape;
+    }
+
+    public String getPillColor() {
+        return pillColor;
+    }
+
+    public void setPillColor(String pillColor) {
+        this.pillColor = pillColor;
+    }
+
+    public String getPillSize() {
+        return pillSize;
+    }
+
+    public void setPillSize(String pillSize) {
+        this.pillSize = pillSize;
+    }
+
     public LocalTime getReminderTime() {
         return reminderTime;
     }
@@ -118,12 +151,28 @@ public class MedicationReminder {
         this.isActive = isActive;
     }
 
-    public String getNotificationMethod() {
-        return notificationMethod;
+    public Boolean getInAppReminderEnabled() {
+        return inAppReminderEnabled;
     }
 
-    public void setNotificationMethod(String notificationMethod) {
-        this.notificationMethod = notificationMethod;
+    public void setInAppReminderEnabled(Boolean inAppReminderEnabled) {
+        this.inAppReminderEnabled = inAppReminderEnabled;
+    }
+
+    public Boolean getEmailReminderEnabled() {
+        return emailReminderEnabled;
+    }
+
+    public void setEmailReminderEnabled(Boolean emailReminderEnabled) {
+        this.emailReminderEnabled = emailReminderEnabled;
+    }
+
+    public Boolean getSmsReminderEnabled() {
+        return smsReminderEnabled;
+    }
+
+    public void setSmsReminderEnabled(Boolean smsReminderEnabled) {
+        this.smsReminderEnabled = smsReminderEnabled;
     }
 
     public LocalDateTime getCreatedAt() {

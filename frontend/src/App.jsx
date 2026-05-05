@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import { logoutUser, isLoggedIn } from "./services/api";
 import SignUpPage from "./pages/SignUpPage";
 import DietaryProfilePage from "./pages/DietaryProfilePage";
+import MedicationReminderPage from "./pages/MedicationReminderPage";
 
 function App() {
   const handleLogout = () => {
@@ -24,6 +25,7 @@ function App() {
         <Link to="/journal">Journal</Link> |{" "}
         <Link to="/memory">Memory Profile</Link> |{" "}
         <Link to="/dietary">Dietary Profile</Link> |{" "}
+        <Link to="/medication">Medication</Link> |
 
         {isLoggedIn() && <button onClick={handleLogout}>Logout</button>}
       </nav>
@@ -36,6 +38,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/dietary" element={<DietaryProfilePage />} />
+        <Route path="/medication" element={<MedicationReminderPage />} />
       </Routes>
     </main>
   );

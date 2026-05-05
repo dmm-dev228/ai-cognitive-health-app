@@ -14,11 +14,16 @@ public class MedicationReminderResponse {
     private Long userId;
     private String medicationName;
     private String dosage;
+    private String pillShape;
+    private String pillColor;
+    private String pillSize;
     private LocalTime reminderTime;
     private String frequency;
     private String notes;
     private Boolean isActive;
-    private String notificationMethod;
+    private Boolean inAppReminderEnabled;
+    private Boolean emailReminderEnabled;
+    private Boolean smsReminderEnabled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -27,11 +32,16 @@ public class MedicationReminderResponse {
             Long userId,
             String medicationName,
             String dosage,
+            String pillShape,
+            String pillColor,
+            String pillSize,
             LocalTime reminderTime,
             String frequency,
             String notes,
             Boolean isActive,
-            String notificationMethod,
+            Boolean inAppReminderEnabled,
+            Boolean emailReminderEnabled,
+            Boolean smsReminderEnabled,
             LocalDateTime createdAt,
             LocalDateTime updatedAt) {
 
@@ -39,11 +49,16 @@ public class MedicationReminderResponse {
         this.userId = userId;
         this.medicationName = medicationName;
         this.dosage = dosage;
+        this.pillShape = pillShape;
+        this.pillColor = pillColor;
+        this.pillSize = pillSize;
         this.reminderTime = reminderTime;
         this.frequency = frequency;
         this.notes = notes;
         this.isActive = isActive;
-        this.notificationMethod = notificationMethod;
+        this.inAppReminderEnabled = inAppReminderEnabled;
+        this.emailReminderEnabled = emailReminderEnabled;
+        this.smsReminderEnabled = smsReminderEnabled;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -64,6 +79,18 @@ public class MedicationReminderResponse {
         return dosage;
     }
 
+    public String getPillShape() {
+        return pillShape;
+    }
+
+    public String getPillColor() {
+        return pillColor;
+    }
+
+    public String getPillSize() {
+        return pillSize;
+    }
+
     public LocalTime getReminderTime() {
         return reminderTime;
     }
@@ -80,8 +107,16 @@ public class MedicationReminderResponse {
         return isActive;
     }
 
-    public String getNotificationMethod() {
-        return notificationMethod;
+    public Boolean getInAppReminderEnabled() {
+        return inAppReminderEnabled;
+    }
+
+    public Boolean getEmailReminderEnabled() {
+        return emailReminderEnabled;
+    }
+
+    public Boolean getSmsReminderEnabled() {
+        return smsReminderEnabled;
     }
 
     public LocalDateTime getCreatedAt() {

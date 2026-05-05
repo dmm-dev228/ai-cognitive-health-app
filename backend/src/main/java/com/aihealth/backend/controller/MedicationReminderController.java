@@ -4,7 +4,6 @@ import com.aihealth.backend.dto.MedicationReminderRequest;
 import com.aihealth.backend.dto.MedicationReminderResponse;
 import com.aihealth.backend.service.MedicationReminderService;
 
-import org.hibernate.sql.Delete;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

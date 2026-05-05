@@ -1,6 +1,5 @@
 package com.aihealth.backend.service;
 
-import com.aihealth.backend.dto.AIAnalysisResponse;
 import com.aihealth.backend.dto.JournalEntryRequest;
 import com.aihealth.backend.dto.JournalEntryResponse;
 import com.aihealth.backend.model.JournalEntry;

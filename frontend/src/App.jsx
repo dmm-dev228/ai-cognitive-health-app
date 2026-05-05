@@ -4,17 +4,18 @@ import MemoryProfilePage from "./pages/MemoryProfilePage";
 import LoginPage from "./pages/LoginPage";
 import { logoutUser, isLoggedIn } from "./services/api";
 import SignUpPage from "./pages/SignUpPage";
+import DietaryProfilePage from "./pages/DietaryProfilePage";
 
 function App() {
   const handleLogout = () => {
     logoutUser();
     window.location.href = "/login";
-};
+  };
   return (
     <main>
       <h1>CogniHaven</h1>
       <p>A safe, AI-powered space for cognitive wellness, reflection, and daily support.</p>
-    
+
       {/* Navigation */}
       <nav>
         <Link to="/">Home</Link> |{" "}
@@ -22,6 +23,8 @@ function App() {
         <Link to="/login">Login</Link> |{" "}
         <Link to="/journal">Journal</Link> |{" "}
         <Link to="/memory">Memory Profile</Link> |{" "}
+        <Link to="/dietary">Dietary Profile</Link> |{" "}
+
         {isLoggedIn() && <button onClick={handleLogout}>Logout</button>}
       </nav>
 
@@ -32,6 +35,7 @@ function App() {
         <Route path="/memory" element={<MemoryProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/dietary" element={<DietaryProfilePage />} />
       </Routes>
     </main>
   );

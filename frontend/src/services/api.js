@@ -149,3 +149,26 @@ export const addConversationMessage = async (journalEntryId, message) => {
 
     return response.json();
 };
+
+// ===== DIETARY PROFILE =====
+
+// Save or update dietary profile (JWT-based)
+export const saveDietaryProfile = async (data) => {
+    const response = await fetch(`${BASE_URL}/dietary-profile`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    return response.json();
+};
+
+// Get dietary profile for current user
+export const getDietaryProfile = async () => {
+    const response = await fetch(`${BASE_URL}/dietary-profile`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    return response.json();
+};

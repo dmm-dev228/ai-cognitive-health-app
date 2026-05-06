@@ -226,3 +226,12 @@ export const toggleMedicationReminder = async (id) => {
 
     return response.json();
 };
+
+export const getNotifications = async () => {
+    const response = await fetch(`${BASE_URL}/notifications`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    return response.json();
+};

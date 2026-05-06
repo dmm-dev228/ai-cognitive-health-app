@@ -6,8 +6,47 @@ import { logoutUser, isLoggedIn } from "./services/api";
 import SignUpPage from "./pages/SignUpPage";
 import DietaryProfilePage from "./pages/DietaryProfilePage";
 import MedicationReminderPage from "./pages/MedicationReminderPage";
+import { useEffect, useState } from "react";
+import { getNotifications } from "./services/api";
+
 
 function App() {
+  const [notifications, setNotifications] = useState([]);
+  const [visibleNotifications, setVisibleNotifications] = useState([]);
+  useEffect(() => {
+const fetchNotifications = async () => {
+  try {
+    if (!isLoggedIn()) {
+      setNotifications([]);
+      setVisibleNotifications([]);
+      return;
+    }
+
+    const data = await getNotifications();
+
+    console.log("NOTIFICATION DATA:", data);
+
+    const notifications = Array.isArray(data) ? data : [];
+
+    console.log("VISIBLE NOTIFICATIONS:", notifications);
+
+    setNotifications(notifications);
+    setVisibleNotifications(notifications);
+
+    setTimeout(() => {
+      setVisibleNotifications([]);
+    }, 8000);
+  } catch (err) {
+    console.error("Failed to fetch notifications:", err);
+  }
+};
+
+    fetchNotifications();
+
+    const interval = setInterval(fetchNotifications, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
   const handleLogout = () => {
     logoutUser();
     window.location.href = "/login";
@@ -29,7 +68,43 @@ function App() {
 
         {isLoggedIn() && <button onClick={handleLogout}>Logout</button>}
       </nav>
+      {visibleNotifications.length > 0 && (
+        <div style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          background: "#fff3cd",
+          padding: "12px",
+          border: "1px solid #ffeeba",
+          borderRadius: "8px",
+          zIndex: 1000,
+          maxWidth: "350px"
+        }}>
+          {visibleNotifications.map((n, index) => (
+            <div key={index} style={{ marginBottom: "8px" }}>
+              <strong>{n.type}:</strong> {n.message}
 
+              <div>
+                {n.actionUrl && (
+                  <a href={n.actionUrl} style={{ marginRight: "10px" }}>
+                    Go
+                  </a>
+                )}
+
+                <button
+                  onClick={() =>
+                    setVisibleNotifications((prev) =>
+                      prev.filter((_, i) => i !== index)
+                    )
+                  }
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {/* Routes */}
       <Routes>
         <Route path="/" element={<p>Welcome to CogniHaven</p>} />

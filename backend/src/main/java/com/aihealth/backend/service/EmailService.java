@@ -44,4 +44,28 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    /*
+     * Sends email verification link to newly registered users.
+     */
+    public void sendVerificationEmail(String toEmail, String verificationToken) {
+
+        String verificationLink = frontendUrl + "/verify-email?token=" + verificationToken;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(toEmail);
+
+        message.setSubject("Verify Your CogniHaven Email");
+
+        message.setText(
+                "Welcome to CogniHaven.\n\n"
+                        + "Please verify your email by clicking the link below:\n\n"
+                        + verificationLink
+                        + "\n\n"
+                        + "If you did not create this account, you can ignore this email.\n\n"
+                        + "— CogniHaven");
+
+        mailSender.send(message);
+    }
 }

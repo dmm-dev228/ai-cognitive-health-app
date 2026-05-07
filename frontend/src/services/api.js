@@ -12,14 +12,14 @@ const getAuthHeaders = () => {
 
 // ===== AUTH =====
 export const loginUser = async (data) => {
-    
+
     const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
-        
+
     });
 
     return handleResponse(response);
@@ -231,6 +231,15 @@ export const getNotifications = async () => {
     const response = await fetch(`${BASE_URL}/notifications`, {
         method: "GET",
         headers: getAuthHeaders()
+    });
+
+    return response.json();
+};
+
+// Verify Email
+export const verifyEmail = async (token) => {
+    const response = await fetch(`${BASE_URL}/auth/verify-email?token=${token}`, {
+        method: "GET"
     });
 
     return response.json();

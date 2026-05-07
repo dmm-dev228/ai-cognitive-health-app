@@ -8,6 +8,7 @@ import DietaryProfilePage from "./pages/DietaryProfilePage";
 import MedicationReminderPage from "./pages/MedicationReminderPage";
 import { useEffect, useState } from "react";
 import { getNotifications } from "./services/api";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 
 function App() {
@@ -114,6 +115,7 @@ const fetchNotifications = async () => {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/dietary" element={<DietaryProfilePage />} />
         <Route path="/medication" element={<MedicationReminderPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
       </Routes>
     </main>
   );

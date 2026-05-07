@@ -30,7 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/users").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/api/auth/login", "/api/auth/verify-email", "/api/users/**").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/verify-email", "/api/auth/resend-verification", "/api/users/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -9,38 +9,39 @@ import MedicationReminderPage from "./pages/MedicationReminderPage";
 import { useEffect, useState } from "react";
 import { getNotifications } from "./services/api";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import { deleteAccount } from "./services/api";
 
 
 function App() {
   const [notifications, setNotifications] = useState([]);
   const [visibleNotifications, setVisibleNotifications] = useState([]);
   useEffect(() => {
-const fetchNotifications = async () => {
-  try {
-    if (!isLoggedIn()) {
-      setNotifications([]);
-      setVisibleNotifications([]);
-      return;
-    }
+    const fetchNotifications = async () => {
+      try {
+        if (!isLoggedIn()) {
+          setNotifications([]);
+          setVisibleNotifications([]);
+          return;
+        }
 
-    const data = await getNotifications();
+        const data = await getNotifications();
 
-    console.log("NOTIFICATION DATA:", data);
+        console.log("NOTIFICATION DATA:", data);
 
-    const notifications = Array.isArray(data) ? data : [];
+        const notifications = Array.isArray(data) ? data : [];
 
-    console.log("VISIBLE NOTIFICATIONS:", notifications);
+        console.log("VISIBLE NOTIFICATIONS:", notifications);
 
-    setNotifications(notifications);
-    setVisibleNotifications(notifications);
+        setNotifications(notifications);
+        setVisibleNotifications(notifications);
 
-    setTimeout(() => {
-      setVisibleNotifications([]);
-    }, 8000);
-  } catch (err) {
-    console.error("Failed to fetch notifications:", err);
-  }
-};
+        setTimeout(() => {
+          setVisibleNotifications([]);
+        }, 8000);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
 
     fetchNotifications();
 
@@ -51,6 +52,18 @@ const fetchNotifications = async () => {
   const handleLogout = () => {
     logoutUser();
     window.location.href = "/login";
+  };
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    await deleteAccount();
+
+    logoutUser();
+    window.location.href = "/signup";
   };
   return (
     <main>
@@ -67,7 +80,15 @@ const fetchNotifications = async () => {
         <Link to="/dietary">Dietary Profile</Link> |{" "}
         <Link to="/medication">Medication</Link> |
 
-        {isLoggedIn() && <button onClick={handleLogout}>Logout</button>}
+
+        {isLoggedIn() && (
+          <>
+            <button onClick={handleLogout}>Logout</button>
+            <button onClick={handleDeleteAccount}>
+              Delete Account
+            </button>
+          </>
+        )}
       </nav>
       {visibleNotifications.length > 0 && (
         <div style={{

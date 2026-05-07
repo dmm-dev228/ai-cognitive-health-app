@@ -4,6 +4,7 @@ import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.UserRepository;
+import com.aihealth.backend.security.SecurityUtils;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -83,5 +84,44 @@ public class UserService {
         user.setVerificationToken(null);
 
         return userRepository.save(user);
+    }
+
+    // Deletes the currently authenticated user's account.
+    public void deleteCurrentUser() {
+        User user = getCurrentAuthenticatedUser();
+
+        userRepository.delete(user);
+    }
+
+    // Loads the currently authenticated user from JWT.
+    private User getCurrentAuthenticatedUser() {
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+    }
+
+    // Resends verification email to unverified users.
+    public void resendVerificationEmail(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException(
+                        "Verification email sent if account exists."));
+
+        // Do nothing if already verified
+        if (Boolean.TRUE.equals(user.getEmailVerified())) {
+            return;
+        }
+
+        // Generate fresh token
+        String verificationToken = UUID.randomUUID().toString();
+
+        user.setVerificationToken(verificationToken);
+
+        userRepository.save(user);
+
+        emailService.sendVerificationEmail(
+                user.getEmail(),
+                verificationToken);
     }
 }

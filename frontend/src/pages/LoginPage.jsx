@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { loginUser } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { loginUser, resendVerificationEmail } from "../services/api";
 
 function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
-    const navigate = useNavigate();
+    const [showResend, setShowResend] = useState(false);
 
     const handleLogin = async () => {
         const data = await loginUser({
@@ -24,10 +23,31 @@ function LoginPage() {
             }
 
             setMessage("Login successful.");
+            setShowResend(false);
             window.location.href = "/journal";
         } else {
-            setMessage(data.message || "Login failed. Missing token or user ID.");
+            const errorMessage =
+                data.message || "Invalid email or password.";
+
+            setMessage(errorMessage);
+
+            if (errorMessage.toLowerCase().includes("verify")) {
+                setShowResend(true);
+            } else {
+                setShowResend(false);
+            }
         }
+    };
+
+    const handleResendVerification = async () => {
+        if (!email.trim()) {
+            setMessage("Please enter your email first.");
+            return;
+        }
+
+        const result = await resendVerificationEmail(email);
+
+        setMessage(result || "Verification email sent. Please check your inbox.");
     };
 
     return (
@@ -51,6 +71,12 @@ function LoginPage() {
             <button onClick={handleLogin}>Login</button>
 
             {message && <p>{message}</p>}
+
+            {showResend && (
+                <button onClick={handleResendVerification}>
+                    Resend Verification Email
+                </button>
+            )}
         </section>
     );
 }

@@ -37,4 +37,12 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
+    // Deletes the currently authenticated user's account.
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteCurrentUser() {
+        userService.deleteCurrentUser();
+
+        return ResponseEntity.noContent().build();
+    }
 }

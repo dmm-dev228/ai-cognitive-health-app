@@ -51,7 +51,8 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(token, user.getId()));
     }
 
-    // Verifies a user's email and returns a JWT so they can be logged in automatically.
+    // Verifies a user's email and returns a JWT so they can be logged in
+    // automatically.
     @GetMapping("/verify-email")
     public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String token) {
         User user = userService.verifyEmail(token);
@@ -59,5 +60,16 @@ public class AuthController {
         String jwt = jwtUtil.generateToken(user.getEmail());
 
         return ResponseEntity.ok(new AuthResponse(jwt, user.getId()));
+    }
+
+    // Resends email verification link.
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerificationEmail(
+            @RequestParam String email) {
+
+        userService.resendVerificationEmail(email);
+
+        return ResponseEntity.ok(
+                "Verification email sent if account exists.");
     }
 }

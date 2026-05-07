@@ -25,6 +25,26 @@ export const loginUser = async (data) => {
     return handleResponse(response);
 };
 
+// Verify Email
+export const verifyEmail = async (token) => {
+    const response = await fetch(`${BASE_URL}/auth/verify-email?token=${token}`, {
+        method: "GET"
+    });
+
+    return response.json();
+};
+
+// Resend Verification Email
+export const resendVerificationEmail = async (email) => {
+    const response = await fetch(
+        `${BASE_URL}/auth/resend-verification?email=${encodeURIComponent(email)}`,
+        {
+            method: "POST"
+        }
+    );
+
+    return response.text();
+};
 // ===== USER =====
 export const createUser = async (data) => {
     const response = await fetch(`${BASE_URL}/users`, {
@@ -36,6 +56,16 @@ export const createUser = async (data) => {
     });
 
     return response.json();
+};
+
+// Delete User Account
+export const deleteAccount = async () => {
+    const response = await fetch(`${BASE_URL}/users/me`, {
+        method: "DELETE",
+        headers: getAuthHeaders()
+    });
+
+    return response;
 };
 
 // ===== JOURNAL =====
@@ -231,15 +261,6 @@ export const getNotifications = async () => {
     const response = await fetch(`${BASE_URL}/notifications`, {
         method: "GET",
         headers: getAuthHeaders()
-    });
-
-    return response.json();
-};
-
-// Verify Email
-export const verifyEmail = async (token) => {
-    const response = await fetch(`${BASE_URL}/auth/verify-email?token=${token}`, {
-        method: "GET"
     });
 
     return response.json();

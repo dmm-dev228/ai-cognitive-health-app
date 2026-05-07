@@ -29,7 +29,7 @@ function MedicationReminderPage() {
         notes: "",
         inAppReminderEnabled: true,
         emailReminderEnabled: false,
-        smsReminderEnabled: false
+    //  smsReminderEnabled: false
     });
 
     useEffect(() => {
@@ -85,7 +85,7 @@ function MedicationReminderPage() {
             notes: "",
             inAppReminderEnabled: true,
             emailReminderEnabled: false,
-            smsReminderEnabled: false
+        //  smsReminderEnabled: false
         });
 
         fetchReminders();
@@ -195,16 +195,6 @@ function MedicationReminderPage() {
                         />
                         Email reminder
                     </label>
-
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="smsReminderEnabled"
-                            checked={formData.smsReminderEnabled}
-                            onChange={handleCheckboxChange}
-                        />
-                        Phone/SMS reminder
-                    </label>
                 </div>
 
                 <button onClick={handleSubmit}>
@@ -232,7 +222,7 @@ function MedicationReminderPage() {
                             {[
                                 r.inAppReminderEnabled ? "In-app" : null,
                                 r.emailReminderEnabled ? "Email" : null,
-                                r.smsReminderEnabled ? "Phone/SMS" : null
+                            //   r.smsReminderEnabled ? "Phone/SMS" : null
                             ]
                                 .filter(Boolean)
                                 .join(", ") || "None"}

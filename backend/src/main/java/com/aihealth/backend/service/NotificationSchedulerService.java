@@ -29,9 +29,12 @@ import java.util.List;
 public class NotificationSchedulerService {
 
     private final MedicationReminderRepository medicationReminderRepository;
+    private final EmailService emailService;
 
-    public NotificationSchedulerService(MedicationReminderRepository medicationReminderRepository) {
+    public NotificationSchedulerService(MedicationReminderRepository medicationReminderRepository,
+            EmailService emailService) {
         this.medicationReminderRepository = medicationReminderRepository;
+        this.emailService = emailService;
     }
 
     /*
@@ -62,8 +65,7 @@ public class NotificationSchedulerService {
                                 + " may need reminder for "
                                 + reminder.getMedicationName()
                                 + " at "
-                                + reminder.getReminderTime()
-                );
+                                + reminder.getReminderTime());
 
                 if (Boolean.TRUE.equals(reminder.getInAppReminderEnabled())) {
                     System.out.println("→ In-app reminder enabled");
@@ -75,6 +77,13 @@ public class NotificationSchedulerService {
 
                 if (Boolean.TRUE.equals(reminder.getSmsReminderEnabled())) {
                     System.out.println("→ SMS reminder enabled");
+                }
+                if (Boolean.TRUE.equals(reminder.getEmailReminderEnabled())) {
+                    System.out.println("→ Sending email reminder");
+
+                    emailService.sendMedicationReminderEmail(
+                            reminder.getUser().getEmail(),
+                            reminder.getMedicationName());
                 }
             }
         }

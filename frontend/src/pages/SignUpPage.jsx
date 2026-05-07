@@ -9,6 +9,7 @@ function SignUpPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleSignUp = async () => {
         const data = await createUser({
@@ -16,6 +17,10 @@ function SignUpPage() {
             email,
             password
         });
+        if (password !== confirmPassword) {
+            setMessage("Passwords do not match.");
+            return;
+        }
 
         if (data.id) {
             setMessage("Account created successfully. Redirecting to login...");
@@ -50,6 +55,12 @@ function SignUpPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Password"
+            />
+            <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                placeholder="Confirm Password"
             />
 
             <button onClick={handleSignUp}>Sign Up</button>

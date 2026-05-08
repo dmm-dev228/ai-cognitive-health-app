@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { getNotifications } from "./services/api";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import { deleteAccount } from "./services/api";
+import GamePage from "./pages/GamePage";
 
 
 function App() {
@@ -78,7 +79,8 @@ function App() {
         <Link to="/journal">Journal</Link> |{" "}
         <Link to="/memory">Memory Profile</Link> |{" "}
         <Link to="/dietary">Dietary Profile</Link> |{" "}
-        <Link to="/medication">Medication</Link> |
+        <Link to="/games">Games</Link> |{" "}
+        <Link to="/medication">Medication</Link> | 
 
 
         {isLoggedIn() && (
@@ -137,6 +139,7 @@ function App() {
         <Route path="/dietary" element={<DietaryProfilePage />} />
         <Route path="/medication" element={<MedicationReminderPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/games" element={<GamePage />} />
       </Routes>
     </main>
   );

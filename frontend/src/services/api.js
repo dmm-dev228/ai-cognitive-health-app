@@ -265,3 +265,43 @@ export const getNotifications = async () => {
 
     return response.json();
 };
+
+// ===== Game Results =====
+
+/*
+ * Save a completed cognitive game result.
+ * JWT token automatically identifies the authenticated user.
+ */
+export const saveGameResult = async (data) => {
+    const response = await fetch(`${BASE_URL}/game-results`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to save game result");
+    }
+
+    return response.json();
+};
+
+/*
+ * Fetch all game results for the authenticated user.
+ * Used later for:
+ * - analytics dashboard
+ * - AI performance context
+ * - progress tracking
+ */
+export const getGameResults = async () => {
+    const response = await fetch(`${BASE_URL}/game-results`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch game results");
+    }
+
+    return response.json();
+};

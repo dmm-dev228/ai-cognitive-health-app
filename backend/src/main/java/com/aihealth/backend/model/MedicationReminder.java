@@ -67,6 +67,9 @@ public class MedicationReminder {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "last_triggered_at")
+    private LocalDateTime lastTriggeredAt;
+
     public MedicationReminder() {
     }
 
@@ -192,5 +195,13 @@ public class MedicationReminder {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getLastTriggeredAt() {
+        return lastTriggeredAt;
+    }
+
+    public void setLastTriggeredAt(LocalDateTime lastTriggeredAt) {
+        this.lastTriggeredAt = lastTriggeredAt;
     }
 }

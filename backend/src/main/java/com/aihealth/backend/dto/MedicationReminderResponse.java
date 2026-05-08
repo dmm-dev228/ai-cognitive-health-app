@@ -2,11 +2,13 @@ package com.aihealth.backend.dto;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 /*
  * MedicationReminderResponse
  * --------------------------
  * Safe response returned to frontend.
+ * Uses reminderTimes so one medication can have multiple daily reminders.
  */
 public class MedicationReminderResponse {
 
@@ -17,8 +19,8 @@ public class MedicationReminderResponse {
     private String pillShape;
     private String pillColor;
     private String pillSize;
-    private LocalTime reminderTime;
-    private String frequency;
+    private Integer frequencyPerDay;
+    private List<LocalTime> reminderTimes;
     private String notes;
     private Boolean isActive;
     private Boolean inAppReminderEnabled;
@@ -35,8 +37,8 @@ public class MedicationReminderResponse {
             String pillShape,
             String pillColor,
             String pillSize,
-            LocalTime reminderTime,
-            String frequency,
+            Integer frequencyPerDay,
+            List<LocalTime> reminderTimes,
             String notes,
             Boolean isActive,
             Boolean inAppReminderEnabled,
@@ -52,8 +54,8 @@ public class MedicationReminderResponse {
         this.pillShape = pillShape;
         this.pillColor = pillColor;
         this.pillSize = pillSize;
-        this.reminderTime = reminderTime;
-        this.frequency = frequency;
+        this.frequencyPerDay = frequencyPerDay;
+        this.reminderTimes = reminderTimes;
         this.notes = notes;
         this.isActive = isActive;
         this.inAppReminderEnabled = inAppReminderEnabled;
@@ -91,12 +93,12 @@ public class MedicationReminderResponse {
         return pillSize;
     }
 
-    public LocalTime getReminderTime() {
-        return reminderTime;
+    public Integer getFrequencyPerDay() {
+        return frequencyPerDay;
     }
 
-    public String getFrequency() {
-        return frequency;
+    public List<LocalTime> getReminderTimes() {
+        return reminderTimes;
     }
 
     public String getNotes() {

@@ -1,6 +1,9 @@
 package com.aihealth.backend.dto;
 
 import java.time.LocalTime;
+import java.util.List;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 /*
  * MedicationReminderRequest
@@ -14,8 +17,6 @@ public class MedicationReminderRequest {
     private String pillShape;
     private String pillColor;
     private String pillSize;
-    private LocalTime reminderTime;
-    private String frequency;
     private String notes;
     private Boolean isActive;
     private Boolean inAppReminderEnabled;
@@ -62,20 +63,20 @@ public class MedicationReminderRequest {
         this.pillSize = pillSize;
     }
 
-    public LocalTime getReminderTime() {
-        return reminderTime;
+    public Integer getFrequencyPerDay() {
+        return frequencyPerDay;
     }
 
-    public void setReminderTime(LocalTime reminderTime) {
-        this.reminderTime = reminderTime;
+    public void setFrequencyPerDay(Integer frequencyPerDay) {
+        this.frequencyPerDay = frequencyPerDay;
     }
 
-    public String getFrequency() {
-        return frequency;
+    public List<LocalTime> getReminderTimes() {
+        return reminderTimes;
     }
 
-    public void setFrequency(String frequency) {
-        this.frequency = frequency;
+    public void setReminderTimes(List<LocalTime> reminderTimes) {
+        this.reminderTimes = reminderTimes;
     }
 
     public String getNotes() {
@@ -117,4 +118,10 @@ public class MedicationReminderRequest {
     public void setSmsReminderEnabled(Boolean smsReminderEnabled) {
         this.smsReminderEnabled = smsReminderEnabled;
     }
+
+    @NotNull(message = "Frequency per day is required")
+    private Integer frequencyPerDay;
+
+    @NotEmpty(message = "At least one reminder time is required")
+    private List<LocalTime> reminderTimes;
 }

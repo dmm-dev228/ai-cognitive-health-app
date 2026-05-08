@@ -12,6 +12,8 @@ import {
  * Allows users to:
  * - Add medication reminders
  * - Include pill details for recognition
+ * - Choose how many times per day the medication is taken
+ * - Add multiple reminder times based on frequencyPerDay
  * - Choose reminder channels
  * - View, delete, and toggle reminders
  */
@@ -24,28 +26,35 @@ function MedicationReminderPage() {
         pillShape: "",
         pillColor: "",
         pillSize: "",
-        reminderTime: "",
-        frequency: "",
+        frequencyPerDay: 1,
+        reminderTimes: [""],
         notes: "",
         inAppReminderEnabled: true,
-        emailReminderEnabled: false,
-    //  smsReminderEnabled: false
+        emailReminderEnabled: false
+        // smsReminderEnabled: false
     });
 
     useEffect(() => {
         fetchReminders();
     }, []);
 
-    /*
-     * Fetch all reminders for current authenticated user.
-     */
-    const fetchReminders = async () => {
+/*
+ * Fetch all reminders for the currently authenticated user.
+ */
+const fetchReminders = async () => {
+    try {
         const data = await getMedicationReminders();
-        setReminders(Array.isArray(data) ? data : []);
-    };
 
+        console.log("Fetched medication reminders:", data);
+
+        setReminders(Array.isArray(data) ? data : []);
+    } catch (err) {
+        console.error("Failed to fetch medication reminders:", err);
+        setReminders([]);
+    }
+};
     /*
-     * Handles text/time input changes.
+     * Handles normal text input changes.
      */
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -54,6 +63,39 @@ function MedicationReminderPage() {
             ...prev,
             [name]: value
         }));
+    };
+
+    /*
+     * Updates frequencyPerDay and automatically creates
+     * the matching number of time input fields.
+     *
+     * Example:
+     * frequencyPerDay = 3
+     * reminderTimes = ["", "", ""]
+     */
+    const handleFrequencyChange = (e) => {
+        const count = Number(e.target.value);
+
+        setFormData((prev) => ({
+            ...prev,
+            frequencyPerDay: count,
+            reminderTimes: Array(count).fill("")
+        }));
+    };
+
+    /*
+     * Updates a specific reminder time inside reminderTimes.
+     */
+    const handleReminderTimeChange = (index, value) => {
+        setFormData((prev) => {
+            const updatedTimes = [...prev.reminderTimes];
+            updatedTimes[index] = value;
+
+            return {
+                ...prev,
+                reminderTimes: updatedTimes
+            };
+        });
     };
 
     /*
@@ -70,9 +112,23 @@ function MedicationReminderPage() {
 
     /*
      * Create a medication reminder.
+     * Backend expects:
+     * - frequencyPerDay
+     * - reminderTimes array
      */
-    const handleSubmit = async () => {
-        await createMedicationReminder(formData);
+/*
+ * Create a medication reminder.
+ * Backend expects:
+ * - frequencyPerDay
+ * - reminderTimes array
+ */
+const handleSubmit = async () => {
+    try {
+        console.log("Submitting medication reminder:", formData);
+
+        const savedReminder = await createMedicationReminder(formData);
+
+        console.log("Saved medication reminder:", savedReminder);
 
         setFormData({
             medicationName: "",
@@ -80,16 +136,20 @@ function MedicationReminderPage() {
             pillShape: "",
             pillColor: "",
             pillSize: "",
-            reminderTime: "",
-            frequency: "",
+            frequencyPerDay: 1,
+            reminderTimes: [""],
             notes: "",
             inAppReminderEnabled: true,
-            emailReminderEnabled: false,
-        //  smsReminderEnabled: false
+            emailReminderEnabled: false
+            // smsReminderEnabled: false
         });
 
-        fetchReminders();
-    };
+        await fetchReminders();
+    } catch (err) {
+        console.error("Failed to create medication reminder:", err);
+        alert("Could not create medication reminder. Check console/backend logs.");
+    }
+};
 
     /*
      * Delete a reminder.
@@ -152,19 +212,33 @@ function MedicationReminderPage() {
                     onChange={handleChange}
                 />
 
-                <input
-                    type="time"
-                    name="reminderTime"
-                    value={formData.reminderTime}
-                    onChange={handleChange}
-                />
+                <label>
+                    How many times per day?
+                    <select
+                        name="frequencyPerDay"
+                        value={formData.frequencyPerDay}
+                        onChange={handleFrequencyChange}
+                    >
+                        <option value={1}>Once daily</option>
+                        <option value={2}>Twice daily</option>
+                        <option value={3}>Three times daily</option>
+                        <option value={4}>Four times daily</option>
+                    </select>
+                </label>
 
-                <input
-                    name="frequency"
-                    placeholder="Frequency (e.g. daily, twice daily)"
-                    value={formData.frequency}
-                    onChange={handleChange}
-                />
+                {/* Dynamic reminder time inputs */}
+                {formData.reminderTimes.map((time, index) => (
+                    <label key={index}>
+                        Reminder Time {index + 1}
+                        <input
+                            type="time"
+                            value={time}
+                            onChange={(e) =>
+                                handleReminderTimeChange(index, e.target.value)
+                            }
+                        />
+                    </label>
+                ))}
 
                 <input
                     name="notes"
@@ -174,7 +248,9 @@ function MedicationReminderPage() {
                 />
 
                 <div>
-                    <p><strong>Reminder Channels</strong></p>
+                    <p>
+                        <strong>Reminder Channels</strong>
+                    </p>
 
                     <label>
                         <input
@@ -197,22 +273,37 @@ function MedicationReminderPage() {
                     </label>
                 </div>
 
-                <button onClick={handleSubmit}>
-                    Add Reminder
-                </button>
+                <button onClick={handleSubmit}>Add Reminder</button>
             </div>
 
             {/* LIST */}
             <div>
                 {reminders.map((r) => (
                     <div key={r.id}>
-                        <p><strong>{r.medicationName}</strong></p>
+                        <p>
+                            <strong>{r.medicationName}</strong>
+                        </p>
+
                         <p>Dosage: {r.dosage || "Not set"}</p>
                         <p>Shape: {r.pillShape || "Not set"}</p>
                         <p>Color: {r.pillColor || "Not set"}</p>
                         <p>Size: {r.pillSize || "Not set"}</p>
-                        <p>Time: {r.reminderTime}</p>
-                        <p>Frequency: {r.frequency || "Not set"}</p>
+
+                        <p>
+                            Frequency:{" "}
+                            {r.frequencyPerDay
+                                ? `${r.frequencyPerDay} time(s) per day`
+                                : "Not set"}
+                        </p>
+
+                        <p>
+                            Times:{" "}
+                            {Array.isArray(r.reminderTimes) &&
+                            r.reminderTimes.length > 0
+                                ? r.reminderTimes.join(", ")
+                                : "Not set"}
+                        </p>
+
                         <p>Notes: {r.notes || "None"}</p>
 
                         <p>Status: {r.isActive ? "Active" : "Inactive"}</p>
@@ -221,8 +312,8 @@ function MedicationReminderPage() {
                             Channels:{" "}
                             {[
                                 r.inAppReminderEnabled ? "In-app" : null,
-                                r.emailReminderEnabled ? "Email" : null,
-                            //   r.smsReminderEnabled ? "Phone/SMS" : null
+                                r.emailReminderEnabled ? "Email" : null
+                                // r.smsReminderEnabled ? "Phone/SMS" : null
                             ]
                                 .filter(Boolean)
                                 .join(", ") || "None"}

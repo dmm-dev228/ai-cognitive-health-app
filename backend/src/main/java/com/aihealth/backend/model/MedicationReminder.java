@@ -3,6 +3,7 @@ package com.aihealth.backend.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 /*
  * MedicationReminder
@@ -38,11 +39,13 @@ public class MedicationReminder {
     @Column(name = "pill_size", length = 100)
     private String pillSize;
 
-    @Column(name = "reminder_time", nullable = false)
-    private LocalTime reminderTime;
+    @ElementCollection
+    @CollectionTable(name = "medication_reminder_times", joinColumns = @JoinColumn(name = "medication_reminder_id"))
+    @Column(name = "reminder_times", nullable = false)
+    private List<LocalTime> reminderTimes;
 
-    @Column(length = 50)
-    private String frequency;
+    @Column(name = "frequency_per_day", nullable = false)
+    private Integer frequencyPerDay;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
@@ -119,20 +122,20 @@ public class MedicationReminder {
         this.pillSize = pillSize;
     }
 
-    public LocalTime getReminderTime() {
-        return reminderTime;
+    public List<LocalTime> getReminderTimes() {
+        return reminderTimes;
     }
 
-    public void setReminderTime(LocalTime reminderTime) {
-        this.reminderTime = reminderTime;
+    public void setReminderTimes(List<LocalTime> reminderTimes) {
+        this.reminderTimes = reminderTimes;
     }
 
-    public String getFrequency() {
-        return frequency;
+    public Integer getFrequencyPerDay() {
+        return frequencyPerDay;
     }
 
-    public void setFrequency(String frequency) {
-        this.frequency = frequency;
+    public void setFrequencyPerDay(Integer frequencyPerDay) {
+        this.frequencyPerDay = frequencyPerDay;
     }
 
     public String getNotes() {

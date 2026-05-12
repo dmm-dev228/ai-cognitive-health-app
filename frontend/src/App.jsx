@@ -11,6 +11,7 @@ import { getNotifications } from "./services/api";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import { deleteAccount } from "./services/api";
 import GamePage from "./pages/GamePage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
         <Link to="/dietary">Dietary Profile</Link> |{" "}
         <Link to="/games">Games</Link> |{" "}
         <Link to="/medication">Medication</Link> | 
+        <Link to="/analytics">Analytics</Link>
 
 
         {isLoggedIn() && (
@@ -140,6 +142,7 @@ function App() {
         <Route path="/medication" element={<MedicationReminderPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/games" element={<GamePage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Routes>
     </main>
   );

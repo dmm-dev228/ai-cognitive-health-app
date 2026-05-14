@@ -32,29 +32,24 @@ function GamePage() {
     // Stores when the user begins answering so we can calculate real completion time.
     const [answerStartTime, setAnswerStartTime] = useState(null);
 
-    const totalQuestions = 1;
+    const correctAnswer = pattern.join("");
+    const totalQuestions = correctAnswer.length;
 
-    /*
-     * Returns pattern length based on selected difficulty.
-     */
+    // Returns pattern length based on selected difficulty.
     const getPatternLength = () => {
         if (difficulty === "MEDIUM") return 5;
         if (difficulty === "HARD") return 6;
         return 4;
     };
 
-    /*
-     * Returns how long the pattern should stay visible.
-     */
+    // Returns how long the pattern should stay visible.
     const getDisplayTime = () => {
         if (difficulty === "MEDIUM") return 4000;
         if (difficulty === "HARD") return 5000;
         return 3000;
     };
 
-    /*
-     * Generates a random number pattern.
-     */
+    // Generates a random number pattern.
     const generatePattern = () => {
         const newPattern = [];
         const patternLength = getPatternLength();
@@ -66,9 +61,7 @@ function GamePage() {
         return newPattern;
     };
 
-    /*
-     * Starts or restarts the game.
-     */
+    // Starts or restarts the game.
     const startGame = () => {
         const newPattern = generatePattern();
 
@@ -90,8 +83,6 @@ function GamePage() {
 
     /*
      * Calculates score based on correctness and difficulty.
-     */
-    /*
      * Score represents correctness only.
      * Difficulty is stored separately for analytics.
      */
@@ -99,16 +90,33 @@ function GamePage() {
         return isCorrect ? 100 : 0;
     };
 
-    /*
-     * Checks answer, saves game result, then generates AI reflection.
-     */
+    //Checks answer, saves game result, then generates AI reflection.
     const submitAnswer = async () => {
         const correctAnswer = pattern.join("");
         const cleanedInput = userInput.replace(/\s/g, "");
 
-        const isCorrect = cleanedInput === correctAnswer;
-        const score = calculateScore(isCorrect);
-        const correctAnswers = isCorrect ? 1 : 0;
+        /*
+         * Count how many positions match correctly.
+         *
+         * Example:
+         * Pattern: 1234
+         * Input:   1235
+         * Result:  3 correct
+         */
+        let correctCount = 0;
+
+        for (let i = 0; i < correctAnswer.length; i++) {
+            if (cleanedInput[i] === correctAnswer[i]) {
+                correctCount++;
+            }
+        }
+
+        const correctAnswers = correctCount;
+
+        // Score is now percentage-based instead of all-or-nothing.
+        const score = Math.round(
+            (correctCount / correctAnswer.length) * 100
+        );
 
         const timeTakenSeconds = answerStartTime
             ? Math.max(1, Math.round((Date.now() - answerStartTime) / 1000))
@@ -130,9 +138,9 @@ function GamePage() {
             const savedResult = await saveGameResult(gameResult);
 
             setResultMessage(
-                isCorrect
-                    ? `Correct! Score: ${score}. Time: ${timeTakenSeconds} seconds.`
-                    : `Not quite. The correct pattern was ${correctAnswer}. Time: ${timeTakenSeconds} seconds.`
+                score === 100
+                    ? `Perfect! Score: ${score}%. Time: ${timeTakenSeconds} seconds.`
+                    : `You remembered ${correctAnswers}/${correctAnswer.length} correctly. Score: ${score}%. The correct pattern was ${correctAnswer}.`
             );
 
             setIsGeneratingReflection(true);

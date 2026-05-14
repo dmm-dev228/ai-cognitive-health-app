@@ -4,13 +4,14 @@ import { getGameResults } from "../services/api";
 /*
  * AnalyticsPage
  * -------------
- * Displays simple game performance analytics.
+ * Displays simple cognitive wellness game analytics.
  *
  * Current MVP:
  * - Total games played
  * - Average score
  * - Best score
  * - Average time
+ * - Performance by difficulty
  * - Recent game history
  *
  * Future:
@@ -83,13 +84,45 @@ function AnalyticsPage() {
         return Math.round(total / gameResults.length);
     };
 
+    /*
+     * Groups game results by difficulty.
+     * This lets us compare performance across Easy, Medium, and Hard.
+     */
+    const getStatsByDifficulty = () => {
+        const groups = {};
+
+        gameResults.forEach((result) => {
+            const difficulty = result.difficulty || "UNKNOWN";
+
+            if (!groups[difficulty]) {
+                groups[difficulty] = {
+                    totalGames: 0,
+                    totalScore: 0,
+                    totalTime: 0
+                };
+            }
+
+            groups[difficulty].totalGames += 1;
+            groups[difficulty].totalScore += result.score || 0;
+            groups[difficulty].totalTime += result.timeTakenSeconds || 0;
+        });
+
+        return Object.entries(groups).map(([difficulty, stats]) => ({
+            difficulty,
+            totalGames: stats.totalGames,
+            averageScore: Math.round(stats.totalScore / stats.totalGames),
+            averageTime: Math.round(stats.totalTime / stats.totalGames)
+        }));
+    };
+
     return (
         <section>
             <h2>Analytics Dashboard</h2>
 
             <p>
-                View your cognitive game activity and progress over time.
-                These insights are supportive only and are not medical evaluations.
+                View your cognitive wellness game activity and progress over
+                time. These insights are supportive only and are not medical
+                evaluations.
             </p>
 
             {error && <p className="error-message">{error}</p>}
@@ -107,6 +140,24 @@ function AnalyticsPage() {
                         <p>Average Score: {getAverageScore()}%</p>
                         <p>Best Score: {getBestScore()}%</p>
                         <p>Average Time: {getAverageTime()} seconds</p>
+                    </div>
+
+                    <div>
+                        <h3>Performance by Difficulty</h3>
+
+                        {getStatsByDifficulty().map((stats) => (
+                            <div key={stats.difficulty}>
+                                <p>
+                                    <strong>{stats.difficulty}</strong>
+                                </p>
+                                <p>Games Played: {stats.totalGames}</p>
+                                <p>Average Score: {stats.averageScore}%</p>
+                                <p>
+                                    Average Time: {stats.averageTime} seconds
+                                </p>
+                                <hr />
+                            </div>
+                        ))}
                     </div>
 
                     <div>

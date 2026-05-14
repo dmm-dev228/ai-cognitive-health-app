@@ -277,7 +277,7 @@ Click below to watch a demo of the journal system:
 
 ## Authentication & Email Verification Demo
 
-Click below to watch a demo of the email-verification system:
+Click below to watch a demo of the Authentication & Email Verification system:
 
 [![Watch Demo](./assets/email-verification-demo.png)](https://youtu.be/Ng3uUpbvEks)
 ```

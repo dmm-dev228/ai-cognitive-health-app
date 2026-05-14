@@ -7,44 +7,59 @@ import {
 /*
  * GamePage
  * --------
- * First cognitive wellness game for CogniHaven.
+ * Cognitive wellness games for CogniHaven.
  *
  * Game: Pattern Recall
- * User views a short pattern, then tries to repeat it.
  *
- * Flow:
- * 1. Show pattern
- * 2. User enters remembered pattern
- * 3. Save game result to backend
- * 4. Generate AI wellness reflection
- * 5. Display supportive reflection to user
+ * User views a number pattern, then repeats it from memory.
+ * Difficulty changes the pattern length.
+ *
+ * Results are saved for:
+ * - analytics dashboard
+ * - AI wellness reflections
+ * - future progress tracking
  */
 function GamePage() {
     const [pattern, setPattern] = useState([]);
     const [userInput, setUserInput] = useState("");
+    const [difficulty, setDifficulty] = useState("EASY");
     const [isShowingPattern, setIsShowingPattern] = useState(false);
     const [gameStarted, setGameStarted] = useState(false);
     const [resultMessage, setResultMessage] = useState("");
-
-    // Stores AI reflection after the user completes a game.
     const [aiReflection, setAiReflection] = useState("");
-
-    // Tracks when CogniHaven is generating the game reflection.
     const [isGeneratingReflection, setIsGeneratingReflection] = useState(false);
 
-    const difficulty = "EASY";
+    // Stores when the user begins answering so we can calculate real completion time.
+    const [answerStartTime, setAnswerStartTime] = useState(null);
+
     const totalQuestions = 1;
 
     /*
-     * Generates a simple 4-number pattern.
-     *
-     * Example:
-     * [3, 8, 1, 6]
+     * Returns pattern length based on selected difficulty.
+     */
+    const getPatternLength = () => {
+        if (difficulty === "MEDIUM") return 5;
+        if (difficulty === "HARD") return 6;
+        return 4;
+    };
+
+    /*
+     * Returns how long the pattern should stay visible.
+     */
+    const getDisplayTime = () => {
+        if (difficulty === "MEDIUM") return 4000;
+        if (difficulty === "HARD") return 5000;
+        return 3000;
+    };
+
+    /*
+     * Generates a random number pattern.
      */
     const generatePattern = () => {
         const newPattern = [];
+        const patternLength = getPatternLength();
 
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < patternLength; i++) {
             newPattern.push(Math.floor(Math.random() * 9) + 1);
         }
 
@@ -53,9 +68,6 @@ function GamePage() {
 
     /*
      * Starts or restarts the game.
-     *
-     * The pattern is shown briefly, then hidden so the user
-     * can try to recall it from memory.
      */
     const startGame = () => {
         const newPattern = generatePattern();
@@ -66,34 +78,48 @@ function GamePage() {
         setAiReflection("");
         setGameStarted(true);
         setIsShowingPattern(true);
+        setAnswerStartTime(null);
 
-        // Hide the pattern after 3 seconds.
         setTimeout(() => {
             setIsShowingPattern(false);
-        }, 3000);
+
+            // Start timer when user is allowed to answer.
+            setAnswerStartTime(Date.now());
+        }, getDisplayTime());
     };
 
     /*
-     * Checks the user's answer, saves the result,
-     * then asks CogniHaven to generate a supportive AI reflection.
+     * Calculates score based on correctness and difficulty.
+     */
+    /*
+     * Score represents correctness only.
+     * Difficulty is stored separately for analytics.
+     */
+    const calculateScore = (isCorrect) => {
+        return isCorrect ? 100 : 0;
+    };
+
+    /*
+     * Checks answer, saves game result, then generates AI reflection.
      */
     const submitAnswer = async () => {
         const correctAnswer = pattern.join("");
-
-        // Remove spaces so "1 2 3 4" and "1234" are both accepted.
         const cleanedInput = userInput.replace(/\s/g, "");
 
         const isCorrect = cleanedInput === correctAnswer;
-
-        const score = isCorrect ? 100 : 0;
+        const score = calculateScore(isCorrect);
         const correctAnswers = isCorrect ? 1 : 0;
+
+        const timeTakenSeconds = answerStartTime
+            ? Math.max(1, Math.round((Date.now() - answerStartTime) / 1000))
+            : 0;
 
         const gameResult = {
             gameType: "PATTERN_RECALL",
             score,
             totalQuestions,
             correctAnswers,
-            timeTakenSeconds: 3,
+            timeTakenSeconds,
             difficulty
         };
 
@@ -101,34 +127,21 @@ function GamePage() {
             setResultMessage("");
             setAiReflection("");
 
-            /*
-             * Step 1:
-             * Save the game result first.
-             * The backend returns the saved result including its ID.
-             */
             const savedResult = await saveGameResult(gameResult);
 
             setResultMessage(
                 isCorrect
-                    ? "Correct! Your result was saved."
-                    : `Not quite. The correct pattern was ${correctAnswer}. Result saved.`
+                    ? `Correct! Score: ${score}. Time: ${timeTakenSeconds} seconds.`
+                    : `Not quite. The correct pattern was ${correctAnswer}. Time: ${timeTakenSeconds} seconds.`
             );
 
-            /*
-             * Step 2:
-             * Use the saved game result ID to generate an AI reflection.
-             */
             setIsGeneratingReflection(true);
 
             const aiResult = await generateGameReflection(savedResult.id);
 
-            /*
-             * Step 3:
-             * Store the AI reflection so it can display on the page.
-             */
             setAiReflection(
                 aiResult.supportiveResponse ||
-                    "CogniHaven generated a reflection, but no response text was returned."
+                "CogniHaven generated a reflection, but no response text was returned."
             );
         } catch (err) {
             console.error("Failed during game result/reflection flow:", err);
@@ -146,17 +159,33 @@ function GamePage() {
 
             <p>
                 Practice memory and attention with short cognitive wellness
-                games. Results are saved for future progress tracking and
-                supportive AI insights.
+                games. Results are saved for progress tracking and supportive
+                AI insights.
             </p>
 
             <div>
                 <h3>Pattern Recall</h3>
 
                 {!gameStarted && (
-                    <button onClick={startGame}>
-                        Start Game
-                    </button>
+                    <div>
+                        <label>
+                            Difficulty:
+                            <select
+                                value={difficulty}
+                                onChange={(e) =>
+                                    setDifficulty(e.target.value)
+                                }
+                            >
+                                <option value="EASY">Easy</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HARD">Hard</option>
+                            </select>
+                        </label>
+
+                        <button onClick={startGame}>
+                            Start Game
+                        </button>
+                    </div>
                 )}
 
                 {gameStarted && isShowingPattern && (
@@ -192,6 +221,19 @@ function GamePage() {
                             disabled={isGeneratingReflection}
                         >
                             Play Again
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setGameStarted(false);
+                                setUserInput("");
+                                setPattern([]);
+                                setResultMessage("");
+                                setAiReflection("");
+                            }}
+                            disabled={isGeneratingReflection}
+                        >
+                            Change Difficulty
                         </button>
                     </div>
                 )}

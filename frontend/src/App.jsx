@@ -18,6 +18,9 @@ function App() {
   const [notifications, setNotifications] = useState([]);
   const [visibleNotifications, setVisibleNotifications] = useState([]);
 
+  // Controls app-wide dark mode styling.
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
   // Checks for in-app notifications after login and refreshes them every minute.
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -70,13 +73,22 @@ function App() {
 
   // Reusable NavLink styling so every route has the same active and hover behavior.
   const navLinkClass = ({ isActive }) =>
-    `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${isActive
-      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-      : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-indigo-700 hover:shadow-sm"
+    `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+      isActive
+        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+        : isDarkMode
+        ? "text-slate-300 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
+        : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-indigo-700 hover:shadow-sm"
     }`;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800">
+    <main
+      className={`min-h-screen transition-colors duration-300 ${
+        isDarkMode
+          ? "bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
+          : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
+      }`}
+    >
       {/* Soft background decoration */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
@@ -86,7 +98,13 @@ function App() {
 
       <div className="relative z-10">
         {/* Header / Navbar */}
-        <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 shadow-sm shadow-slate-200/40 backdrop-blur-xl">
+        <header
+          className={`sticky top-0 z-40 border-b shadow-sm backdrop-blur-xl transition-colors duration-300 ${
+            isDarkMode
+              ? "border-white/10 bg-slate-950/75 shadow-black/30"
+              : "border-white/60 bg-white/75 shadow-slate-200/40"
+          }`}
+        >
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               {/* Brand area */}
@@ -96,10 +114,18 @@ function App() {
                 </div>
 
                 <div>
-                  <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-                    Cogni<span className="text-indigo-600">Haven</span>
+                  <h1
+                    className={`text-2xl font-black tracking-tight sm:text-3xl ${
+                      isDarkMode ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    Cogni<span className="text-indigo-500">Haven</span>
                   </h1>
-                  <p className="text-xs font-medium text-slate-500 sm:text-sm">
+                  <p
+                    className={`text-xs font-medium sm:text-sm ${
+                      isDarkMode ? "text-slate-400" : "text-slate-500"
+                    }`}
+                  >
                     AI-powered cognitive wellness and daily support.
                   </p>
                 </div>
@@ -107,9 +133,10 @@ function App() {
 
               {/* Navigation links */}
               <nav className="flex flex-col gap-3 xl:flex-row xl:items-center">
-                <div className="flex flex-wrap items-center gap-2">                  <NavLink to="/" className={navLinkClass}>
-                  Home
-                </NavLink>
+                <div className="flex flex-wrap items-center gap-2">
+                  <NavLink to="/" className={navLinkClass}>
+                    Home
+                  </NavLink>
                   <NavLink to="/journal" className={navLinkClass}>
                     Journal
                   </NavLink>
@@ -132,11 +159,26 @@ function App() {
 
                 {/* Auth actions are separated from primary navigation for cleaner UX. */}
                 <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setIsDarkMode((prev) => !prev)}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${
+                      isDarkMode
+                        ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
+                        : "bg-white text-slate-700 hover:text-indigo-700"
+                    }`}
+                  >
+                    {isDarkMode ? "☀️ Light" : "🌙 Dark"}
+                  </button>
+
                   {!isLoggedIn() && (
                     <>
                       <NavLink
                         to="/login"
-                        className="rounded-full border border-indigo-100 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                        className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                          isDarkMode
+                            ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
+                            : "border-indigo-100 bg-white text-indigo-700"
+                        }`}
                       >
                         Login
                       </NavLink>
@@ -154,7 +196,11 @@ function App() {
                     <>
                       <button
                         onClick={handleLogout}
-                        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:text-indigo-700 hover:shadow-md"
+                        className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                          isDarkMode
+                            ? "border-white/10 bg-white/10 text-slate-200 hover:bg-white/15"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700"
+                        }`}
                       >
                         Logout
                       </button>
@@ -230,13 +276,15 @@ function App() {
                       </p>
 
                       <h2 className="mt-8 max-w-4xl text-5xl font-black leading-tight tracking-tight sm:text-6xl">
-                        A calm daily space for reflection, routines, and supportive AI insights.
+                        A calm daily space for reflection, routines, and
+                        supportive AI insights.
                       </h2>
 
                       <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
-                        CogniHaven helps users build healthier daily habits through
-                        journaling, reminders, cognitive engagement, wellness profiles,
-                        analytics, and warm AI-guided support.
+                        CogniHaven helps users build healthier daily habits
+                        through journaling, reminders, cognitive engagement,
+                        wellness profiles, analytics, and warm AI-guided
+                        support.
                       </p>
 
                       <div className="mt-8 flex flex-wrap gap-4">
@@ -287,7 +335,11 @@ function App() {
                     ].map((feature) => (
                       <div
                         key={feature.title}
-                        className="glass-card rounded-3xl p-6 hover-lift"
+                        className={`rounded-3xl p-6 shadow-lg transition hover:-translate-y-1 ${
+                          isDarkMode
+                            ? "border border-white/10 bg-white/10 text-white backdrop-blur-xl"
+                            : "glass-card"
+                        }`}
                       >
                         <div
                           className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color} text-3xl`}
@@ -295,11 +347,19 @@ function App() {
                           {feature.icon}
                         </div>
 
-                        <h3 className="text-xl font-bold text-slate-900">
+                        <h3
+                          className={`text-xl font-bold ${
+                            isDarkMode ? "text-white" : "text-slate-900"
+                          }`}
+                        >
                           {feature.title}
                         </h3>
 
-                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                        <p
+                          className={`mt-3 text-sm leading-6 ${
+                            isDarkMode ? "text-slate-300" : "text-slate-600"
+                          }`}
+                        >
                           {feature.text}
                         </p>
                       </div>
@@ -308,43 +368,61 @@ function App() {
 
                   {/* Product Story / Value Section */}
                   <section className="grid gap-8 lg:grid-cols-[1fr_0.85fr]">
-                    <div className="glass-card rounded-[2rem] p-8">
+                    <div
+                      className={`rounded-[2rem] p-8 ${
+                        isDarkMode
+                          ? "border border-white/10 bg-white/10 backdrop-blur-xl"
+                          : "glass-card"
+                      }`}
+                    >
                       <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-500">
                         Why CogniHaven
                       </p>
 
-                      <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
+                      <h3
+                        className={`mt-3 text-3xl font-bold tracking-tight ${
+                          isDarkMode ? "text-white" : "text-slate-900"
+                        }`}
+                      >
                         Designed to feel supportive, simple, and non-clinical.
                       </h3>
 
-                      <p className="mt-4 text-sm leading-7 text-slate-600">
-                        CogniHaven brings together reflection, wellness routines, memory
-                        reinforcement, and AI-guided insights in one calming experience.
-                        The goal is to help users stay engaged with daily support tools
-                        without feeling overwhelmed.
+                      <p
+                        className={`mt-4 text-sm leading-7 ${
+                          isDarkMode ? "text-slate-300" : "text-slate-600"
+                        }`}
+                      >
+                        CogniHaven brings together reflection, wellness
+                        routines, memory reinforcement, and AI-guided insights
+                        in one calming experience. The goal is to help users
+                        stay engaged with daily support tools without feeling
+                        overwhelmed.
                       </p>
 
                       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                        <div className="rounded-3xl bg-white p-5 shadow-sm">
-                          <p className="text-3xl font-black text-indigo-600">AI</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-700">
-                            Supportive insights
-                          </p>
-                        </div>
-
-                        <div className="rounded-3xl bg-white p-5 shadow-sm">
-                          <p className="text-3xl font-black text-emerald-600">24/7</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-700">
-                            Daily support space
-                          </p>
-                        </div>
-
-                        <div className="rounded-3xl bg-white p-5 shadow-sm">
-                          <p className="text-3xl font-black text-violet-600">Calm</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-700">
-                            Wellness-first design
-                          </p>
-                        </div>
+                        {[
+                          ["AI", "Supportive insights", "text-indigo-600"],
+                          ["24/7", "Daily support space", "text-emerald-600"],
+                          ["Calm", "Wellness-first design", "text-violet-600"],
+                        ].map(([big, small, color]) => (
+                          <div
+                            key={big}
+                            className={`rounded-3xl p-5 shadow-sm ${
+                              isDarkMode ? "bg-white/10" : "bg-white"
+                            }`}
+                          >
+                            <p className={`text-3xl font-black ${color}`}>
+                              {big}
+                            </p>
+                            <p
+                              className={`mt-2 text-sm font-semibold ${
+                                isDarkMode ? "text-slate-200" : "text-slate-700"
+                              }`}
+                            >
+                              {small}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
 

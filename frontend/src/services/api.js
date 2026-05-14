@@ -324,3 +324,23 @@ export const getGameResults = async () => {
 
     return response.json();
 };
+
+
+// ===== Analytics AI =====
+
+// Generate AI analytics summary.
+export const generateAnalyticsSummary = async () => {
+    const response = await fetch(
+        `${BASE_URL}/ai-analysis/analytics-summary`,
+        {
+            method: "POST",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to generate analytics summary");
+    }
+
+    return response.json();
+};

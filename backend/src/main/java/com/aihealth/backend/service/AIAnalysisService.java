@@ -3,9 +3,12 @@ package com.aihealth.backend.service;
 import com.aihealth.backend.dto.AIAnalysisResponse;
 import com.aihealth.backend.model.AIAnalysis;
 import com.aihealth.backend.model.JournalEntry;
+import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.GameResultRepository;
+import com.aihealth.backend.repository.UserRepository;
+import com.aihealth.backend.security.SecurityUtils;
 import org.springframework.stereotype.Service;
 import com.aihealth.backend.model.GameResult;
 
@@ -26,6 +29,7 @@ public class AIAnalysisService {
     private final OpenAIService openAIService;
     private final ConversationMessageService conversationMessageService;
     private final GameResultRepository gameResultRepository;
+    private final UserRepository userRepository;
 
     public AIAnalysisService(
             AIAnalysisRepository aiAnalysisRepository,
@@ -33,13 +37,14 @@ public class AIAnalysisService {
             MemoryProfileService memoryProfileService,
             OpenAIService openAIService,
             ConversationMessageService conversationMessageService,
-            GameResultRepository gameResultRepository) {
+            GameResultRepository gameResultRepository, UserRepository userRepository) {
         this.aiAnalysisRepository = aiAnalysisRepository;
         this.journalEntryRepository = journalEntryRepository;
         this.memoryProfileService = memoryProfileService;
         this.openAIService = openAIService;
         this.conversationMessageService = conversationMessageService;
         this.gameResultRepository = gameResultRepository;
+        this.userRepository = userRepository;
     }
 
     /*
@@ -120,6 +125,18 @@ public class AIAnalysisService {
         } catch (RuntimeException ex) {
             return "No memory profile available yet.";
         }
+    }
+
+    /*
+     * Loads the currently authenticated user from the JWT security context.
+     * Used when generating user-specific AI summaries that are not tied
+     * directly to a journal entry.
+     */
+    private User getCurrentAuthenticatedUser() {
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
     }
 
     /*
@@ -226,6 +243,100 @@ public class AIAnalysisService {
         analysis.setSummary("AI-generated supportive game reflection.");
         analysis.setMood("N/A");
         analysis.setKeyThemes("cognitive wellness game reflection");
+        analysis.setSupportiveResponse(aiResponse);
+        analysis.setCreatedAt(LocalDateTime.now());
+
+        AIAnalysis saved = aiAnalysisRepository.save(analysis);
+
+        return mapToResponse(saved);
+    }
+
+    /*
+     * Builds structured analytics context from recent game activity.
+     *
+     * This gives the AI summarized wellness engagement data
+     * instead of raw database entities.
+     */
+    private String buildAnalyticsContext(List<GameResult> results) {
+
+        if (results == null || results.isEmpty()) {
+            return "No cognitive wellness game activity available.";
+        }
+
+        double averageScore = results.stream()
+                .mapToInt(GameResult::getScore)
+                .average()
+                .orElse(0);
+
+        double averageTime = results.stream()
+                .mapToInt(GameResult::getTimeTakenSeconds)
+                .average()
+                .orElse(0);
+
+        long easyGames = results.stream()
+                .filter(r -> "EASY".equalsIgnoreCase(r.getDifficulty()))
+                .count();
+
+        long mediumGames = results.stream()
+                .filter(r -> "MEDIUM".equalsIgnoreCase(r.getDifficulty()))
+                .count();
+
+        long hardGames = results.stream()
+                .filter(r -> "HARD".equalsIgnoreCase(r.getDifficulty()))
+                .count();
+
+        return """
+                Recent Cognitive Wellness Analytics:
+
+                Total games played: %s
+                Average score: %.0f%%
+                Average completion time: %.0f seconds
+
+                Difficulty breakdown:
+                - Easy games: %s
+                - Medium games: %s
+                - Hard games: %s
+
+                Use this only as supportive wellness engagement context.
+                """
+                .formatted(
+                        results.size(),
+                        averageScore,
+                        averageTime,
+                        easyGames,
+                        mediumGames,
+                        hardGames);
+    }
+
+    /*
+     * Generates an AI-powered analytics summary based on recent
+     * cognitive wellness game activity.
+     *
+     * This provides supportive insights and engagement observations
+     * without making medical claims.
+     */
+    public AIAnalysisResponse generateAnalyticsSummary() {
+
+        // Get authenticated user.
+        User user = getCurrentAuthenticatedUser();
+
+        // Fetch recent game results.
+        List<GameResult> results = gameResultRepository.findByUserIdOrderByPlayedAtDesc(user.getId());
+
+        // Build structured analytics context.
+        String analyticsContext = buildAnalyticsContext(results);
+
+        // Build supportive AI summary.
+        String aiResponse = openAIService.generateAnalyticsSummaryResponse(
+                analyticsContext);
+
+        AIAnalysis analysis = new AIAnalysis();
+
+        analysis.setUser(user);
+        analysis.setAnalysisType("ANALYTICS_SUMMARY");
+        analysis.setSummary("AI-generated cognitive wellness analytics summary.");
+        analysis.setMood("N/A");
+        analysis.setKeyThemes("analytics, wellness engagement, game trends");
         analysis.setSupportiveResponse(aiResponse);
         analysis.setCreatedAt(LocalDateTime.now());
 

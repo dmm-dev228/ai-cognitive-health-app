@@ -177,4 +177,60 @@ public class OpenAIService {
                                 .asOutputText()
                                 .text();
         }
+
+        /*
+         * Generates a supportive AI summary from analytics context.
+         *
+         * The AI should explain trends in plain language while staying
+         * non-medical and wellness-focused.
+         */
+        public String generateAnalyticsSummaryResponse(String analyticsContext) {
+
+                String prompt = """
+                                You are CogniHaven, an AI-powered cognitive wellness and daily support companion.
+
+                                Your job is to explain the user's cognitive wellness game analytics
+                                in a warm, supportive, non-medical way.
+
+                                Safety rules:
+                                - Do not diagnose.
+                                - Do not mention cognitive decline.
+                                - Do not make medical claims.
+                                - Do not say the user is improving or declining unless the provided data clearly supports it.
+                                - Frame results as wellness engagement, consistency, focus, and practice.
+
+                                Analytics context:
+                                %s
+
+                                Response style:
+                                - Keep it under 120 words.
+                                - Explain the trend in simple language.
+                                - Mention one encouraging observation.
+                                - Suggest one gentle next step.
+                                """
+                                .formatted(analyticsContext);
+
+                ResponseCreateParams params = ResponseCreateParams.builder()
+                                .model("gpt-4.1-mini")
+                                .input(prompt)
+                                .build();
+
+                Response response = client.responses().create(params);
+
+                if (response.output().isEmpty()) {
+                        return "Your analytics are available, but I had trouble creating a summary this time.";
+                }
+
+                var firstOutput = response.output().get(0);
+
+                if (firstOutput.asMessage().content().isEmpty()) {
+                        return "Your analytics were reviewed, but I had trouble reading the summary.";
+                }
+
+                return firstOutput.asMessage()
+                                .content()
+                                .get(0)
+                                .asOutputText()
+                                .text();
+        }
 }

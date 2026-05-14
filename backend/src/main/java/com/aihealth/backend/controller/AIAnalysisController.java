@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/ai-analysis")
@@ -39,4 +38,16 @@ public class AIAnalysisController {
             @PathVariable Long gameResultId) {
         return aiAnalysisService.generateGameReflection(gameResultId);
     }
+
+    /*
+     * Generates an AI-powered summary of the user's game analytics.
+     *
+     * Example:
+     * POST /api/ai-analysis/analytics-summary
+     */
+    @PostMapping("/analytics-summary")
+    public AIAnalysisResponse generateAnalyticsSummary() {
+        return aiAnalysisService.generateAnalyticsSummary();
+    }
+
 }

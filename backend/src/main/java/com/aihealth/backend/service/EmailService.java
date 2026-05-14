@@ -28,6 +28,7 @@ public class EmailService {
      */
     public void sendMedicationReminderEmail(String toEmail, String medicationName) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
 
         message.setTo(toEmail);
         message.setSubject("CogniHaven Medication Reminder");
@@ -45,14 +46,13 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    /*
-     * Sends email verification link to newly registered users.
-     */
+    // Sends email verification link to newly registered users.
     public void sendVerificationEmail(String toEmail, String verificationToken) {
 
         String verificationLink = frontendUrl + "/verify-email?token=" + verificationToken;
 
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
 
         message.setTo(toEmail);
 

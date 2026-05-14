@@ -5,6 +5,7 @@ import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
+import com.aihealth.backend.repository.MedicationReminderRepository;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,11 +20,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final MedicationReminderRepository medicationReminderRepository;
 
     public UserService(UserRepository userRepository,
-            EmailService emailService) {
+            EmailService emailService,
+            MedicationReminderRepository medicationReminderRepository) {
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.medicationReminderRepository = medicationReminderRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -89,6 +93,12 @@ public class UserService {
     // Deletes the currently authenticated user's account.
     public void deleteCurrentUser() {
         User user = getCurrentAuthenticatedUser();
+
+        var medicationReminders = medicationReminderRepository.findByUserId(user.getId());
+
+        if (!medicationReminders.isEmpty()) {
+            medicationReminderRepository.deleteAll(medicationReminders);
+        }
 
         userRepository.delete(user);
     }

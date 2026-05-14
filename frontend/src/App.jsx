@@ -218,18 +218,167 @@ function App() {
             <Route
               path="/"
               element={
-                <div className="glass-card rounded-3xl p-8">
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-500">
-                    Welcome
-                  </p>
-                  <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
-                    Your calm space for reflection, routines, and cognitive wellness.
-                  </h2>
-                  <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-                    CogniHaven helps support daily reflection, healthy habits,
-                    reminders, cognitive engagement, and AI-guided insights in a
-                    warm, non-clinical experience.
-                  </p>
+                <div className="animate-fade-in space-y-10">
+                  {/* Hero Section */}
+                  <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 px-8 py-16 text-white shadow-2xl shadow-indigo-200 sm:px-12 lg:px-16">
+                    <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-white/20 blur-3xl animate-float" />
+                    <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
+
+                    <div className="relative z-10 max-w-4xl">
+                      <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
+                        AI-powered cognitive wellness platform
+                      </p>
+
+                      <h2 className="mt-8 max-w-4xl text-5xl font-black leading-tight tracking-tight sm:text-6xl">
+                        A calm daily space for reflection, routines, and supportive AI insights.
+                      </h2>
+
+                      <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
+                        CogniHaven helps users build healthier daily habits through
+                        journaling, reminders, cognitive engagement, wellness profiles,
+                        analytics, and warm AI-guided support.
+                      </p>
+
+                      <div className="mt-8 flex flex-wrap gap-4">
+                        <Link
+                          to="/signup"
+                          className="rounded-2xl bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
+                        >
+                          Get Started
+                        </Link>
+
+                        <Link
+                          to="/journal"
+                          className="rounded-2xl border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/20"
+                        >
+                          Open Journal
+                        </Link>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Feature Cards */}
+                  <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                    {[
+                      {
+                        icon: "✍️",
+                        title: "Daily Reflection",
+                        text: "Write journal entries and receive supportive AI reflections.",
+                        color: "bg-indigo-50",
+                      },
+                      {
+                        icon: "💊",
+                        title: "Routine Reminders",
+                        text: "Create medication and wellness reminders for consistency.",
+                        color: "bg-emerald-50",
+                      },
+                      {
+                        icon: "🧠",
+                        title: "Cognitive Games",
+                        text: "Practice memory and attention with interactive activities.",
+                        color: "bg-violet-50",
+                      },
+                      {
+                        icon: "📊",
+                        title: "Wellness Analytics",
+                        text: "Track progress with charts, summaries, and AI insights.",
+                        color: "bg-sky-50",
+                      },
+                    ].map((feature) => (
+                      <div
+                        key={feature.title}
+                        className="glass-card rounded-3xl p-6 hover-lift"
+                      >
+                        <div
+                          className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color} text-3xl`}
+                        >
+                          {feature.icon}
+                        </div>
+
+                        <h3 className="text-xl font-bold text-slate-900">
+                          {feature.title}
+                        </h3>
+
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                          {feature.text}
+                        </p>
+                      </div>
+                    ))}
+                  </section>
+
+                  {/* Product Story / Value Section */}
+                  <section className="grid gap-8 lg:grid-cols-[1fr_0.85fr]">
+                    <div className="glass-card rounded-[2rem] p-8">
+                      <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-500">
+                        Why CogniHaven
+                      </p>
+
+                      <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
+                        Designed to feel supportive, simple, and non-clinical.
+                      </h3>
+
+                      <p className="mt-4 text-sm leading-7 text-slate-600">
+                        CogniHaven brings together reflection, wellness routines, memory
+                        reinforcement, and AI-guided insights in one calming experience.
+                        The goal is to help users stay engaged with daily support tools
+                        without feeling overwhelmed.
+                      </p>
+
+                      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                        <div className="rounded-3xl bg-white p-5 shadow-sm">
+                          <p className="text-3xl font-black text-indigo-600">AI</p>
+                          <p className="mt-2 text-sm font-semibold text-slate-700">
+                            Supportive insights
+                          </p>
+                        </div>
+
+                        <div className="rounded-3xl bg-white p-5 shadow-sm">
+                          <p className="text-3xl font-black text-emerald-600">24/7</p>
+                          <p className="mt-2 text-sm font-semibold text-slate-700">
+                            Daily support space
+                          </p>
+                        </div>
+
+                        <div className="rounded-3xl bg-white p-5 shadow-sm">
+                          <p className="text-3xl font-black text-violet-600">Calm</p>
+                          <p className="mt-2 text-sm font-semibold text-slate-700">
+                            Wellness-first design
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">
+                      <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/30 blur-3xl" />
+                      <div className="absolute -bottom-20 left-8 h-56 w-56 rounded-full bg-emerald-500/20 blur-3xl" />
+
+                      <div className="relative z-10">
+                        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/50">
+                          Experience Flow
+                        </p>
+
+                        <div className="mt-8 space-y-5">
+                          {[
+                            "Reflect in your journal",
+                            "Receive supportive AI insight",
+                            "Stay consistent with reminders",
+                            "Practice with cognitive games",
+                            "Review progress in analytics",
+                          ].map((step, index) => (
+                            <div key={step} className="flex items-center gap-4">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-sm font-bold">
+                                {index + 1}
+                              </div>
+
+                              <p className="text-sm font-semibold text-white/85">
+                                {step}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
                 </div>
               }
             />

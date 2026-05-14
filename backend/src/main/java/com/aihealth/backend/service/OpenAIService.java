@@ -20,7 +20,8 @@ public class OpenAIService {
 
         public String generateSupportiveJournalResponse(String journalContent,
                         String mood,
-                        String memoryContext) {
+                        String memoryContext,
+                        String gamePerformanceContext) {
                 String prompt = """
                                 You are CogniHaven, a calm, supportive cognitive wellness companion and safe place for reflection.
 
@@ -49,13 +50,16 @@ public class OpenAIService {
                                 User memory context:
                                 %s
 
+                                Recent Cognitive Wellness Activity:
+                                %s
+
                                 User mood:
                                 %s
 
                                 User journal entry:
                                 %s
                                 """
-                                .formatted(memoryContext, mood, journalContent);
+                                .formatted(memoryContext, gamePerformanceContext, mood, journalContent);
 
                 ResponseCreateParams params = ResponseCreateParams.builder()
                                 .model("gpt-4.1-mini")
@@ -72,6 +76,99 @@ public class OpenAIService {
 
                 if (firstOutput.asMessage().content().isEmpty()) {
                         return "I'm here with you, but I had trouble understanding the response. You can try again in a moment.";
+                }
+
+                return firstOutput.asMessage()
+                                .content()
+                                .get(0)
+                                .asOutputText()
+                                .text();
+        }
+
+        /*
+         * Generates a supportive, non-medical reflection after a cognitive wellness
+         * game.
+         *
+         * This is separate from journal reflection because game feedback should focus
+         * on:
+         * - effort
+         * - consistency
+         * - engagement
+         * - encouragement
+         *
+         * It should NOT diagnose or interpret performance medically.
+         */
+        public String generateGameReflectionResponse(
+                        String gameType,
+                        Integer score,
+                        Integer correctAnswers,
+                        Integer totalQuestions,
+                        Integer timeTakenSeconds,
+                        String difficulty,
+                        String memoryContext,
+                        String gamePerformanceContext) {
+
+                String prompt = """
+                                You are CogniHaven, a calm, supportive cognitive wellness companion.
+
+                                Personality:
+                                - Be warm, encouraging, and grounded.
+                                - Speak like a supportive coach or trusted friend.
+                                - Keep the response short and easy to understand.
+                                - Avoid sounding clinical or overly formal.
+
+                                Safety rules:
+                                - You are not a doctor.
+                                - Do not diagnose cognitive decline, memory issues, or medical conditions.
+                                - Do not make medical claims based on game performance.
+                                - Do not say the user is improving or declining unless the data clearly supports a simple wellness trend.
+                                - Frame game results as cognitive engagement, routine, and practice.
+
+                                Game result:
+                                - Game type: %s
+                                - Score: %s%%
+                                - Correct answers: %s/%s
+                                - Time taken: %s seconds
+                                - Difficulty: %s
+
+                                User memory context:
+                                %s
+
+                                Recent cognitive wellness activity:
+                                %s
+
+                                Response style:
+                                - Acknowledge the user's effort.
+                                - Reflect on the result in a supportive, non-medical way.
+                                - Encourage consistency or gentle practice.
+                                - End with one simple follow-up question.
+                                - Keep the response under 100 words.
+                                """
+                                .formatted(
+                                                gameType,
+                                                score,
+                                                correctAnswers,
+                                                totalQuestions,
+                                                timeTakenSeconds,
+                                                difficulty,
+                                                memoryContext,
+                                                gamePerformanceContext);
+
+                ResponseCreateParams params = ResponseCreateParams.builder()
+                                .model("gpt-4.1-mini")
+                                .input(prompt)
+                                .build();
+
+                Response response = client.responses().create(params);
+
+                if (response.output().isEmpty()) {
+                        return "Nice work completing the game. I'm here with you, but I had trouble creating a reflection this time.";
+                }
+
+                var firstOutput = response.output().get(0);
+
+                if (firstOutput.asMessage().content().isEmpty()) {
+                        return "Nice work completing the game. I had trouble reading the reflection, but your effort still counts.";
                 }
 
                 return firstOutput.asMessage()

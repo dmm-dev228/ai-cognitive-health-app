@@ -13,10 +13,13 @@ public class AIAnalysisResponse {
     private String keyThemes;
     private String supportiveResponse;
     private LocalDateTime createdAt;
+    private Long gameResultId;
 
-    public AIAnalysisResponse(Long id,
+    public AIAnalysisResponse(
+            Long id,
             Long userId,
             Long journalEntryId,
+            Long gameResultId,
             String analysisType,
             String summary,
             String mood,
@@ -26,6 +29,7 @@ public class AIAnalysisResponse {
         this.id = id;
         this.userId = userId;
         this.journalEntryId = journalEntryId;
+        this.gameResultId = gameResultId;
         this.analysisType = analysisType;
         this.summary = summary;
         this.mood = mood;
@@ -44,6 +48,10 @@ public class AIAnalysisResponse {
 
     public Long getJournalEntryId() {
         return journalEntryId;
+    }
+
+    public Long getGameResultId() {
+        return gameResultId;
     }
 
     public String getAnalysisType() {

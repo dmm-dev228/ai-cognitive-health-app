@@ -1,14 +1,23 @@
 import { useState } from "react";
-import { saveGameResult } from "../services/api";
+import {
+    saveGameResult,
+    generateGameReflection
+} from "../services/api";
 
 /*
  * GamePage
  * --------
- * First cognitive game for CogniHaven.
+ * First cognitive wellness game for CogniHaven.
  *
  * Game: Pattern Recall
  * User views a short pattern, then tries to repeat it.
- * Result is saved to backend for future analytics and AI context.
+ *
+ * Flow:
+ * 1. Show pattern
+ * 2. User enters remembered pattern
+ * 3. Save game result to backend
+ * 4. Generate AI wellness reflection
+ * 5. Display supportive reflection to user
  */
 function GamePage() {
     const [pattern, setPattern] = useState([]);
@@ -17,11 +26,20 @@ function GamePage() {
     const [gameStarted, setGameStarted] = useState(false);
     const [resultMessage, setResultMessage] = useState("");
 
+    // Stores AI reflection after the user completes a game.
+    const [aiReflection, setAiReflection] = useState("");
+
+    // Tracks when CogniHaven is generating the game reflection.
+    const [isGeneratingReflection, setIsGeneratingReflection] = useState(false);
+
     const difficulty = "EASY";
     const totalQuestions = 1;
 
     /*
-     * Generates a simple number pattern.
+     * Generates a simple 4-number pattern.
+     *
+     * Example:
+     * [3, 8, 1, 6]
      */
     const generatePattern = () => {
         const newPattern = [];
@@ -34,7 +52,10 @@ function GamePage() {
     };
 
     /*
-     * Starts the game by showing the pattern briefly.
+     * Starts or restarts the game.
+     *
+     * The pattern is shown briefly, then hidden so the user
+     * can try to recall it from memory.
      */
     const startGame = () => {
         const newPattern = generatePattern();
@@ -42,19 +63,24 @@ function GamePage() {
         setPattern(newPattern);
         setUserInput("");
         setResultMessage("");
+        setAiReflection("");
         setGameStarted(true);
         setIsShowingPattern(true);
 
+        // Hide the pattern after 3 seconds.
         setTimeout(() => {
             setIsShowingPattern(false);
         }, 3000);
     };
 
     /*
-     * Checks user answer and saves result to backend.
+     * Checks the user's answer, saves the result,
+     * then asks CogniHaven to generate a supportive AI reflection.
      */
     const submitAnswer = async () => {
         const correctAnswer = pattern.join("");
+
+        // Remove spaces so "1 2 3 4" and "1234" are both accepted.
         const cleanedInput = userInput.replace(/\s/g, "");
 
         const isCorrect = cleanedInput === correctAnswer;
@@ -72,16 +98,45 @@ function GamePage() {
         };
 
         try {
-            await saveGameResult(gameResult);
+            setResultMessage("");
+            setAiReflection("");
+
+            /*
+             * Step 1:
+             * Save the game result first.
+             * The backend returns the saved result including its ID.
+             */
+            const savedResult = await saveGameResult(gameResult);
 
             setResultMessage(
                 isCorrect
                     ? "Correct! Your result was saved."
                     : `Not quite. The correct pattern was ${correctAnswer}. Result saved.`
             );
+
+            /*
+             * Step 2:
+             * Use the saved game result ID to generate an AI reflection.
+             */
+            setIsGeneratingReflection(true);
+
+            const aiResult = await generateGameReflection(savedResult.id);
+
+            /*
+             * Step 3:
+             * Store the AI reflection so it can display on the page.
+             */
+            setAiReflection(
+                aiResult.supportiveResponse ||
+                    "CogniHaven generated a reflection, but no response text was returned."
+            );
         } catch (err) {
-            console.error("Failed to save game result:", err);
-            setResultMessage("Game completed, but result could not be saved.");
+            console.error("Failed during game result/reflection flow:", err);
+            setResultMessage(
+                "Game completed, but the result or reflection could not be saved."
+            );
+        } finally {
+            setIsGeneratingReflection(false);
         }
     };
 
@@ -90,8 +145,9 @@ function GamePage() {
             <h2>Cognitive Games</h2>
 
             <p>
-                Practice memory and attention with short cognitive games.
-                Results are saved for future progress tracking.
+                Practice memory and attention with short cognitive wellness
+                games. Results are saved for future progress tracking and
+                supportive AI insights.
             </p>
 
             <div>
@@ -119,19 +175,39 @@ function GamePage() {
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
                             placeholder="Example: 1234"
+                            disabled={isGeneratingReflection}
                         />
 
-                        <button onClick={submitAnswer}>
-                            Submit Answer
+                        <button
+                            onClick={submitAnswer}
+                            disabled={isGeneratingReflection}
+                        >
+                            {isGeneratingReflection
+                                ? "Saving..."
+                                : "Submit Answer"}
                         </button>
 
-                        <button onClick={startGame}>
+                        <button
+                            onClick={startGame}
+                            disabled={isGeneratingReflection}
+                        >
                             Play Again
                         </button>
                     </div>
                 )}
 
                 {resultMessage && <p>{resultMessage}</p>}
+
+                {isGeneratingReflection && (
+                    <p>CogniHaven is reflecting on your game...</p>
+                )}
+
+                {aiReflection && (
+                    <div className="ai-bubble">
+                        <strong>CogniHaven Reflection</strong>
+                        <p>{aiReflection}</p>
+                    </div>
+                )}
             </div>
         </section>
     );

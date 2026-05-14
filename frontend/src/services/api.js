@@ -180,6 +180,25 @@ export const addConversationMessage = async (journalEntryId, message) => {
     return response.json();
 };
 
+
+// Generate a supportive AI reflection for a completed game.
+
+export const generateGameReflection = async (gameResultId) => {
+    const response = await fetch(
+        `${BASE_URL}/ai-analysis/game/${gameResultId}`,
+        {
+            method: "POST",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to generate game reflection");
+    }
+
+    return response.json();
+};
+
 // ===== DIETARY PROFILE =====
 
 // Save or update dietary profile (JWT-based)

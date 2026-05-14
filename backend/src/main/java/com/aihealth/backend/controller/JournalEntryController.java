@@ -6,6 +6,7 @@ import com.aihealth.backend.service.JournalEntryService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,23 +22,26 @@ public class JournalEntryController {
         this.journalEntryService = journalEntryService;
     }
 
-    // Create journal entry
-    @PostMapping("/{userId}")
+    /*
+     * Creates a journal entry for the currently authenticated user.
+     * User identity is derived from JWT (no userId passed from frontend).
+     */
+    @PostMapping
     public ResponseEntity<JournalEntryResponse> createEntry(
-            @PathVariable Long userId,
-            @RequestBody @Valid JournalEntryRequest request) {
+            @RequestBody @Valid @NonNull JournalEntryRequest request) {
 
-        JournalEntryResponse response = journalEntryService.createEntry(userId, request);
+        JournalEntryResponse response = journalEntryService.createEntry(request);
 
         return ResponseEntity.ok(response);
     }
 
-    // Get all journal entries for a user
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<JournalEntryResponse>> getEntries(
-            @PathVariable Long userId) {
+    /*
+     * Retrieves all journal entries for the currently authenticated user.
+     */
+    @GetMapping
+    public ResponseEntity<List<JournalEntryResponse>> getEntries() {
 
-        List<JournalEntryResponse> responses = journalEntryService.getEntriesByUser(userId);
+        List<JournalEntryResponse> responses = journalEntryService.getEntriesByCurrentUser();
 
         return ResponseEntity.ok(responses);
     }

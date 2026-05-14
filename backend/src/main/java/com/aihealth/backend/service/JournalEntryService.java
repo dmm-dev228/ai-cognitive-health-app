@@ -7,6 +7,9 @@ import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.UserRepository;
+import com.aihealth.backend.security.SecurityUtils;
+
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,19 +22,25 @@ public class JournalEntryService {
     private final JournalEntryRepository journalEntryRepository;
     private final UserRepository userRepository;
     private final AIAnalysisRepository aiAnalysisRepository;
+    private final ConversationMessageService conversationMessageService;
 
-    public JournalEntryService(JournalEntryRepository journalEntryRepository,
+    public JournalEntryService(
+            JournalEntryRepository journalEntryRepository,
             UserRepository userRepository,
-            AIAnalysisRepository aiAnalysisRepository) {
+            AIAnalysisRepository aiAnalysisRepository,
+            ConversationMessageService conversationMessageService) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
+        this.conversationMessageService = conversationMessageService;
     }
 
-    // Create journal entry
-    public JournalEntryResponse createEntry(Long userId, JournalEntryRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    /*
+     * Creates a new journal entry for the currently authenticated user.
+     * The user's email is extracted from the JWT security context.
+     */
+    public JournalEntryResponse createEntry(@NonNull JournalEntryRequest request) {
+        User user = getCurrentAuthenticatedUser();
 
         JournalEntry entry = new JournalEntry();
 
@@ -43,20 +52,46 @@ public class JournalEntryService {
         entry.setCreatedAt(LocalDateTime.now());
         entry.setUpdatedAt(LocalDateTime.now());
 
+        // Save journal first so it gets an ID
         JournalEntry saved = journalEntryRepository.save(entry);
+
+        // Save the user's journal content as the first conversation message
+        conversationMessageService.saveMessage(
+                saved,
+                "USER",
+                saved.getContent());
 
         return mapToResponse(saved);
     }
 
-    // Get all entries for a user
-    public List<JournalEntryResponse> getEntriesByUser(Long userId) {
-        return journalEntryRepository.findByUserId(userId)
+    /*
+     * Retrieves all journal entries for the currently authenticated user.
+     */
+    public List<JournalEntryResponse> getEntriesByCurrentUser() {
+        User user = getCurrentAuthenticatedUser();
+
+        return journalEntryRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    private JournalEntryResponse mapToResponse(JournalEntry entry) {
+    /*
+     * Loads the currently authenticated user from the JWT email stored in the
+     * security context.
+     */
+    private User getCurrentAuthenticatedUser() {
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+    }
+
+    /*
+     * Converts a JournalEntry entity into a response DTO.
+     * Also attaches AI response if one exists for the entry.
+     */
+    private JournalEntryResponse mapToResponse(@NonNull JournalEntry entry) {
         String aiResponse = null;
 
         var aiAnalysisList = aiAnalysisRepository.findByJournalEntryId(entry.getId());

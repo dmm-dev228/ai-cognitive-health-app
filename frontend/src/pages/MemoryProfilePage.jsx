@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { getMemoryProfile, saveMemoryProfile } from "../services/api";
 
-
 function MemoryProfilePage() {
-    const userId = 1; // Temporary test user until authentication is added
-
     const [saveMessage, setSaveMessage] = useState("");
+    const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
     const [formData, setFormData] = useState({
         favoritePeople: "",
         favoritePlaces: "",
@@ -21,17 +21,27 @@ function MemoryProfilePage() {
     }, []);
 
     const fetchMemoryProfile = async () => {
-        const data = await getMemoryProfile(userId);
+        try {
+            setIsLoading(true);
+            setError("");
 
-        if (data && !data.status) {
-            setFormData({
-                favoritePeople: data.favoritePeople || "",
-                favoritePlaces: data.favoritePlaces || "",
-                calmingMemories: data.calmingMemories || "",
-                favoriteMusic: data.favoriteMusic || "",
-                comfortingActivities: data.comfortingActivities || "",
-                triggersToAvoid: data.triggersToAvoid || ""
-            });
+            const data = await getMemoryProfile();
+
+            if (data && !data.status) {
+                setFormData({
+                    favoritePeople: data.favoritePeople || "",
+                    favoritePlaces: data.favoritePlaces || "",
+                    calmingMemories: data.calmingMemories || "",
+                    favoriteMusic: data.favoriteMusic || "",
+                    comfortingActivities: data.comfortingActivities || "",
+                    triggersToAvoid: data.triggersToAvoid || ""
+                });
+            }
+        } catch (err) {
+            console.error("Failed to fetch memory profile:", err);
+            setError("Could not load memory profile.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -45,34 +55,49 @@ function MemoryProfilePage() {
     };
 
     const handleSubmit = async () => {
-        await saveMemoryProfile(userId, formData);
+        try {
+            setError("");
 
-        setSaveMessage("Memory profile saved successfully.");
-        setIsEditing(false);
-        fetchMemoryProfile();
+            await saveMemoryProfile(formData);
 
-        setTimeout(() => {
-            setSaveMessage("");
-        }, 3000);
+            setSaveMessage("Memory profile saved successfully.");
+            setIsEditing(false);
+            fetchMemoryProfile();
+
+            setTimeout(() => {
+                setSaveMessage("");
+            }, 3000);
+        } catch (err) {
+            console.error("Failed to save memory profile:", err);
+            setError("Could not save memory profile.");
+        }
     };
+
+    if (isLoading) {
+        return (
+            <section>
+                <h2>Memory Profile</h2>
+                <p>Loading memory profile...</p>
+            </section>
+        );
+    }
 
     return (
         <section>
             <h2>Memory Profile</h2>
-            <p>Help CogniCare personalize supportive responses for you.</p>
+            <p>Help CogniHaven personalize supportive responses for you.</p>
 
-            {/* Edit button ONLY shows when NOT editing */}
+            {error && <p>{error}</p>}
+            {saveMessage && <p>{saveMessage}</p>}
+
             {!isEditing && (
                 <button onClick={() => setIsEditing(true)}>
                     Edit Memory Profile
                 </button>
             )}
 
-            {/* Conditional rendering */}
             {isEditing ? (
-                /* ===== EDIT MODE ===== */
                 <div>
-
                     <label>Favorite People</label>
                     <textarea
                         name="favoritePeople"
@@ -115,23 +140,20 @@ function MemoryProfilePage() {
                         onChange={handleChange}
                     />
 
-                    <button onClick={handleSubmit}>Save Memory Profile</button>
-
+                    <button onClick={handleSubmit}>
+                        Save Memory Profile
+                    </button>
                 </div>
             ) : (
-                /* ===== VIEW MODE ===== */
                 <div>
-                    <p><strong>Favorite People:</strong> {formData.favoritePeople}</p>
-                    <p><strong>Favorite Places:</strong> {formData.favoritePlaces}</p>
-                    <p><strong>Calming Memories:</strong> {formData.calmingMemories}</p>
-                    <p><strong>Favorite Music:</strong> {formData.favoriteMusic}</p>
-                    <p><strong>Comforting Activities:</strong> {formData.comfortingActivities}</p>
-                    <p><strong>Triggers to Avoid:</strong> {formData.triggersToAvoid}</p>
+                    <p><strong>Favorite People:</strong> {formData.favoritePeople || "Not added yet"}</p>
+                    <p><strong>Favorite Places:</strong> {formData.favoritePlaces || "Not added yet"}</p>
+                    <p><strong>Calming Memories:</strong> {formData.calmingMemories || "Not added yet"}</p>
+                    <p><strong>Favorite Music:</strong> {formData.favoriteMusic || "Not added yet"}</p>
+                    <p><strong>Comforting Activities:</strong> {formData.comfortingActivities || "Not added yet"}</p>
+                    <p><strong>Triggers to Avoid:</strong> {formData.triggersToAvoid || "Not added yet"}</p>
                 </div>
             )}
-
-            {/* Save message */}
-            {saveMessage && <p>{saveMessage}</p>}
         </section>
     );
 }

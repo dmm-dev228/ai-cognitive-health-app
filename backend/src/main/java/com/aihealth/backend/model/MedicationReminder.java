@@ -3,29 +3,33 @@ package com.aihealth.backend.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
+/*
+ * MedicationReminder
+ * ------------------
+ * Stores medication reminder information for a user.
+ * Each reminder belongs to one authenticated user and can be enabled/disabled.
+ */
 @Entity
 @Table(name = "medication_reminders")
 public class MedicationReminder {
 
-    // Primary key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Many reminders → One user
+    // Many medication reminders belong to one user
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Core fields
-    @Column(name = "medication_name", nullable = false, length = 100)
+    @Column(name = "medication_name", nullable = false, length = 150)
     private String medicationName;
 
-    @Column(name = "dosage_text", length = 100)
-    private String dosageText;
+    @Column(length = 100)
+    private String dosage;
 
-    // 🆕 Visual identification fields
     @Column(name = "pill_shape", length = 100)
     private String pillShape;
 
@@ -35,11 +39,13 @@ public class MedicationReminder {
     @Column(name = "pill_size", length = 100)
     private String pillSize;
 
-    @Column(length = 50)
-    private String frequency;
+    @ElementCollection
+    @CollectionTable(name = "medication_reminder_times", joinColumns = @JoinColumn(name = "medication_reminder_id"))
+    @Column(name = "reminder_times", nullable = false)
+    private List<LocalTime> reminderTimes;
 
-    @Column(name = "reminder_time")
-    private LocalTime reminderTime;
+    @Column(name = "frequency_per_day", nullable = false)
+    private Integer frequencyPerDay;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
@@ -47,13 +53,25 @@ public class MedicationReminder {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Column(name = "in_app_reminder_enabled")
+    private Boolean inAppReminderEnabled;
+
+    @Column(name = "email_reminder_enabled")
+    private Boolean emailReminderEnabled;
+
+    @Column(name = "sms_reminder_enabled")
+    private Boolean smsReminderEnabled;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "last_triggered_at")
+    private LocalDateTime lastTriggeredAt;
+
     public MedicationReminder() {
     }
-
-    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -75,12 +93,12 @@ public class MedicationReminder {
         this.medicationName = medicationName;
     }
 
-    public String getDosageText() {
-        return dosageText;
+    public String getDosage() {
+        return dosage;
     }
 
-    public void setDosageText(String dosageText) {
-        this.dosageText = dosageText;
+    public void setDosage(String dosage) {
+        this.dosage = dosage;
     }
 
     public String getPillShape() {
@@ -107,20 +125,20 @@ public class MedicationReminder {
         this.pillSize = pillSize;
     }
 
-    public String getFrequency() {
-        return frequency;
+    public List<LocalTime> getReminderTimes() {
+        return reminderTimes;
     }
 
-    public void setFrequency(String frequency) {
-        this.frequency = frequency;
+    public void setReminderTimes(List<LocalTime> reminderTimes) {
+        this.reminderTimes = reminderTimes;
     }
 
-    public LocalTime getReminderTime() {
-        return reminderTime;
+    public Integer getFrequencyPerDay() {
+        return frequencyPerDay;
     }
 
-    public void setReminderTime(LocalTime reminderTime) {
-        this.reminderTime = reminderTime;
+    public void setFrequencyPerDay(Integer frequencyPerDay) {
+        this.frequencyPerDay = frequencyPerDay;
     }
 
     public String getNotes() {
@@ -139,11 +157,51 @@ public class MedicationReminder {
         this.isActive = isActive;
     }
 
+    public Boolean getInAppReminderEnabled() {
+        return inAppReminderEnabled;
+    }
+
+    public void setInAppReminderEnabled(Boolean inAppReminderEnabled) {
+        this.inAppReminderEnabled = inAppReminderEnabled;
+    }
+
+    public Boolean getEmailReminderEnabled() {
+        return emailReminderEnabled;
+    }
+
+    public void setEmailReminderEnabled(Boolean emailReminderEnabled) {
+        this.emailReminderEnabled = emailReminderEnabled;
+    }
+
+    public Boolean getSmsReminderEnabled() {
+        return smsReminderEnabled;
+    }
+
+    public void setSmsReminderEnabled(Boolean smsReminderEnabled) {
+        this.smsReminderEnabled = smsReminderEnabled;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getLastTriggeredAt() {
+        return lastTriggeredAt;
+    }
+
+    public void setLastTriggeredAt(LocalDateTime lastTriggeredAt) {
+        this.lastTriggeredAt = lastTriggeredAt;
     }
 }

@@ -21,15 +21,19 @@ public class AIAnalysisService {
     private final JournalEntryRepository journalEntryRepository;
     private final MemoryProfileService memoryProfileService;
     private final OpenAIService openAIService;
+    private final ConversationMessageService conversationMessageService;
 
-    public AIAnalysisService(AIAnalysisRepository aiAnalysisRepository,
+    public AIAnalysisService(
+            AIAnalysisRepository aiAnalysisRepository,
             JournalEntryRepository journalEntryRepository,
             MemoryProfileService memoryProfileService,
-            OpenAIService openAIService) {
+            OpenAIService openAIService,
+            ConversationMessageService conversationMessageService) {
         this.aiAnalysisRepository = aiAnalysisRepository;
         this.journalEntryRepository = journalEntryRepository;
         this.memoryProfileService = memoryProfileService;
         this.openAIService = openAIService;
+        this.conversationMessageService = conversationMessageService;
     }
 
     /*
@@ -43,6 +47,9 @@ public class AIAnalysisService {
      * 5. Return DTO for frontend
      */
     public AIAnalysisResponse generateJournalReflection(Long journalEntryId) {
+        if (journalEntryId == null) {
+            throw new IllegalArgumentException("JournalEntryId cannot be null");
+        }
         JournalEntry journalEntry = journalEntryRepository.findById(journalEntryId)
                 .orElseThrow(() -> new RuntimeException("Journal entry not found"));
 
@@ -65,6 +72,12 @@ public class AIAnalysisService {
         analysis.setCreatedAt(LocalDateTime.now());
 
         AIAnalysis saved = aiAnalysisRepository.save(analysis);
+        // Save the AI reflection into the conversation thread.
+        // This allows the journal to behave like a chat later.
+        conversationMessageService.saveMessage(
+                journalEntry,
+                "AI",
+                aiResponse);
 
         return mapToResponse(saved);
     }
@@ -78,8 +91,7 @@ public class AIAnalysisService {
     private String buildMemoryContext(Long userId) {
         // Structured context improves AI understanding compared to raw text
         try {
-            var memoryProfile = memoryProfileService.getMemoryProfileByUserId(userId);
-
+            var memoryProfile = memoryProfileService.getMemoryProfileEntityByUserId(userId);
             return """
                     Favorite people: %s
                     Favorite places: %s

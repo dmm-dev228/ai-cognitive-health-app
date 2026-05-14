@@ -1,23 +1,37 @@
 import { useEffect, useState } from "react";
 import { getGameResults } from "../services/api";
+import {
+    BarChart,
+    Bar,
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Label
+} from "recharts";
 
 /*
  * AnalyticsPage
  * -------------
- * Displays simple cognitive wellness game analytics.
+ * Displays cognitive wellness game analytics.
  *
- * Current MVP:
+ * Current:
  * - Total games played
  * - Average score
  * - Best score
  * - Average time
  * - Performance by difficulty
+ * - Bar chart for average score by difficulty
+ * - Line chart for score trend over time
  * - Recent game history
  *
  * Future:
- * - Charts
- * - Mood/game correlation
  * - AI-generated performance summaries
+ * - Mood/game correlation
+ * - Weekly progress reports
  */
 function AnalyticsPage() {
     const [gameResults, setGameResults] = useState([]);
@@ -115,6 +129,20 @@ function AnalyticsPage() {
         }));
     };
 
+    /*
+     * Formats game results for the line chart.
+     * Each point represents one game attempt over time.
+     */
+    const getScoreTrendData = () => {
+        return [...gameResults]
+            .reverse()
+            .map((result, index) => ({
+                game: index + 1,
+                score: result.score || 0,
+                difficulty: result.difficulty || "UNKNOWN"
+            }));
+    };
+
     return (
         <section>
             <h2>Analytics Dashboard</h2>
@@ -158,6 +186,64 @@ function AnalyticsPage() {
                                 <hr />
                             </div>
                         ))}
+                    </div>
+
+                    <div>
+                        <h3>Average Score by Difficulty</h3>
+
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={getStatsByDifficulty()}>
+                                <CartesianGrid strokeDasharray="3 3" />
+
+                                <XAxis dataKey="difficulty">
+                                    <Label
+                                        value="Difficulty Level"
+                                        position="insideBottom"
+                                        offset={-5}
+                                    />
+                                </XAxis>
+
+                                <YAxis domain={[0, 100]}>
+                                    <Label
+                                        value="Average Score (%)"
+                                        angle={-90}
+                                        position="insideLeft"
+                                    />
+                                </YAxis>
+
+                                <Tooltip />
+                                <Bar dataKey="averageScore" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    <div>
+                        <h3>Score Trend Over Time</h3>
+
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={getScoreTrendData()}>
+                                <CartesianGrid strokeDasharray="3 3" />
+
+                                <XAxis dataKey="game">
+                                    <Label
+                                        value="Game Attempt"
+                                        position="insideBottom"
+                                        offset={-5}
+                                    />
+                                </XAxis>
+
+                                <YAxis domain={[0, 100]}>
+                                    <Label
+                                        value="Score (%)"
+                                        angle={-90}
+                                        position="insideLeft"
+                                    />
+                                </YAxis>
+
+                                <Tooltip />
+                                <Line type="monotone" dataKey="score" />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
 
                     <div>

@@ -13,6 +13,7 @@ import { deleteAccount } from "./services/api";
 import GamePage from "./pages/GamePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import CommunityPage from "./pages/CommunityPage";
+import MyGoalsPage from "./pages/MyGoalsPage";
 import "./index.css";
 
 function App() {
@@ -84,8 +85,8 @@ function App() {
   return (
     <main
       className={`min-h-screen transition-colors duration-300 ${isDarkMode
-          ? "bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
-          : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
+        ? "bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
+        : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
         }`}
     >
       {/* Soft background decoration */}
@@ -99,8 +100,8 @@ function App() {
         {/* Header / Navbar */}
         <header
           className={`sticky top-0 z-40 border-b shadow-sm backdrop-blur-xl transition-colors duration-300 ${isDarkMode
-              ? "border-white/10 bg-slate-950/75 shadow-black/30"
-              : "border-white/60 bg-white/75 shadow-slate-200/40"
+            ? "border-white/10 bg-slate-950/75 shadow-black/30"
+            : "border-white/60 bg-white/75 shadow-slate-200/40"
             }`}
         >
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
@@ -154,6 +155,9 @@ function App() {
                   <NavLink to="/community" className={navLinkClass}>
                     Community
                   </NavLink>
+                  <NavLink to="/goals" className={navLinkClass}>
+                    MyGoals
+                  </NavLink>
                 </div>
 
                 {/* Auth actions are separated from primary navigation for cleaner UX. */}
@@ -161,8 +165,8 @@ function App() {
                   <button
                     onClick={() => setIsDarkMode((prev) => !prev)}
                     className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${isDarkMode
-                        ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
-                        : "bg-white text-slate-700 hover:text-indigo-700"
+                      ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
+                      : "bg-white text-slate-700 hover:text-indigo-700"
                       }`}
                   >
                     {isDarkMode ? "☀️ Light" : "🌙 Dark"}
@@ -173,8 +177,8 @@ function App() {
                       <NavLink
                         to="/login"
                         className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDarkMode
-                            ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
-                            : "border-indigo-100 bg-white text-indigo-700"
+                          ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
+                          : "border-indigo-100 bg-white text-indigo-700"
                           }`}
                       >
                         Login
@@ -194,8 +198,8 @@ function App() {
                       <button
                         onClick={handleLogout}
                         className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDarkMode
-                            ? "border-white/10 bg-white/10 text-slate-200 hover:bg-white/15"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700"
+                          ? "border-white/10 bg-white/10 text-slate-200 hover:bg-white/15"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700"
                           }`}
                       >
                         Logout
@@ -332,8 +336,8 @@ function App() {
                       <div
                         key={feature.title}
                         className={`rounded-3xl p-6 shadow-lg transition hover:-translate-y-1 ${isDarkMode
-                            ? "border border-white/10 bg-white/10 text-white backdrop-blur-xl"
-                            : "glass-card"
+                          ? "border border-white/10 bg-white/10 text-white backdrop-blur-xl"
+                          : "glass-card"
                           }`}
                       >
                         <div
@@ -363,8 +367,8 @@ function App() {
                   <section className="grid gap-8 lg:grid-cols-[1fr_0.85fr]">
                     <div
                       className={`rounded-[2rem] p-8 ${isDarkMode
-                          ? "border border-white/10 bg-white/10 backdrop-blur-xl"
-                          : "glass-card"
+                        ? "border border-white/10 bg-white/10 backdrop-blur-xl"
+                        : "glass-card"
                         }`}
                     >
                       <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-500">
@@ -458,6 +462,7 @@ function App() {
             <Route path="/games" element={<GamePage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/goals" element={<MyGoalsPage />} />
           </Routes>
         </section>
       </div>

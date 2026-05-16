@@ -378,3 +378,52 @@ export const getCommunityPosts = async () => {
 
     return response.json();
 };
+
+// ===== Goals =====
+
+/*
+ * Create a new wellness goal.
+ * Backend uses JWT to attach the goal to the logged-in user.
+ */
+export const createGoal = async (data) => {
+    const response = await fetch(`${BASE_URL}/goals`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to create goal");
+    }
+
+    return response.json();
+};
+
+// Fetch all goals for the logged-in user.
+export const getGoals = async () => {
+    const response = await fetch(`${BASE_URL}/goals`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch goals");
+    }
+
+    return response.json();
+};
+
+// Log progress toward a specific goal.
+export const logGoalProgress = async (goalId, data) => {
+    const response = await fetch(`${BASE_URL}/goals/${goalId}/logs`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to log goal progress");
+    }
+
+    return response.json();
+};

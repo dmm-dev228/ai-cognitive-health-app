@@ -233,4 +233,96 @@ public class OpenAIService {
                                 .asOutputText()
                                 .text();
         }
+
+        /*
+         * Generates a supportive AI goal plan.
+         *
+         * The goal of this response is:
+         * - encouragement
+         * - realistic habit-building
+         * - simple actionable steps
+         *
+         * NOT:
+         * - medical advice
+         * - pressure/shaming
+         * - unrealistic expectations
+         */
+        public String generateGoalPlan(
+                        String title,
+                        String description,
+                        String category,
+                        Integer targetCount,
+                        String unitLabel) {
+
+                String prompt = """
+                                You are CogniHaven, a calm and supportive AI wellness companion.
+
+                                Your role:
+                                - Help users create realistic wellness goals
+                                - Encourage consistency and small progress
+                                - Keep advice supportive and practical
+                                - Never sound clinical or judgmental
+
+                                Safety rules:
+                                - Do not diagnose conditions
+                                - Do not provide medical advice
+                                - Do not shame the user
+                                - Avoid unrealistic expectations
+
+                                Create a short supportive goal plan.
+
+                                Goal Title:
+                                %s
+
+                                Goal Description:
+                                %s
+
+                                Goal Category:
+                                %s
+
+                                Goal Target:
+                                %s %s
+
+                                Requirements:
+                                - Keep response under 150 words
+                                - Break the goal into small manageable actions
+                                - Encourage consistency over perfection
+                                - End with a gentle motivational statement
+                                """
+                                .formatted(
+                                                title,
+                                                description,
+                                                category,
+                                                targetCount,
+                                                unitLabel);
+
+                ResponseCreateParams params = ResponseCreateParams.builder()
+                                .model("gpt-4.1-mini")
+                                .input(prompt)
+                                .build();
+
+                Response response = client.responses().create(params);
+
+                if (response.output().isEmpty()) {
+                        return """
+                                        Start with small consistent progress.
+                                        Small steps can build healthy momentum over time.
+                                        """;
+                }
+
+                var firstOutput = response.output().get(0);
+
+                if (firstOutput.asMessage().content().isEmpty()) {
+                        return """
+                                        Focus on consistency and gradual improvement.
+                                        Small progress still matters.
+                                        """;
+                }
+
+                return firstOutput.asMessage()
+                                .content()
+                                .get(0)
+                                .asOutputText()
+                                .text();
+        }
 }

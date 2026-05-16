@@ -12,6 +12,7 @@ import VerifyEmailPage from "./pages/VerifyEmailPage";
 import { deleteAccount } from "./services/api";
 import GamePage from "./pages/GamePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import CommunityPage from "./pages/CommunityPage";
 import "./index.css";
 
 function App() {
@@ -73,21 +74,19 @@ function App() {
 
   // Reusable NavLink styling so every route has the same active and hover behavior.
   const navLinkClass = ({ isActive }) =>
-    `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-      isActive
-        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-        : isDarkMode
+    `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${isActive
+      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+      : isDarkMode
         ? "text-slate-300 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
         : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-indigo-700 hover:shadow-sm"
     }`;
 
   return (
     <main
-      className={`min-h-screen transition-colors duration-300 ${
-        isDarkMode
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode
           ? "bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
           : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
-      }`}
+        }`}
     >
       {/* Soft background decoration */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -99,11 +98,10 @@ function App() {
       <div className="relative z-10">
         {/* Header / Navbar */}
         <header
-          className={`sticky top-0 z-40 border-b shadow-sm backdrop-blur-xl transition-colors duration-300 ${
-            isDarkMode
+          className={`sticky top-0 z-40 border-b shadow-sm backdrop-blur-xl transition-colors duration-300 ${isDarkMode
               ? "border-white/10 bg-slate-950/75 shadow-black/30"
               : "border-white/60 bg-white/75 shadow-slate-200/40"
-          }`}
+            }`}
         >
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -115,16 +113,14 @@ function App() {
 
                 <div>
                   <h1
-                    className={`text-2xl font-black tracking-tight sm:text-3xl ${
-                      isDarkMode ? "text-white" : "text-slate-900"
-                    }`}
+                    className={`text-2xl font-black tracking-tight sm:text-3xl ${isDarkMode ? "text-white" : "text-slate-900"
+                      }`}
                   >
                     Cogni<span className="text-indigo-500">Haven</span>
                   </h1>
                   <p
-                    className={`text-xs font-medium sm:text-sm ${
-                      isDarkMode ? "text-slate-400" : "text-slate-500"
-                    }`}
+                    className={`text-xs font-medium sm:text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                      }`}
                   >
                     AI-powered cognitive wellness and daily support.
                   </p>
@@ -155,17 +151,19 @@ function App() {
                   <NavLink to="/analytics" className={navLinkClass}>
                     Analytics
                   </NavLink>
+                  <NavLink to="/community" className={navLinkClass}>
+                    Community
+                  </NavLink>
                 </div>
 
                 {/* Auth actions are separated from primary navigation for cleaner UX. */}
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => setIsDarkMode((prev) => !prev)}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${
-                      isDarkMode
+                    className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${isDarkMode
                         ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
                         : "bg-white text-slate-700 hover:text-indigo-700"
-                    }`}
+                      }`}
                   >
                     {isDarkMode ? "☀️ Light" : "🌙 Dark"}
                   </button>
@@ -174,11 +172,10 @@ function App() {
                     <>
                       <NavLink
                         to="/login"
-                        className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                          isDarkMode
+                        className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDarkMode
                             ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
                             : "border-indigo-100 bg-white text-indigo-700"
-                        }`}
+                          }`}
                       >
                         Login
                       </NavLink>
@@ -196,11 +193,10 @@ function App() {
                     <>
                       <button
                         onClick={handleLogout}
-                        className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                          isDarkMode
+                        className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDarkMode
                             ? "border-white/10 bg-white/10 text-slate-200 hover:bg-white/15"
                             : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700"
-                        }`}
+                          }`}
                       >
                         Logout
                       </button>
@@ -335,11 +331,10 @@ function App() {
                     ].map((feature) => (
                       <div
                         key={feature.title}
-                        className={`rounded-3xl p-6 shadow-lg transition hover:-translate-y-1 ${
-                          isDarkMode
+                        className={`rounded-3xl p-6 shadow-lg transition hover:-translate-y-1 ${isDarkMode
                             ? "border border-white/10 bg-white/10 text-white backdrop-blur-xl"
                             : "glass-card"
-                        }`}
+                          }`}
                       >
                         <div
                           className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color} text-3xl`}
@@ -348,17 +343,15 @@ function App() {
                         </div>
 
                         <h3
-                          className={`text-xl font-bold ${
-                            isDarkMode ? "text-white" : "text-slate-900"
-                          }`}
+                          className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-900"
+                            }`}
                         >
                           {feature.title}
                         </h3>
 
                         <p
-                          className={`mt-3 text-sm leading-6 ${
-                            isDarkMode ? "text-slate-300" : "text-slate-600"
-                          }`}
+                          className={`mt-3 text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-slate-600"
+                            }`}
                         >
                           {feature.text}
                         </p>
@@ -369,28 +362,25 @@ function App() {
                   {/* Product Story / Value Section */}
                   <section className="grid gap-8 lg:grid-cols-[1fr_0.85fr]">
                     <div
-                      className={`rounded-[2rem] p-8 ${
-                        isDarkMode
+                      className={`rounded-[2rem] p-8 ${isDarkMode
                           ? "border border-white/10 bg-white/10 backdrop-blur-xl"
                           : "glass-card"
-                      }`}
+                        }`}
                     >
                       <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-500">
                         Why CogniHaven
                       </p>
 
                       <h3
-                        className={`mt-3 text-3xl font-bold tracking-tight ${
-                          isDarkMode ? "text-white" : "text-slate-900"
-                        }`}
+                        className={`mt-3 text-3xl font-bold tracking-tight ${isDarkMode ? "text-white" : "text-slate-900"
+                          }`}
                       >
                         Designed to feel supportive, simple, and non-clinical.
                       </h3>
 
                       <p
-                        className={`mt-4 text-sm leading-7 ${
-                          isDarkMode ? "text-slate-300" : "text-slate-600"
-                        }`}
+                        className={`mt-4 text-sm leading-7 ${isDarkMode ? "text-slate-300" : "text-slate-600"
+                          }`}
                       >
                         CogniHaven brings together reflection, wellness
                         routines, memory reinforcement, and AI-guided insights
@@ -407,17 +397,15 @@ function App() {
                         ].map(([big, small, color]) => (
                           <div
                             key={big}
-                            className={`rounded-3xl p-5 shadow-sm ${
-                              isDarkMode ? "bg-white/10" : "bg-white"
-                            }`}
+                            className={`rounded-3xl p-5 shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
+                              }`}
                           >
                             <p className={`text-3xl font-black ${color}`}>
                               {big}
                             </p>
                             <p
-                              className={`mt-2 text-sm font-semibold ${
-                                isDarkMode ? "text-slate-200" : "text-slate-700"
-                              }`}
+                              className={`mt-2 text-sm font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-700"
+                                }`}
                             >
                               {small}
                             </p>
@@ -469,6 +457,7 @@ function App() {
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/games" element={<GamePage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/community" element={<CommunityPage />} />
           </Routes>
         </section>
       </div>

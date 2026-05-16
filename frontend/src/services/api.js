@@ -344,3 +344,37 @@ export const generateAnalyticsSummary = async () => {
 
     return response.json();
 };
+
+// ===== Community =====
+
+/*
+ * Create a new community post.
+ * JWT identifies the authenticated user.
+ */
+export const createCommunityPost = async (data) => {
+    const response = await fetch(`${BASE_URL}/community`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to create community post");
+    }
+
+    return response.json();
+};
+
+// Fetch all community posts newest first.
+export const getCommunityPosts = async () => {
+    const response = await fetch(`${BASE_URL}/community`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community posts");
+    }
+
+    return response.json();
+};

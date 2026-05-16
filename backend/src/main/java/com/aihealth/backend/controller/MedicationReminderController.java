@@ -4,6 +4,8 @@ import com.aihealth.backend.dto.MedicationReminderRequest;
 import com.aihealth.backend.dto.MedicationReminderResponse;
 import com.aihealth.backend.service.MedicationReminderService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,7 @@ public class MedicationReminderController {
     // Create a new reminder
     @PostMapping
     public ResponseEntity<MedicationReminderResponse> createReminder(
-            @RequestBody MedicationReminderRequest request) {
+            @Valid @RequestBody MedicationReminderRequest request) {
 
         MedicationReminderResponse response = medicationReminderService.saveReminder(request);
 
@@ -49,7 +51,7 @@ public class MedicationReminderController {
     @PutMapping("/{id}")
     public ResponseEntity<MedicationReminderResponse> updateReminder(
             @PathVariable Long id,
-            @RequestBody MedicationReminderRequest request) {
+            @Valid @RequestBody MedicationReminderRequest request) {
 
         MedicationReminderResponse response = medicationReminderService.updateReminder(id, request);
 

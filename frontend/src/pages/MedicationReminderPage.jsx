@@ -6,20 +6,10 @@ import {
   toggleMedicationReminder
 } from "../services/api";
 
-/*
- * MedicationReminderPage
- * ----------------------
- * Allows users to:
- * - Add medication reminders
- * - Include pill details for recognition
- * - Choose how many times per day the medication is taken
- * - Add multiple reminder times based on frequencyPerDay
- * - Choose reminder channels
- * - View, delete, and toggle reminders
- */
 function MedicationReminderPage() {
   const [reminders, setReminders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     medicationName: "",
@@ -32,24 +22,16 @@ function MedicationReminderPage() {
     notes: "",
     inAppReminderEnabled: true,
     emailReminderEnabled: false
-    // smsReminderEnabled: false
   });
 
   useEffect(() => {
     fetchReminders();
   }, []);
 
-  /*
-   * Fetch all reminders for the currently authenticated user.
-   */
   const fetchReminders = async () => {
     try {
       setIsLoading(true);
-
       const data = await getMedicationReminders();
-
-      console.log("Fetched medication reminders:", data);
-
       setReminders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch medication reminders:", err);
@@ -59,9 +41,6 @@ function MedicationReminderPage() {
     }
   };
 
-  /*
-   * Handles normal text input changes.
-   */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -71,14 +50,6 @@ function MedicationReminderPage() {
     }));
   };
 
-  /*
-   * Updates frequencyPerDay and automatically creates
-   * the matching number of time input fields.
-   *
-   * Example:
-   * frequencyPerDay = 3
-   * reminderTimes = ["", "", ""]
-   */
   const handleFrequencyChange = (e) => {
     const count = Number(e.target.value);
 
@@ -89,9 +60,6 @@ function MedicationReminderPage() {
     }));
   };
 
-  /*
-   * Updates a specific reminder time inside reminderTimes.
-   */
   const handleReminderTimeChange = (index, value) => {
     setFormData((prev) => {
       const updatedTimes = [...prev.reminderTimes];
@@ -104,9 +72,6 @@ function MedicationReminderPage() {
     });
   };
 
-  /*
-   * Handles checkbox changes for reminder channels.
-   */
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
 
@@ -116,19 +81,38 @@ function MedicationReminderPage() {
     }));
   };
 
-  /*
-   * Create a medication reminder.
-   * Backend expects:
-   * - frequencyPerDay
-   * - reminderTimes array
-   */
+  const validateForm = () => {
+    if (!formData.medicationName.trim()) {
+      return "Medication name is required.";
+    }
+
+    if (!formData.frequencyPerDay) {
+      return "Please choose how many times per day.";
+    }
+
+    if (
+      !formData.reminderTimes ||
+      formData.reminderTimes.length !== Number(formData.frequencyPerDay) ||
+      formData.reminderTimes.some((time) => !time)
+    ) {
+      return "Please select a reminder time for each daily dose.";
+    }
+
+    return "";
+  };
+
   const handleSubmit = async () => {
+    const validationMessage = validateForm();
+
+    if (validationMessage) {
+      setError(validationMessage);
+      return;
+    }
+
     try {
-      console.log("Submitting medication reminder:", formData);
+      setError("");
 
-      const savedReminder = await createMedicationReminder(formData);
-
-      console.log("Saved medication reminder:", savedReminder);
+      await createMedicationReminder(formData);
 
       setFormData({
         medicationName: "",
@@ -141,30 +125,20 @@ function MedicationReminderPage() {
         notes: "",
         inAppReminderEnabled: true,
         emailReminderEnabled: false
-        // smsReminderEnabled: false
       });
 
       await fetchReminders();
     } catch (err) {
       console.error("Failed to create medication reminder:", err);
-
-      alert(
-        "Could not create medication reminder. Check console/backend logs."
-      );
+      setError("Could not create medication reminder. Please check your fields and try again.");
     }
   };
 
-  /*
-   * Delete a reminder.
-   */
   const handleDelete = async (id) => {
     await deleteMedicationReminder(id);
     fetchReminders();
   };
 
-  /*
-   * Toggle active/inactive status.
-   */
   const handleToggle = async (id) => {
     await toggleMedicationReminder(id);
     fetchReminders();
@@ -172,7 +146,6 @@ function MedicationReminderPage() {
 
   return (
     <section className="animate-fade-in">
-      {/* Page Header */}
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-500">
           Supportive Wellness Reminders
@@ -188,8 +161,13 @@ function MedicationReminderPage() {
         </p>
       </div>
 
+      {error && (
+        <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+          {error}
+        </div>
+      )}
+
       <div className="grid gap-8 xl:grid-cols-[420px_1fr]">
-        {/* Left Form Panel */}
         <div className="glass-card h-fit rounded-[2rem] p-6 lg:sticky lg:top-28">
           <div className="mb-6">
             <p className="text-sm font-semibold text-emerald-600">
@@ -206,13 +184,18 @@ function MedicationReminderPage() {
           </div>
 
           <div className="space-y-5">
-            <input
-              name="medicationName"
-              placeholder="Medication Name"
-              value={formData.medicationName}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
-            />
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">
+                Medication Name <span className="text-red-500">*</span>
+              </span>
+              <input
+                name="medicationName"
+                placeholder="Medication Name"
+                value={formData.medicationName}
+                onChange={handleChange}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
+              />
+            </label>
 
             <input
               name="dosage"
@@ -223,34 +206,14 @@ function MedicationReminderPage() {
             />
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <input
-                name="pillShape"
-                placeholder="Shape"
-                value={formData.pillShape}
-                onChange={handleChange}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
-              />
-
-              <input
-                name="pillColor"
-                placeholder="Color"
-                value={formData.pillColor}
-                onChange={handleChange}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
-              />
-
-              <input
-                name="pillSize"
-                placeholder="Size"
-                value={formData.pillSize}
-                onChange={handleChange}
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
-              />
+              <input name="pillShape" placeholder="Shape" value={formData.pillShape} onChange={handleChange} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
+              <input name="pillColor" placeholder="Color" value={formData.pillColor} onChange={handleChange} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
+              <input name="pillSize" placeholder="Size" value={formData.pillSize} onChange={handleChange} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
             </div>
 
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">
-                Frequency Per Day
+                Frequency Per Day <span className="text-red-500">*</span>
               </span>
 
               <select
@@ -266,17 +229,17 @@ function MedicationReminderPage() {
               </select>
             </label>
 
-            {/* Dynamic reminder time inputs */}
             <div className="space-y-3">
               {formData.reminderTimes.map((time, index) => (
                 <label key={index} className="block">
                   <span className="mb-2 block text-sm font-semibold text-slate-700">
-                    Reminder Time {index + 1}
+                    Reminder Time {index + 1} <span className="text-red-500">*</span>
                   </span>
 
                   <input
                     type="time"
                     value={time}
+                    required
                     onChange={(e) =>
                       handleReminderTimeChange(index, e.target.value)
                     }
@@ -294,55 +257,6 @@ function MedicationReminderPage() {
               rows="4"
               className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
             />
-
-            {/* Reminder Channels */}
-            <div className="rounded-3xl border border-slate-100 bg-white/70 p-5">
-              <p className="mb-4 text-sm font-bold text-slate-900">
-                Reminder Channels
-              </p>
-
-              <div className="space-y-3">
-                <label className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">
-                      In-app Reminder
-                    </p>
-
-                    <p className="text-xs text-slate-500">
-                      Receive notifications inside CogniHaven
-                    </p>
-                  </div>
-
-                  <input
-                    type="checkbox"
-                    name="inAppReminderEnabled"
-                    checked={formData.inAppReminderEnabled}
-                    onChange={handleCheckboxChange}
-                    className="h-5 w-5 accent-emerald-500"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">
-                      Email Reminder
-                    </p>
-
-                    <p className="text-xs text-slate-500">
-                      Receive reminder emails
-                    </p>
-                  </div>
-
-                  <input
-                    type="checkbox"
-                    name="emailReminderEnabled"
-                    checked={formData.emailReminderEnabled}
-                    onChange={handleCheckboxChange}
-                    className="h-5 w-5 accent-emerald-500"
-                  />
-                </label>
-              </div>
-            </div>
 
             <button
               onClick={handleSubmit}
@@ -422,11 +336,10 @@ function MedicationReminderPage() {
                     </div>
 
                     <span
-                      className={`rounded-full px-4 py-2 text-xs font-bold ${
-                        r.isActive
+                      className={`rounded-full px-4 py-2 text-xs font-bold ${r.isActive
                           ? "bg-emerald-50 text-emerald-700"
                           : "bg-slate-100 text-slate-600"
-                      }`}
+                        }`}
                     >
                       {r.isActive ? "Active" : "Inactive"}
                     </span>
@@ -500,7 +413,7 @@ function MedicationReminderPage() {
 
                         <div className="mt-4 flex flex-wrap gap-2">
                           {Array.isArray(r.reminderTimes) &&
-                          r.reminderTimes.length > 0 ? (
+                            r.reminderTimes.length > 0 ? (
                             r.reminderTimes.map((time, index) => (
                               <span
                                 key={index}

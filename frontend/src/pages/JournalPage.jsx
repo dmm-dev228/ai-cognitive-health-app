@@ -186,8 +186,13 @@ function JournalPage() {
     };
 
     const handleSubmit = async () => {
-        if (!title.trim() || !content.trim()) {
-            setError("Please enter both a title and journal content.");
+        if (!title.trim()) {
+            setError("Title is required. Please add a title before saving.");
+            return;
+        }
+
+        if (!content.trim()) {
+            setError("Journal Entry is required. Please write your thoughts before saving.");
             return;
         }
 
@@ -365,8 +370,8 @@ function JournalPage() {
                                     key={themeKey}
                                     onClick={() => handleThemeChange(themeKey)}
                                     className={`rounded-2xl px-3 py-2 text-xs font-semibold transition ${journalTheme === themeKey
-                                            ? "bg-slate-900 text-white"
-                                            : "bg-white text-slate-600 hover:bg-slate-50"
+                                        ? "bg-slate-900 text-white"
+                                        : "bg-white text-slate-600 hover:bg-slate-50"
                                         }`}
                                 >
                                     {theme.name}
@@ -408,8 +413,8 @@ function JournalPage() {
                                         key={entry.id}
                                         onClick={() => openExistingEntryPage(entry.id)}
                                         className={`w-full rounded-3xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 ${selectedEntryId === entry.id && !isCreatingEntry
-                                                ? "border-indigo-200 bg-indigo-50 shadow-md"
-                                                : "border-white/60 bg-white/70 hover:bg-white"
+                                            ? "border-indigo-200 bg-indigo-50 shadow-md"
+                                            : "border-white/60 bg-white/70 hover:bg-white"
                                             }`}
                                     >
                                         <div className="flex items-start justify-between gap-3">
@@ -474,8 +479,8 @@ function JournalPage() {
                             {/* Active right book page */}
                             <div
                                 className={`min-h-[720px] bg-white p-6 transition-all duration-300 sm:p-8 ${isPageTurning
-                                        ? "scale-[0.98] rotate-1 opacity-40 blur-sm"
-                                        : "scale-100 rotate-0 opacity-100 blur-0"
+                                    ? "scale-[0.98] rotate-1 opacity-40 blur-sm"
+                                    : "scale-100 rotate-0 opacity-100 blur-0"
                                     }`}
                             >
                                 {isCreatingEntry ? (
@@ -594,14 +599,14 @@ function JournalPage() {
                                                     <div
                                                         key={msg.id}
                                                         className={`flex ${msg.senderType === "USER"
-                                                                ? "justify-end"
-                                                                : "justify-start"
+                                                            ? "justify-end"
+                                                            : "justify-start"
                                                             }`}
                                                     >
                                                         <div
                                                             className={`max-w-[85%] rounded-3xl px-5 py-4 text-sm leading-7 shadow-sm ${msg.senderType === "USER"
-                                                                    ? `rounded-br-md bg-gradient-to-r ${activeTheme.button} text-white`
-                                                                    : "rounded-bl-md border border-slate-100 bg-slate-50 text-slate-700"
+                                                                ? `rounded-br-md bg-gradient-to-r ${activeTheme.button} text-white`
+                                                                : "rounded-bl-md border border-slate-100 bg-slate-50 text-slate-700"
                                                                 }`}
                                                         >
                                                             {msg.senderType === "AI" && (

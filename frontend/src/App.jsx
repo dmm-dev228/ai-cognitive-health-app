@@ -281,11 +281,11 @@ function App() {
                       </h2>
 
                       <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
-                        CogniHaven helps users build healthier daily habits
-                        through journaling, reminders, cognitive engagement,
-                        wellness profiles, analytics, and warm AI-guided
-                        support.
+                        CogniHaven is a calm, AI-powered wellness ecosystem focused on reflection,
+                        cognitive engagement, supportive routines, community encouragement, goal
+                        tracking, and emotionally safe AI-guided insights.
                       </p>
+
 
                       <div className="mt-8 flex flex-wrap gap-4">
                         <Link
@@ -306,7 +306,7 @@ function App() {
                   </section>
 
                   {/* Feature Cards */}
-                  <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                  <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {[
                       {
                         icon: "✍️",
@@ -315,21 +315,33 @@ function App() {
                         color: "bg-indigo-50",
                       },
                       {
-                        icon: "💊",
-                        title: "Routine Reminders",
-                        text: "Create medication and wellness reminders for consistency.",
-                        color: "bg-emerald-50",
-                      },
-                      {
                         icon: "🧠",
                         title: "Cognitive Games",
                         text: "Practice memory and attention with interactive activities.",
                         color: "bg-violet-50",
                       },
                       {
+                        icon: "🎯",
+                        title: "MyGoals",
+                        text: "Create AI-supported goals, log progress, and celebrate milestones.",
+                        color: "bg-amber-50",
+                      },
+                      {
+                        icon: "💜",
+                        title: "Community",
+                        text: "Share routines, reflections, encouragement, and wellness tips.",
+                        color: "bg-pink-50",
+                      },
+                      {
+                        icon: "💊",
+                        title: "Medication Reminders",
+                        text: "Create supportive reminder schedules with in-app and email alerts.",
+                        color: "bg-emerald-50",
+                      },
+                      {
                         icon: "📊",
                         title: "Wellness Analytics",
-                        text: "Track progress with charts, summaries, and AI insights.",
+                        text: "Track scores, trends, progress, and AI-generated summaries.",
                         color: "bg-sky-50",
                       },
                     ].map((feature) => (
@@ -427,22 +439,66 @@ function App() {
                           Experience Flow
                         </p>
 
-                        <div className="mt-8 space-y-5">
+                        <h3 className="mt-3 text-3xl font-bold tracking-tight">
+                          Your daily wellness loop
+                        </h3>
+
+                        <p className="mt-3 text-sm leading-7 text-white/60">
+                          CogniHaven connects reflection, routines, goals, community, and insights
+                          into one supportive experience.
+                        </p>
+
+                        <div className="relative mt-8 space-y-5">
+                          <div className="absolute left-5 top-5 h-[calc(100%-2.5rem)] w-px bg-gradient-to-b from-indigo-400 via-emerald-400 to-violet-400" />
+
                           {[
-                            "Reflect in your journal",
-                            "Receive supportive AI insight",
-                            "Stay consistent with reminders",
-                            "Practice with cognitive games",
-                            "Review progress in analytics",
+                            {
+                              icon: "✍️",
+                              title: "Reflect",
+                              text: "Write journal entries and receive supportive AI reflections.",
+                            },
+                            {
+                              icon: "💊",
+                              title: "Build routines",
+                              text: "Stay consistent with reminders and daily support tools.",
+                            },
+                            {
+                              icon: "🧠",
+                              title: "Engage cognition",
+                              text: "Practice memory with Pattern Recall and Story Recall.",
+                            },
+                            {
+                              icon: "🎯",
+                              title: "Track goals",
+                              text: "Follow AI-supported plans and celebrate milestones.",
+                            },
+                            {
+                              icon: "💜",
+                              title: "Connect",
+                              text: "Share encouragement and routines in the community space.",
+                            },
+                            {
+                              icon: "📊",
+                              title: "Review insights",
+                              text: "Use analytics and AI summaries to understand progress.",
+                            },
                           ].map((step, index) => (
-                            <div key={step} className="flex items-center gap-4">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-sm font-bold">
-                                {index + 1}
+                            <div
+                              key={step.title}
+                              className="group relative flex gap-4 rounded-3xl bg-white/5 p-4 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10"
+                            >
+                              <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-lg shadow-lg">
+                                {step.icon}
                               </div>
 
-                              <p className="text-sm font-semibold text-white/85">
-                                {step}
-                              </p>
+                              <div>
+                                <p className="text-sm font-bold text-white">
+                                  {index + 1}. {step.title}
+                                </p>
+                                <p className="mt-1 text-sm leading-6 text-white/65">
+                                  {step.text}
+                                </p>
+                              </div>
                             </div>
                           ))}
                         </div>

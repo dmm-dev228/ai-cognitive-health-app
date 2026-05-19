@@ -427,3 +427,20 @@ export const logGoalProgress = async (goalId, data) => {
 
     return response.json();
 };
+
+
+// ===== Achievements  =====
+
+// Fetch unlocked achievements for the logged-in user.
+export const getAchievements = async () => {
+    const response = await fetch(`${BASE_URL}/achievements`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch achievements");
+    }
+
+    return response.json();
+};

@@ -14,6 +14,7 @@ import GamePage from "./pages/GamePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import CommunityPage from "./pages/CommunityPage";
 import MyGoalsPage from "./pages/MyGoalsPage";
+import AchievementsPage from "./pages/AchievementsPage";
 import "./index.css";
 
 function App() {
@@ -157,6 +158,9 @@ function App() {
                   </NavLink>
                   <NavLink to="/goals" className={navLinkClass}>
                     MyGoals
+                  </NavLink>
+                  <NavLink to="/achievements" className={navLinkClass}>
+                    Achievements
                   </NavLink>
                 </div>
 
@@ -519,6 +523,7 @@ function App() {
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/goals" element={<MyGoalsPage />} />
+            <Route path="/achievements" element={<AchievementsPage />} />
           </Routes>
         </section>
       </div>

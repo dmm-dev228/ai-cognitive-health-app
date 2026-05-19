@@ -8,11 +8,14 @@ import com.aihealth.backend.repository.MedicationReminderRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.aihealth.backend.model.GoalLog;
+import com.aihealth.backend.repository.GoalLogRepository;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 /*
  * NotificationSchedulerService
@@ -32,15 +35,18 @@ public class NotificationSchedulerService {
     private final MedicationReminderRepository medicationReminderRepository;
     private final GoalRepository goalRepository;
     private final EmailService emailService;
+    private final GoalLogRepository goalLogRepository;
 
     public NotificationSchedulerService(
             MedicationReminderRepository medicationReminderRepository,
             GoalRepository goalRepository,
-            EmailService emailService) {
+            EmailService emailService,
+            GoalLogRepository goalLogRepository) {
 
         this.medicationReminderRepository = medicationReminderRepository;
         this.goalRepository = goalRepository;
         this.emailService = emailService;
+        this.goalLogRepository = goalLogRepository;
     }
 
     /*
@@ -127,44 +133,89 @@ public class NotificationSchedulerService {
         }
     }
 
-    /*
-     * Sends supportive goal reminder emails.
-     *
-     * MVP behavior:
-     * This currently runs every minute with the scheduler.
-     *
-     * Later improvement:
-     * Add goal-specific cooldown or reminder frequency so users
-     * do not receive too many emails.
-     */
-    private void processGoalReminders() {
-        List<Goal> goals = goalRepository.findAll();
+/*
+ * Sends supportive goal reminder emails using smart reminder rules.
+ *
+ * Reminder rules:
+ * - Goal must be ACTIVE
+ * - Email reminders must be enabled
+ * - Do not remind the same goal more than once every 24 hours
+ * - If no progress has ever been logged, remind after 24 hours from creation
+ * - If progress exists, remind only after 48 hours without new progress
+ *
+ * This prevents annoying reminder spam.
+ */
+private void processGoalReminders() {
 
-        for (Goal goal : goals) {
-            if (!"ACTIVE".equalsIgnoreCase(goal.getStatus())) {
-                continue;
-            }
+    LocalDateTime now = LocalDateTime.now();
 
-            if (!Boolean.TRUE.equals(goal.getEmailReminderEnabled())) {
-                continue;
-            }
+    List<Goal> goals = goalRepository.findAll();
 
-            try {
-                emailService.sendGoalReminderEmail(
-                        goal.getUser().getEmail(),
-                        goal.getTitle());
+    for (Goal goal : goals) {
 
-                System.out.println(
-                        "[GOAL REMINDER] Email sent for goal: "
-                                + goal.getTitle());
+        if (!"ACTIVE".equalsIgnoreCase(goal.getStatus())) {
+            continue;
+        }
 
-            } catch (Exception e) {
-                System.out.println(
-                        "[GOAL REMINDER ERROR] Failed for goal: "
-                                + goal.getTitle());
+        if (!Boolean.TRUE.equals(goal.getEmailReminderEnabled())) {
+            continue;
+        }
 
-                e.printStackTrace();
-            }
+        /*
+         * Cooldown:
+         * If we already reminded this goal in the last 24 hours,
+         * skip it.
+         */
+        if (goal.getLastRemindedAt() != null
+                && goal.getLastRemindedAt().isAfter(now.minusHours(24))) {
+            continue;
+        }
+
+        Optional<GoalLog> latestLog =
+                goalLogRepository.findTopByGoalIdOrderByLoggedAtDesc(goal.getId());
+
+        boolean shouldRemind;
+
+        if (latestLog.isEmpty()) {
+            /*
+             * No progress logged yet.
+             * Remind only if goal was created more than 24 hours ago.
+             */
+            shouldRemind = goal.getCreatedAt() != null
+                    && goal.getCreatedAt().isBefore(now.minusHours(24));
+        } else {
+            /*
+             * Progress exists.
+             * Remind only if the last progress log was more than 48 hours ago.
+             */
+            shouldRemind = latestLog.get()
+                    .getLoggedAt()
+                    .isBefore(now.minusHours(48));
+        }
+
+        if (!shouldRemind) {
+            continue;
+        }
+
+        try {
+            emailService.sendGoalReminderEmail(
+                    goal.getUser().getEmail(),
+                    goal.getTitle());
+
+            goal.setLastRemindedAt(now);
+            goalRepository.save(goal);
+
+            System.out.println(
+                    "[GOAL REMINDER] Email sent for goal: "
+                            + goal.getTitle());
+
+        } catch (Exception e) {
+            System.out.println(
+                    "[GOAL REMINDER ERROR] Failed for goal: "
+                            + goal.getTitle());
+
+            e.printStackTrace();
         }
     }
+}
 }

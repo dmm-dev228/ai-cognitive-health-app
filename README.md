@@ -1,283 +1,657 @@
 # CogniHaven
 
-A safe, AI-powered space for cognitive wellness, reflection, and daily support.
+AI-powered cognitive wellness and daily support platform.
+
+CogniHaven is a full-stack wellness platform focused on cognitive engagement, supportive reflection, wellness routines, goal tracking, and AI-assisted encouragement. The platform combines AI journaling, cognitive games, community interaction, medication reminders, analytics, and supportive goal planning into one modern wellness ecosystem.
 
 ---
 
-## Overview
+# Vision
 
-CogniHaven is an AI-powered cognitive wellness platform designed to help users build healthy routines, reinforce memory, reflect through journaling, and receive supportive daily assistance.
+CogniHaven is designed as:
 
-The platform combines:
-- AI-generated supportive reflections
-- journaling
-- memory reinforcement
-- medication reminders
-- dietary awareness
-- wellness analytics
-- cognitive engagement tools
+> A safe, AI-powered space for cognitive wellness, reflection, encouragement, and daily support.
 
-CogniHaven is designed as a supportive wellness platform and does **not** diagnose medical conditions, prescribe medication, or provide unsafe medical advice.
+The platform is intentionally positioned as:
 
----
+* supportive
+* wellness-focused
+* non-medical
+* encouraging
+* cognitively engaging
 
-## Tech Stack
+The application does NOT:
 
-### Backend
+* diagnose medical conditions
+* provide medical advice
+* replace professional healthcare
+* prescribe treatments
 
-- Java
-- Spring Boot
-- Spring Security
-- Spring Data JPA (Hibernate)
-- MySQL
-- Maven
-- BCrypt Password Hashing
-- JWT Authentication
-- Spring Boot Mail
+Instead, CogniHaven focuses on:
 
-### Frontend
-
-- React
-- Vite
-- JavaScript
-
-### AI Integration
-
-- OpenAI API
-- AI-generated contextual reflections
-- Dynamic user-context analysis
+* healthy routines
+* cognitive engagement
+* reflection
+* wellness tracking
+* habit consistency
+* supportive AI interactions
 
 ---
 
-## Architecture
+# Tech Stack
 
-The backend follows a layered architecture:
+## Frontend
 
-```txt
-Controller → Service → Repository → Database
-```
+* React (Vite)
+* JavaScript
+* Tailwind CSS
+* Recharts
+* React Router
 
-### Packages
+## Backend
 
-- `model` → database entities
-- `repository` → data access layer
-- `service` → business logic
-- `controller` → API endpoints
-- `dto` → request/response validation
-- `exception` → global exception handling
-- `security` → JWT/security configuration
+* Java
+* Spring Boot
+* Spring Security
+* JWT Authentication
+* Spring Data JPA (Hibernate)
+* Maven
 
----
+## Database
 
-## Features Implemented
+* MySQL
 
-### Authentication & Security
+## AI
 
-- JWT-based authentication
-- Protected routes using authenticated JWT user context
-- BCrypt password hashing
-- Email verification system
-- Verification token generation
-- Auto-login after email verification
-- Resend verification email functionality
-- Delete account functionality
-- Confirm password validation
-- Secure DTO-based responses
-- Global exception handling
-
-### User Features
-
-- User registration and login
-- Secure account management
-- Email verification enforcement
-
-### Memory Profile API
-
-- Create/update memory profile
-- One-to-one relationship with user
-- Supports personalized AI context
-
-### Dietary Profile API
-
-- Create/update dietary profile
-- Supports future AI contextual awareness
-
-### Journal System
-
-- Create journal entries
-- Retrieve entries by authenticated user
-- AI-generated supportive responses
-- Existing conversation loading support
-- Journal entries sorted newest-first
-
-### Medication Reminder System
-
-- Create medication reminders
-- Toggle reminders active/inactive
-- Delete reminders
-- Multiple reminder times per medication
-- Pill metadata support:
-  - shape
-  - color
-  - size
-
-### Notification System
-
-- Scheduled reminder notifications
-- In-app popup notifications
-- Email reminder notifications
-- Notification polling system
-- Dismissible notifications
-
-### Game Tracking System
-
-- Initial cognitive game system implemented
-- Game result tracking implemented
-- Future expansion planned
-
-### Analytics System
-
-- Analytics infrastructure initialized
-- Future chart/dashboard improvements planned
+* OpenAI API
+* GPT-4.1-mini
+* Prompt engineering
+* AI wellness reflections
+* AI analytics summaries
+* AI goal planning
 
 ---
 
-## Security Features
+# Core Features
 
-- BCrypt password hashing
-- JWT authentication
-- Protected API routes
-- DTO validation pattern
-- Jakarta Bean Validation
-- Global exception handling
-- SQL injection protection via JPA repositories
-- Verification-token-based email confirmation
-- Current-user JWT authorization flows
+# Authentication System
 
----
+Secure JWT-based authentication system.
 
-## Database Design
+## Features
 
-### Tables
+* User signup
+* User login
+* JWT authentication
+* Protected routes
+* Email verification
+* Resend verification email
+* Automatic login after verification
+* Delete account
+* Password validation
+* Current-user JWT ownership validation
 
-- users
-- memory_profiles
-- dietary_profiles
-- medication_reminders
-- medication_reminder_times
-- journal_entries
-- game_results
-- ai_analyses
-- notifications
+## Security Architecture
 
-### Relationships
+Security is handled through:
 
-#### One-to-One
+* Spring Security
+* JWT filters
+* protected REST endpoints
+* authenticated user loading through SecurityUtils
 
-- User → MemoryProfile
-- User → DietaryProfile
+Frontend never sends user IDs manually.
 
-#### One-to-Many
-
-- User → JournalEntry
-- User → MedicationReminder
-- User → GameResult
-- User → AIAnalysis
-- User → Notification
+Ownership is derived securely from the JWT token.
 
 ---
 
-## Frontend Progress
+# Journal System
 
-- React + Vite frontend connected to backend APIs
-- JWT authentication integrated
-- Notification popup system integrated
-- Journal system integrated
-- Medication system integrated
-- Memory profile system integrated
-- Dietary profile system integrated
-- Email verification flow integrated
+Users can create personal wellness journal entries.
 
----
+## Features
 
-## AI Vision
+* Create journal entries
+* Mood tracking
+* Title + content support
+* Validation system
+* Persistent storage
+* Authenticated ownership
+* Newest-first loading
 
-CogniHaven is evolving toward a fully AI-aware wellness platform.
+## Validation
 
-The AI system is being designed to understand:
-- journal history
-- mood patterns
-- medication consistency
-- dietary preferences
-- cognitive game performance
-- analytics trends
-- overall user engagement
+Frontend + backend validation.
 
-This allows the platform to generate more personalized and supportive wellness insights over time.
+Examples:
+
+* required title
+* required content
+* character limits
+* invalid field handling
 
 ---
 
-## Current Status
+# AI Reflection System
 
-CogniHaven currently includes:
-- working full-stack architecture
-- JWT authentication
-- email verification
-- AI-generated journal reflections
-- medication reminders
-- notification systems
-- profile management systems
-- scheduled backend automation
+When users create journal entries, CogniHaven generates supportive AI reflections.
 
-The application is currently transitioning from backend-focused development into:
-- improved UX/UI
-- analytics visualization
-- enhanced cognitive games
-- community features
-- deployment preparation
+## AI Behavior
 
----
+AI is instructed to:
 
-## Next Steps
+* sound calm and supportive
+* avoid clinical language
+* avoid diagnosis
+* avoid medical advice
+* encourage healthy reflection
+* ask gentle follow-up questions
 
-- Improve cognitive game experience
-- Build analytics charts/dashboard visualizations
-- Add Community page
-- Add Tailwind/CSS UI overhaul
-- Expand AI contextual awareness
-- Deploy application to Azure
-- Add cloud-hosted database
-- Improve accessibility and mobile responsiveness
+## Context Used
+
+AI reflections can use:
+
+* journal content
+* mood
+* memory profile
+* cognitive game performance
 
 ---
 
-## Future Vision
+# Cognitive Games System
 
-CogniHaven aims to become a supportive AI-powered cognitive wellness ecosystem where users can:
-- reflect
-- build healthy routines
-- strengthen cognitive engagement
-- receive supportive AI guidance
-- track wellness trends
-- connect with a positive community
+CogniHaven includes cognitive wellness games designed for engagement and memory support.
 
-The long-term goal is to create a modern, supportive platform focused on cognitive wellness, mindfulness, and daily support.
+All games:
 
----
-
-# 🎥 Demos
-
-## Journal System Demo
-
-Click below to watch a demo of the journal system:
-
-[![Watch Demo](./assets/JournalDemo.png)](https://www.youtube.com/watch?v=wLBaWi6hfa8)
+* save results
+* track analytics
+* support multiple difficulties
+* generate AI reflections
+* integrate into wellness analytics
 
 ---
 
-## Authentication & Email Verification Demo
+# Game 1 — Pattern Recall
 
-Click below to watch a demo of the Authentication & Email Verification system:
+Users memorize a number pattern and reproduce it.
 
-[![Watch Demo](./assets/email-verification-demo.png)](https://youtu.be/Ng3uUpbvEks)
-```
+## Difficulties
+
+### Easy
+
+* 4 numbers
+* short display time
+
+### Medium
+
+* 5 numbers
+* longer sequence
+
+### Hard
+
+* 6 numbers
+* increased challenge
+
+## Scoring
+
+Scoring is partial-credit based.
+
+Example:
+
+Correct pattern:
+
+1234
+
+User answer:
+
+1238
+
+Result:
+
+* correctAnswers = 3
+* totalQuestions = 4
+* score = 75%
+
+---
+
+# Game 2 — Story Recall
+
+Users read a short story containing 3 hidden memory items.
+
+After a timed delay, they must recall the original items.
+
+## Example
+
+Items:
+
+* car
+* house
+* shoe
+
+Story:
+
+"A small car drove past a quiet house, and someone left a shoe by the front door."
+
+Later the user recalls the original items.
+
+## Difficulties
+
+### Easy
+
+* story visible for 10 seconds
+
+### Medium
+
+* story visible for 15 seconds
+
+### Hard
+
+* story visible for 20 seconds
+
+## Features
+
+* clue system
+* partial-credit scoring
+* AI reflections
+* separate analytics tracking
+
+---
+
+# AI Game Reflections
+
+After every game session, AI generates a supportive reflection.
+
+The AI:
+
+* encourages progress
+* avoids judgment
+* avoids medical conclusions
+* focuses on consistency and engagement
+
+---
+
+# Analytics Dashboard
+
+Comprehensive wellness analytics dashboard.
+
+## Features
+
+* total games played
+* average score
+* best score
+* average completion time
+* AI-generated analytics summaries
+* recent game history
+* game-specific filtering
+* difficulty filtering
+* visual analytics
+
+---
+
+# Analytics Filtering
+
+Users can filter analytics by:
+
+## Game Type
+
+* All Games
+* Pattern Recall
+* Story Recall
+
+## Difficulty
+
+* Overall
+* Easy
+* Medium
+* Hard
+
+---
+
+# Analytics Visualizations
+
+## Bar Graphs
+
+Displays:
+
+* average score
+* average completion time
+* grouped by difficulty
+
+## Line Graphs
+
+Displays:
+
+* score trends over time
+* progress across game attempts
+
+---
+
+# Community Feed
+
+Supportive wellness-focused community system.
+
+## Features
+
+* create posts
+* category system
+* newest-first feed
+* authenticated posting
+* frontend + backend validation
+* persistent community feed
+
+## Community Categories
+
+Examples:
+
+* Reflection
+* Routine
+* Encouragement
+* Wellness Tip
+
+## Community Philosophy
+
+Community is designed as:
+
+* supportive
+* safe
+* wellness-focused
+* non-medical
+
+---
+
+# Medication Reminder System
+
+Users can manage wellness medication reminders.
+
+## Features
+
+* medication creation
+* dosage tracking
+* reminder scheduling
+* multiple reminder times
+* active/inactive states
+* notification preferences
+* pill metadata
+
+## Reminder Channels
+
+* in-app reminders
+* email reminders
+* SMS reminder architecture support
+
+---
+
+# Notification System
+
+In-app notification infrastructure.
+
+## Features
+
+* periodic polling
+* dismiss functionality
+* medication reminder notifications
+* future reminder scalability
+
+---
+
+# MyGoals System
+
+AI-powered goal tracking and supportive habit-building system.
+
+## Features
+
+* create goals
+* AI-generated goal plans
+* progress logging
+* progress bars
+* completion tracking
+* supportive milestones
+* reminder preferences
+* progress analytics foundation
+
+---
+
+# Goal Categories
+
+Examples:
+
+* Journaling
+* Memory
+* Wellness
+* Fitness
+* Nutrition
+* Mindfulness
+* Medication
+* Personal
+
+---
+
+# AI Goal Planning
+
+When goals are created, AI generates:
+
+* supportive action plans
+* realistic habit guidance
+* manageable next steps
+* encouraging reinforcement
+
+AI avoids:
+
+* shaming
+* pressure
+* unrealistic expectations
+* medical guidance
+
+---
+
+# Goal Progress Tracking
+
+Users can:
+
+* log progress
+* add notes
+* track completion percentage
+* view active goals
+* view completed goals
+
+Goals automatically complete when:
+
+currentProgress >= targetCount
+
+---
+
+# Design Philosophy
+
+CogniHaven uses calming and supportive design principles inspired by cognitive wellness research.
+
+## Color Strategy
+
+### Calming Colors
+
+* blue
+* green
+* purple
+* lavender
+
+Used to:
+
+* reduce stress
+* encourage calmness
+* improve readability
+* create emotional safety
+
+### Stimulating Accent Colors
+
+* yellow
+* orange
+* red
+
+Used sparingly for:
+
+* alerts
+* milestones
+* progress emphasis
+* engagement cues
+
+---
+
+# UI/UX Direction
+
+The frontend is designed to feel:
+
+* modern
+* emotionally safe
+* welcoming
+* interactive
+* clean
+* supportive
+
+## Styling Features
+
+* Tailwind CSS
+* glassmorphism
+* soft gradients
+* animated transitions
+* rounded card systems
+* responsive layouts
+* supportive visual hierarchy
+
+---
+
+# Current Backend Architecture
+
+## Controllers
+
+* AuthController
+* UserController
+* JournalEntryController
+* AIAnalysisController
+* MemoryProfileController
+* MedicationReminderController
+* NotificationController
+* CommunityPostController
+* GoalController
+
+## Services
+
+* OpenAIService
+* JournalEntryService
+* AIAnalysisService
+* UserService
+* MedicationReminderService
+* NotificationService
+* GoalService
+* CommunityPostService
+
+## Repositories
+
+* UserRepository
+* JournalEntryRepository
+* AIAnalysisRepository
+* GameResultRepository
+* MedicationReminderRepository
+* NotificationRepository
+* CommunityPostRepository
+* GoalRepository
+* GoalLogRepository
+
+---
+
+# AI Prompt Engineering
+
+OpenAI prompts are carefully structured to:
+
+* maintain supportive tone
+* avoid medical risk
+* preserve emotional safety
+* encourage healthy habits
+* remain concise and readable
+
+AI systems include:
+
+* journal reflections
+* game reflections
+* analytics summaries
+* goal planning
+
+---
+
+# Security
+
+## Authentication
+
+* JWT-based auth
+* protected routes
+* ownership validation
+
+## Validation
+
+Frontend and backend validation throughout the platform.
+
+## Ownership Protection
+
+Users cannot:
+
+* modify another user's goals
+* access another user's journal data
+* post under another identity
+* alter another user's analytics
+
+---
+
+# Future Roadmap
+
+## Planned Features
+
+* additional cognitive games
+* advanced analytics
+* weekly wellness reports
+* achievement system
+* reward system
+* streak tracking
+* smarter AI personalization
+* enhanced reminders
+* AWS deployment
+* Docker support
+* CI/CD pipelines
+* mobile optimization
+
+---
+
+# Project Status
+
+CogniHaven has evolved from a simple journal application into a full AI-powered cognitive wellness ecosystem.
+
+The platform currently includes:
+
+* AI-assisted journaling
+* cognitive games
+* analytics dashboards
+* supportive community interaction
+* wellness reminders
+* AI-powered goals
+* secure authentication
+* modern responsive frontend
+
+The project is actively evolving toward a scalable wellness platform focused on cognitive engagement and supportive daily routines.
+
+---
+
+# Disclaimer
+
+CogniHaven is NOT:
+
+* a medical platform
+* a diagnostic tool
+* a replacement for healthcare professionals
+
+CogniHaven is intended solely for:
+
+* wellness support
+* cognitive engagement
+* reflection
+* encouragement
+* routine building
+* supportive AI interaction

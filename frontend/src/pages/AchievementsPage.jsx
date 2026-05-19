@@ -48,10 +48,14 @@ function AchievementsPage() {
     const allPossibleAchievements = [
         "FIRST_GOAL_CREATED",
         "FIRST_GOAL_COMPLETED",
+
         "FIRST_GAME_PLAYED",
         "PERFECT_GAME_SCORE",
         "PATTERN_RECALL_MASTER",
-        "STORY_RECALL_MASTER"
+        "STORY_RECALL_MASTER",
+
+        "FIRST_JOURNAL_ENTRY",
+        "FIVE_JOURNAL_ENTRIES"
     ];
 
     const unlockedKeys = achievements.map(

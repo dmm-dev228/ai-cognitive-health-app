@@ -23,16 +23,19 @@ public class JournalEntryService {
     private final UserRepository userRepository;
     private final AIAnalysisRepository aiAnalysisRepository;
     private final ConversationMessageService conversationMessageService;
+    private final AchievementService achievementService;
 
     public JournalEntryService(
             JournalEntryRepository journalEntryRepository,
             UserRepository userRepository,
             AIAnalysisRepository aiAnalysisRepository,
-            ConversationMessageService conversationMessageService) {
+            ConversationMessageService conversationMessageService,
+            AchievementService achievementService) {
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
         this.conversationMessageService = conversationMessageService;
+        this.achievementService = achievementService;
     }
 
     /*
@@ -60,6 +63,24 @@ public class JournalEntryService {
                 saved,
                 "USER",
                 saved.getContent());
+
+        achievementService.unlockAchievementIfMissing(
+                user,
+                "FIRST_JOURNAL_ENTRY",
+                "First Journal Entry",
+                "You wrote your first reflection in CogniHaven.",
+                "Reflection Starter");
+
+        long journalCount = journalEntryRepository.countByUserId(user.getId());
+
+        if (journalCount >= 5) {
+            achievementService.unlockAchievementIfMissing(
+                    user,
+                    "FIVE_JOURNAL_ENTRIES",
+                    "Five Journal Entries",
+                    "You have written five reflections in CogniHaven.",
+                    "Reflection Builder");
+        }
 
         return mapToResponse(saved);
     }

@@ -25,13 +25,16 @@ public class GameResultService {
 
     private final GameResultRepository gameResultRepository;
     private final UserRepository userRepository;
+    private final AchievementService achievementService;
 
     public GameResultService(
             GameResultRepository gameResultRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AchievementService achievementService) {
 
         this.gameResultRepository = gameResultRepository;
         this.userRepository = userRepository;
+        this.achievementService = achievementService;
     }
 
     // Save a completed game result for the authenticated user.
@@ -51,6 +54,77 @@ public class GameResultService {
         result.setPlayedAt(LocalDateTime.now());
 
         GameResult saved = gameResultRepository.save(result);
+        /*
+         * Achievement checks happen after the game result is saved.
+         *
+         * Achievements are system-generated, so the frontend does not
+         * manually request badges.
+         */
+        achievementService.unlockAchievementIfMissing(
+                user,
+                "FIRST_GAME_PLAYED",
+                "First Game Played",
+                "You completed your first cognitive wellness game.",
+                "Game Starter");
+
+        // Any perfect score unlocks the general perfect game achievement.
+        if (saved.getScore() != null && saved.getScore() == 100) {
+            achievementService.unlockAchievementIfMissing(
+                    user,
+                    "PERFECT_GAME_SCORE",
+                    "Perfect Game Score",
+                    "You earned a perfect score on a cognitive wellness game.",
+                    "Perfect Recall");
+        }
+
+        // Game-specific mastery badges.
+        if ("PATTERN_RECALL".equalsIgnoreCase(saved.getGameType())
+                && saved.getScore() != null
+                && saved.getScore() == 100) {
+
+            achievementService.unlockAchievementIfMissing(
+                    user,
+                    "PATTERN_RECALL_MASTER",
+                    "Pattern Recall Master",
+                    "You earned a perfect score on Pattern Recall.",
+                    "Pattern Master");
+        }
+
+        if ("STORY_RECALL".equalsIgnoreCase(saved.getGameType())
+                && saved.getScore() != null
+                && saved.getScore() == 100) {
+
+            achievementService.unlockAchievementIfMissing(
+                    user,
+                    "STORY_RECALL_MASTER",
+                    "Story Recall Master",
+                    "You remembered every item in Story Recall.",
+                    "Story Master");
+        }
+
+        /*
+         * Future game support:
+         *
+         * When Card Match is added, it can reuse the same GameResult model:
+         * - gameType = CARD_MATCH
+         * - score = percentage
+         * - correctAnswers = matched pairs
+         * - totalQuestions = total pairs
+         * - timeTakenSeconds = completion time
+         * - difficulty = EASY / MEDIUM / HARD
+         */
+        // if ("CARD_MATCH".equalsIgnoreCase(saved.getGameType())
+        // && saved.getScore() != null
+        // && saved.getScore() == 100) {
+        //
+        // achievementService.unlockAchievementIfMissing(
+        // user,
+        // "CARD_MATCH_MASTER",
+        // "Card Match Master",
+        // "You completed a perfect card matching round.",
+        // "Card Master"
+        // );
+        // }
 
         return mapToResponse(saved);
     }

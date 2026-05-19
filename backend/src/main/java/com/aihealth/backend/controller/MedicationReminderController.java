@@ -1,7 +1,6 @@
 package com.aihealth.backend.controller;
 
 import com.aihealth.backend.dto.MedicationReminderRequest;
-import com.aihealth.backend.dto.MedicationReminderResponse;
 import com.aihealth.backend.service.MedicationReminderService;
 
 import jakarta.validation.Valid;

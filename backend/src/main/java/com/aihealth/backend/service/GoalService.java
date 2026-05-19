@@ -26,173 +26,189 @@ import java.util.List;
 @Service
 public class GoalService {
 
-    private final GoalRepository goalRepository;
-    private final GoalLogRepository goalLogRepository;
-    private final UserRepository userRepository;
-    private final OpenAIService openAIService;
+        private final GoalRepository goalRepository;
+        private final GoalLogRepository goalLogRepository;
+        private final UserRepository userRepository;
+        private final OpenAIService openAIService;
+        private final AchievementService achievementService;
 
-    public GoalService(
-            GoalRepository goalRepository,
-            GoalLogRepository goalLogRepository,
-            UserRepository userRepository,
-            OpenAIService openAIService) {
+        public GoalService(
+                        GoalRepository goalRepository,
+                        GoalLogRepository goalLogRepository,
+                        UserRepository userRepository,
+                        OpenAIService openAIService,
+                        AchievementService achievementService) {
 
-        this.goalRepository = goalRepository;
-        this.goalLogRepository = goalLogRepository;
-        this.userRepository = userRepository;
-        this.openAIService = openAIService;
-    }
-
-    // Creates a new wellness goal.
-    public GoalResponse createGoal(
-            GoalRequest request) {
-
-        User user = getCurrentAuthenticatedUser();
-
-        Goal goal = new Goal();
-
-        goal.setUser(user);
-        goal.setTitle(request.getTitle());
-        goal.setDescription(request.getDescription());
-        goal.setCategory(request.getCategory());
-        goal.setTargetCount(request.getTargetCount());
-        goal.setCurrentProgress(0);
-        goal.setUnitLabel(request.getUnitLabel());
-        goal.setTargetDate(request.getTargetDate());
-
-        goal.setInAppReminderEnabled(
-                request.getInAppReminderEnabled() != null
-                        ? request.getInAppReminderEnabled()
-                        : true);
-
-        goal.setEmailReminderEnabled(
-                request.getEmailReminderEnabled() != null
-                        ? request.getEmailReminderEnabled()
-                        : false);
-
-        goal.setStatus("ACTIVE");
-
-        goal.setCreatedAt(LocalDateTime.now());
-        goal.setUpdatedAt(LocalDateTime.now());
-
-        // Generate supportive AI goal plan.
-        String aiPlan = openAIService.generateGoalPlan(
-                request.getTitle(),
-                request.getDescription(),
-                request.getCategory(),
-                request.getTargetCount(),
-                request.getUnitLabel());
-
-        goal.setAiPlan(aiPlan);
-
-        Goal saved = goalRepository.save(goal);
-
-        return mapToGoalResponse(saved);
-    }
-
-    // Returns authenticated user's goals.
-    public List<GoalResponse> getGoals() {
-
-        User user = getCurrentAuthenticatedUser();
-
-        return goalRepository
-                .findByUserIdOrderByCreatedAtDesc(user.getId())
-                .stream()
-                .map(this::mapToGoalResponse)
-                .toList();
-    }
-
-    // Logs progress toward a goal.
-    public GoalLogResponse logProgress(
-            Long goalId,
-            GoalLogRequest request) {
-
-        User user = getCurrentAuthenticatedUser();
-
-        Goal goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new RuntimeException("Goal not found"));
-
-        /*
-         * Security check:
-         * Prevent users from logging progress
-         * on another user's goal.
-         */
-        if (!goal.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException(
-                    "You do not own this goal");
+                this.goalRepository = goalRepository;
+                this.goalLogRepository = goalLogRepository;
+                this.userRepository = userRepository;
+                this.openAIService = openAIService;
+                this.achievementService = achievementService;
         }
 
-        GoalLog log = new GoalLog();
+        // Creates a new wellness goal.
+        public GoalResponse createGoal(
+                        GoalRequest request) {
 
-        log.setGoal(goal);
-        log.setUser(user);
-        log.setProgressAmount(
-                request.getProgressAmount());
-        log.setNote(request.getNote());
-        log.setLoggedAt(LocalDateTime.now());
+                User user = getCurrentAuthenticatedUser();
 
-        GoalLog savedLog = goalLogRepository.save(log);
+                Goal goal = new Goal();
 
-        // Update total goal progress.
-        int updatedProgress = goal.getCurrentProgress()
-                + request.getProgressAmount();
+                goal.setUser(user);
+                goal.setTitle(request.getTitle());
+                goal.setDescription(request.getDescription());
+                goal.setCategory(request.getCategory());
+                goal.setTargetCount(request.getTargetCount());
+                goal.setCurrentProgress(0);
+                goal.setUnitLabel(request.getUnitLabel());
+                goal.setTargetDate(request.getTargetDate());
 
-        goal.setCurrentProgress(updatedProgress);
+                goal.setInAppReminderEnabled(
+                                request.getInAppReminderEnabled() != null
+                                                ? request.getInAppReminderEnabled()
+                                                : true);
 
-        // Auto-complete goal when target reached.
-        if (updatedProgress >= goal.getTargetCount()) {
-            goal.setStatus("COMPLETED");
+                goal.setEmailReminderEnabled(
+                                request.getEmailReminderEnabled() != null
+                                                ? request.getEmailReminderEnabled()
+                                                : false);
+
+                goal.setStatus("ACTIVE");
+
+                goal.setCreatedAt(LocalDateTime.now());
+                goal.setUpdatedAt(LocalDateTime.now());
+
+                // Generate supportive AI goal plan.
+                String aiPlan = openAIService.generateGoalPlan(
+                                request.getTitle(),
+                                request.getDescription(),
+                                request.getCategory(),
+                                request.getTargetCount(),
+                                request.getUnitLabel());
+
+                goal.setAiPlan(aiPlan);
+
+                Goal saved = goalRepository.save(goal);
+                achievementService.unlockAchievementIfMissing(
+                                user,
+                                "FIRST_GOAL_CREATED",
+                                "First Goal Created",
+                                "You created your first wellness goal.",
+                                "Goal Starter");
+
+                return mapToGoalResponse(saved);
         }
 
-        goal.setUpdatedAt(LocalDateTime.now());
+        // Returns authenticated user's goals.
+        public List<GoalResponse> getGoals() {
 
-        goalRepository.save(goal);
+                User user = getCurrentAuthenticatedUser();
 
-        return mapToGoalLogResponse(savedLog);
-    }
+                return goalRepository
+                                .findByUserIdOrderByCreatedAtDesc(user.getId())
+                                .stream()
+                                .map(this::mapToGoalResponse)
+                                .toList();
+        }
 
-    // Maps Goal entity -> safe response DTO.
-    private GoalResponse mapToGoalResponse(
-            Goal goal) {
+        // Logs progress toward a goal.
+        public GoalLogResponse logProgress(
+                        Long goalId,
+                        GoalLogRequest request) {
 
-        return new GoalResponse(
-                goal.getId(),
-                goal.getUser().getId(),
-                goal.getTitle(),
-                goal.getDescription(),
-                goal.getCategory(),
-                goal.getTargetCount(),
-                goal.getCurrentProgress(),
-                goal.getUnitLabel(),
-                goal.getTargetDate(),
-                goal.getAiPlan(),
-                goal.getStatus(),
-                goal.getInAppReminderEnabled(),
-                goal.getEmailReminderEnabled(),
-                goal.getCreatedAt(),
-                goal.getUpdatedAt());
-    }
+                User user = getCurrentAuthenticatedUser();
 
-    // Maps GoalLog entity -> safe response DTO.
-    private GoalLogResponse mapToGoalLogResponse(
-            GoalLog log) {
+                Goal goal = goalRepository.findById(goalId)
+                                .orElseThrow(() -> new RuntimeException("Goal not found"));
 
-        return new GoalLogResponse(
-                log.getId(),
-                log.getGoal().getId(),
-                log.getUser().getId(),
-                log.getProgressAmount(),
-                log.getNote(),
-                log.getLoggedAt());
-    }
+                /*
+                 * Security check:
+                 * Prevent users from logging progress
+                 * on another user's goal.
+                 */
+                if (!goal.getUser().getId().equals(user.getId())) {
+                        throw new RuntimeException(
+                                        "You do not own this goal");
+                }
 
-    // Loads authenticated user from JWT.
-    private User getCurrentAuthenticatedUser() {
+                GoalLog log = new GoalLog();
 
-        String email = SecurityUtils.getCurrentUserEmail();
+                log.setGoal(goal);
+                log.setUser(user);
+                log.setProgressAmount(
+                                request.getProgressAmount());
+                log.setNote(request.getNote());
+                log.setLoggedAt(LocalDateTime.now());
 
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException(
-                        "Authenticated user not found"));
-    }
+                GoalLog savedLog = goalLogRepository.save(log);
+
+                // Update total goal progress.
+                int updatedProgress = goal.getCurrentProgress()
+                                + request.getProgressAmount();
+
+                goal.setCurrentProgress(updatedProgress);
+
+                // Auto-complete goal when target reached.
+                if (updatedProgress >= goal.getTargetCount()) {
+                        goal.setStatus("COMPLETED");
+
+                        achievementService.unlockAchievementIfMissing(
+                                        user,
+                                        "FIRST_GOAL_COMPLETED",
+                                        "First Goal Completed",
+                                        "You completed your first wellness goal.",
+                                        "Goal Finisher");
+                }
+
+                goal.setUpdatedAt(LocalDateTime.now());
+
+                goalRepository.save(goal);
+
+                return mapToGoalLogResponse(savedLog);
+        }
+
+        // Maps Goal entity -> safe response DTO.
+        private GoalResponse mapToGoalResponse(
+                        Goal goal) {
+
+                return new GoalResponse(
+                                goal.getId(),
+                                goal.getUser().getId(),
+                                goal.getTitle(),
+                                goal.getDescription(),
+                                goal.getCategory(),
+                                goal.getTargetCount(),
+                                goal.getCurrentProgress(),
+                                goal.getUnitLabel(),
+                                goal.getTargetDate(),
+                                goal.getAiPlan(),
+                                goal.getStatus(),
+                                goal.getInAppReminderEnabled(),
+                                goal.getEmailReminderEnabled(),
+                                goal.getCreatedAt(),
+                                goal.getUpdatedAt());
+        }
+
+        // Maps GoalLog entity -> safe response DTO.
+        private GoalLogResponse mapToGoalLogResponse(
+                        GoalLog log) {
+
+                return new GoalLogResponse(
+                                log.getId(),
+                                log.getGoal().getId(),
+                                log.getUser().getId(),
+                                log.getProgressAmount(),
+                                log.getNote(),
+                                log.getLoggedAt());
+        }
+
+        // Loads authenticated user from JWT.
+        private User getCurrentAuthenticatedUser() {
+
+                String email = SecurityUtils.getCurrentUserEmail();
+
+                return userRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Authenticated user not found"));
+        }
 }

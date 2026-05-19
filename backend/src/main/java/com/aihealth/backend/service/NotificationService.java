@@ -7,6 +7,8 @@ import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.MedicationReminderRepository;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
+import com.aihealth.backend.model.Goal;
+import com.aihealth.backend.repository.GoalRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -35,15 +37,18 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final JournalEntryRepository journalEntryRepository;
     private final MedicationReminderRepository medicationReminderRepository;
+    private final GoalRepository goalRepository;
 
     public NotificationService(
             UserRepository userRepository,
             JournalEntryRepository journalEntryRepository,
-            MedicationReminderRepository medicationReminderRepository) {
+            MedicationReminderRepository medicationReminderRepository,
+            GoalRepository goalRepository) {
 
         this.userRepository = userRepository;
         this.journalEntryRepository = journalEntryRepository;
         this.medicationReminderRepository = medicationReminderRepository;
+        this.goalRepository = goalRepository;
     }
 
     /*
@@ -58,6 +63,7 @@ public class NotificationService {
 
         addJournalReminder(user, notifications);
         addMedicationReminders(user, notifications);
+        addGoalReminders(user, notifications);
 
         return notifications;
     }
@@ -161,5 +167,31 @@ public class NotificationService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+    }
+
+    /*
+     * Adds gentle goal reminders for active goals.
+     * This reuses the existing in-app notification system.
+     */
+    private void addGoalReminders(User user, List<NotificationResponse> notifications) {
+
+        List<Goal> goals = goalRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+
+        for (Goal goal : goals) {
+            if (!"ACTIVE".equalsIgnoreCase(goal.getStatus())) {
+                continue;
+            }
+
+            if (!Boolean.TRUE.equals(goal.getInAppReminderEnabled())) {
+                continue;
+            }
+
+            notifications.add(new NotificationResponse(
+                    "GOAL",
+                    "Small steps count. Want to make progress on your goal: "
+                            + goal.getTitle()
+                            + "?",
+                    "/goals"));
+        }
     }
 }

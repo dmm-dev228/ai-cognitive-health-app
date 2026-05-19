@@ -93,6 +93,9 @@ public class Goal {
     @Column(nullable = false, length = 50)
     private String status = "ACTIVE";
 
+    @Column(name = "last_reminded_at")
+private LocalDateTime lastRemindedAt;
+
     /*
      * Reminder channel settings.
      */
@@ -206,6 +209,13 @@ public class Goal {
     public void setEmailReminderEnabled(Boolean emailReminderEnabled) {
         this.emailReminderEnabled = emailReminderEnabled;
     }
+    public LocalDateTime getLastRemindedAt() {
+    return lastRemindedAt;
+}
+
+public void setLastRemindedAt(LocalDateTime lastRemindedAt) {
+    this.lastRemindedAt = lastRemindedAt;
+}
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

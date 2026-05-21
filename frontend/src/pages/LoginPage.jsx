@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { loginUser, resendVerificationEmail } from "../services/api";
 
+
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -154,6 +155,7 @@ function LoginPage() {
               )}
             </label>
 
+
             <button
               onClick={handleLogin}
               disabled={isLoading}
@@ -168,16 +170,22 @@ function LoginPage() {
                 "Login"
               )}
             </button>
+            <Link
+              to="/forgot-password"
+              className="block text-center text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+            >
+              Forgot password?
+            </Link>
+
           </div>
 
           {message && (
             <p
-              className={`mt-5 rounded-2xl border px-4 py-3 text-sm font-medium ${
-                message.toLowerCase().includes("successful") ||
-                message.toLowerCase().includes("sent")
+              className={`mt-5 rounded-2xl border px-4 py-3 text-sm font-medium ${message.toLowerCase().includes("successful") ||
+                  message.toLowerCase().includes("sent")
                   ? "border-emerald-100 bg-emerald-50 text-emerald-700"
                   : "border-amber-100 bg-amber-50 text-amber-700"
-              }`}
+                }`}
             >
               {message}
             </p>

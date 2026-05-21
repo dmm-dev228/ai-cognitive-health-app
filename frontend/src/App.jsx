@@ -13,9 +13,12 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import CommunityPage from "./pages/CommunityPage";
 import MyGoalsPage from "./pages/MyGoalsPage";
 import AchievementsPage from "./pages/AchievementsPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 import Navbar from "./components/Navbar";
 import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
+
 import {
   logoutUser,
   isLoggedIn,
@@ -29,6 +32,10 @@ function App() {
   const [visibleNotifications, setVisibleNotifications] = useState([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  /*
+   * Fetch in-app notifications for the logged-in user.
+   * These are displayed through the unified notification popup system.
+   */
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -82,6 +89,7 @@ function App() {
         : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
         }`}
     >
+      {/* Soft background decoration */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
         <div className="absolute -right-20 top-40 h-80 w-80 rounded-full bg-violet-200/40 blur-3xl" />
@@ -102,13 +110,14 @@ function App() {
             setVisibleNotifications={setVisibleNotifications}
           />
         )}
-        
+
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <Routes>
             <Route
               path="/"
               element={
                 <div className="animate-fade-in space-y-10">
+                  {/* Hero Section */}
                   <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 px-8 py-16 text-white shadow-2xl shadow-indigo-200 sm:px-12 lg:px-16">
                     <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-white/20 blur-3xl animate-float" />
                     <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
@@ -125,9 +134,9 @@ function App() {
 
                       <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
                         CogniHaven is a calm, AI-powered wellness ecosystem
-                        focused on reflection, cognitive engagement,
-                        supportive routines, community encouragement, goal
-                        tracking, and emotionally safe AI-guided insights.
+                        focused on reflection, cognitive engagement, supportive
+                        routines, community encouragement, goal tracking, and
+                        emotionally safe AI-guided insights.
                       </p>
 
                       <div className="mt-8 flex flex-wrap gap-4">
@@ -148,6 +157,7 @@ function App() {
                     </div>
                   </section>
 
+                  {/* Feature Cards */}
                   <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {[
                       {
@@ -216,6 +226,144 @@ function App() {
                       </div>
                     ))}
                   </section>
+
+                  {/* Product Story / Experience Flow */}
+                  <section className="grid items-start gap-8 lg:grid-cols-[1fr_0.85fr]">                    <div
+                    className={`rounded-[2rem] p-8 ${isDarkMode
+                      ? "border border-white/10 bg-white/10 backdrop-blur-xl"
+                      : "glass-card"
+                      }`}
+                  >
+                    <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-500">
+                      Why CogniHaven
+                    </p>
+
+                    <h3
+                      className={`mt-3 text-3xl font-bold tracking-tight ${isDarkMode ? "text-white" : "text-slate-900"
+                        }`}
+                    >
+                      Designed to feel supportive, simple, and non-clinical.
+                    </h3>
+
+                    <p
+                      className={`mt-4 text-sm leading-7 ${isDarkMode ? "text-slate-300" : "text-slate-600"
+                        }`}
+                    >
+                      CogniHaven brings together reflection, wellness
+                      routines, memory reinforcement, and AI-guided insights
+                      in one calming experience. The goal is to help users
+                      stay engaged with daily support tools without feeling
+                      overwhelmed.
+                    </p>
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                      {[
+                        ["AI", "Supportive insights", "text-indigo-600"],
+                        ["24/7", "Daily support space", "text-emerald-600"],
+                        ["Calm", "Wellness-first design", "text-violet-600"]
+
+                      ].map(([big, small, color]) => (
+                        <div
+                          key={big}
+                          className={`rounded-3xl p-5 shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
+                            }`}
+                        >
+                          <p className={`text-3xl font-black ${color}`}>
+                            {big}
+                          </p>
+
+                          <p
+                            className={`mt-2 text-sm font-semibold ${isDarkMode
+                              ? "text-slate-200"
+                              : "text-slate-700"
+                              }`}
+                          >
+                            {small}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+
+                  </div>
+
+                    <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">
+                      <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/30 blur-3xl" />
+                      <div className="absolute -bottom-20 left-8 h-56 w-56 rounded-full bg-emerald-500/20 blur-3xl" />
+
+                      <div className="relative z-10">
+                        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/50">
+                          Experience Flow
+                        </p>
+
+                        <h3 className="mt-3 text-3xl font-bold tracking-tight">
+                          Your daily wellness loop
+                        </h3>
+
+                        <p className="mt-3 text-sm leading-7 text-white/60">
+                          CogniHaven connects reflection, routines, goals,
+                          community, and insights into one supportive
+                          experience.
+                        </p>
+
+                        <div className="relative mt-8 space-y-5">
+                          <div className="absolute left-5 top-5 h-[calc(100%-2.5rem)] w-px bg-gradient-to-b from-indigo-400 via-emerald-400 to-violet-400" />
+
+                          {[
+                            {
+                              icon: "✍️",
+                              title: "Reflect",
+                              text: "Write journal entries and receive supportive AI reflections."
+                            },
+                            {
+                              icon: "💊",
+                              title: "Build routines",
+                              text: "Stay consistent with reminders and daily support tools."
+                            },
+                            {
+                              icon: "🧠",
+                              title: "Engage cognition",
+                              text: "Practice memory with Pattern Recall and Story Recall."
+                            },
+                            {
+                              icon: "🎯",
+                              title: "Track goals",
+                              text: "Follow AI-supported plans and celebrate milestones."
+                            },
+                            {
+                              icon: "💜",
+                              title: "Connect",
+                              text: "Share encouragement and routines in the community space."
+                            },
+                            {
+                              icon: "📊",
+                              title: "Review insights",
+                              text: "Use analytics and AI summaries to understand progress."
+                            }
+                          ].map((step, index) => (
+                            <div
+                              key={step.title}
+                              className="group relative flex gap-4 rounded-3xl bg-white/5 p-4 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10"
+                            >
+                              <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-lg shadow-lg">
+                                {step.icon}
+                              </div>
+
+                              <div>
+                                <p className="text-sm font-bold text-white">
+                                  {index + 1}. {step.title}
+                                </p>
+
+                                <p className="mt-1 text-sm leading-6 text-white/65">
+                                  {step.text}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
                 </div>
               }
             />
@@ -232,6 +380,8 @@ function App() {
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/goals" element={<MyGoalsPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Routes>
         </section>
       </div>

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import VoiceControls from "../components/VoiceControls";
+import MemoryMatchGame from "../components/games/MemoryMatchGame";
 import { useTextToSpeech } from "../hooks/useTextToSpeech";
 import {
   saveGameResult,
   generateGameReflection,
-  generateStoryRecallGame
+  generateStoryRecallGame,
 } from "../services/api";
 
 function GamePage() {
@@ -22,10 +23,36 @@ function GamePage() {
   const [isGeneratingReflection, setIsGeneratingReflection] = useState(false);
   const [answerStartTime, setAnswerStartTime] = useState(null);
   const [showClue, setShowClue] = useState(false);
+
   const [storyPhase, setStoryPhase] = useState("WORDS");
   const [countdown, setCountdown] = useState(0);
   const [spokenStory, setSpokenStory] = useState("");
-  const { speak, stopSpeaking } = useTextToSpeech();
+
+  const { speak } = useTextToSpeech();
+
+  const getGameLabel = () => {
+    if (selectedGame === "STORY_RECALL") return "Story Recall";
+    if (selectedGame === "CARD_MATCH") return "Memory Match";
+    return "Pattern Recall";
+  };
+
+  const getGameHeading = () => {
+    if (selectedGame === "STORY_RECALL") return "Story Memory Challenge";
+    if (selectedGame === "CARD_MATCH") return "Memory Match Challenge";
+    return "Memory Challenge";
+  };
+
+  const getGameDescription = () => {
+    if (selectedGame === "STORY_RECALL") {
+      return "Memorize the target words, listen to the story, then recall the original words.";
+    }
+
+    if (selectedGame === "CARD_MATCH") {
+      return "Flip cards, find matching pairs, and practice focus, recognition, and memory.";
+    }
+
+    return "Memorize the number sequence, then enter it from memory after it disappears.";
+  };
 
   const getPatternLength = () => {
     if (difficulty === "MEDIUM") return 5;
@@ -55,7 +82,6 @@ function GamePage() {
     return newPattern;
   };
 
-
   const resetGameState = () => {
     setPattern([]);
     setStoryData(null);
@@ -73,6 +99,12 @@ function GamePage() {
     resetGameState();
     setGameStarted(true);
     setIsShowingPrompt(true);
+
+    if (selectedGame === "CARD_MATCH") {
+      setIsShowingPrompt(false);
+      setAnswerStartTime(Date.now());
+      return;
+    }
 
     if (selectedGame === "PATTERN_RECALL") {
       setPattern(generatePattern());
@@ -151,7 +183,7 @@ function GamePage() {
 
       setAiReflection(
         aiResult.supportiveResponse ||
-        "CogniHaven generated a reflection, but no response text was returned."
+          "CogniHaven generated a reflection, but no response text was returned."
       );
     } catch (err) {
       console.error("Failed during game result/reflection flow:", err);
@@ -160,7 +192,7 @@ function GamePage() {
 
       setResultMessage(
         err.response?.data?.message ||
-        "Game completed, but the result or reflection could not be saved."
+          "Game completed, but the result or reflection could not be saved."
       );
     } finally {
       setIsGeneratingReflection(false);
@@ -192,7 +224,7 @@ function GamePage() {
       totalQuestions,
       correctAnswers: correctCount,
       timeTakenSeconds,
-      difficulty
+      difficulty,
     };
 
     const message =
@@ -226,15 +258,15 @@ function GamePage() {
       totalQuestions,
       correctAnswers,
       timeTakenSeconds,
-      difficulty
+      difficulty,
     };
 
     const message =
       score === 100
         ? `Excellent recall! You remembered all ${totalQuestions} items. Score: ${score}%.`
         : `You remembered ${correctAnswers}/${totalQuestions} items. Score: ${score}%. The original items were: ${storyData.targetWords.join(
-          ", "
-        )}.`;
+            ", "
+          )}.`;
 
     await saveResultAndReflect(gameResult, message);
   };
@@ -270,21 +302,15 @@ function GamePage() {
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/80">
-                  {selectedGame === "STORY_RECALL"
-                    ? "Story Recall"
-                    : "Pattern Recall"}
+                  {getGameLabel()}
                 </p>
 
                 <h3 className="mt-3 text-4xl font-black tracking-tight">
-                  {selectedGame === "STORY_RECALL"
-                    ? "Story Memory Challenge"
-                    : "Memory Challenge"}
+                  {getGameHeading()}
                 </h3>
 
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-white/85">
-                  {selectedGame === "STORY_RECALL"
-                    ? "Read a short story, remember the three original items, then recall them after the story disappears."
-                    : "Memorize the number sequence, then enter it from memory after it disappears."}
+                  {getGameDescription()}
                 </p>
               </div>
 
@@ -306,6 +332,10 @@ function GamePage() {
 
                       <option className="text-slate-900" value="STORY_RECALL">
                         Story Recall
+                      </option>
+
+                      <option className="text-slate-900" value="CARD_MATCH">
+                        Memory Match
                       </option>
                     </select>
                   </label>
@@ -346,6 +376,24 @@ function GamePage() {
           </div>
 
           <div className="p-6 sm:p-8">
+            {gameStarted && selectedGame === "CARD_MATCH" && (
+              <MemoryMatchGame
+                difficulty={difficulty}
+                onComplete={(result) => {
+                  console.log("Memory Match completed:", result);
+
+                  setResultMessage(
+                    `Great work! You completed Memory Match in ${result.moveCount} moves with ${result.accuracy}% accuracy.`
+                  );
+
+                  /*
+                    Backend save will be added after CARD_MATCH exists in the backend enum.
+                    The result object is already shaped for future GameResult integration.
+                  */
+                }}
+              />
+            )}
+
             {gameStarted &&
               isShowingPrompt &&
               selectedGame === "PATTERN_RECALL" && (
@@ -416,9 +464,9 @@ function GamePage() {
                       </p>
 
                       {/*
-            Users do not need to click this during the first story reading.
-            This is only here in case they want to replay the story audio.
-          */}
+                        Users do not need to click this during the first story reading.
+                        This is only here in case they want to replay the story audio.
+                      */}
                       <div className="mt-6">
                         <VoiceControls
                           textToRead={spokenStory}
@@ -433,6 +481,7 @@ function GamePage() {
               )}
 
             {gameStarted &&
+              selectedGame !== "CARD_MATCH" &&
               !isShowingPrompt &&
               (selectedGame !== "STORY_RECALL" || storyPhase === "RECALL") && (
                 <div className="animate-fade-in">
@@ -444,7 +493,7 @@ function GamePage() {
 
                       <h3 className="mt-3 text-3xl font-bold text-slate-900">
                         {selectedGame === "STORY_RECALL"
-                          ? "What were the three original items?"
+                          ? `What were the original ${storyData?.targetWords?.length || 3} items?`
                           : "Enter the pattern you remember"}
                       </h3>
 
@@ -465,17 +514,18 @@ function GamePage() {
                           : "Example: 1234"
                       }
                       disabled={isGeneratingReflection}
-                      className={`w-full rounded-[2rem] border border-slate-200 bg-white px-6 py-5 text-center font-bold text-slate-700 shadow-lg shadow-slate-100 transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 ${selectedGame === "STORY_RECALL"
-                        ? "text-lg"
-                        : "text-3xl tracking-[0.5em]"
-                        }`}
+                      className={`w-full rounded-[2rem] border border-slate-200 bg-white px-6 py-5 text-center font-bold text-slate-700 shadow-lg shadow-slate-100 transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        selectedGame === "STORY_RECALL"
+                          ? "text-lg"
+                          : "text-3xl tracking-[0.5em]"
+                      }`}
                     />
 
                     {/*
-                    Speech-to-text support for Story Recall.
-                    Lets users speak their answer instead of typing.
-                    Also lets users hear the story again if they need audio support.
-                  */}
+                      Speech-to-text support for Story Recall.
+                      Lets users speak their answer instead of typing.
+                      Also lets users hear the story again if they need audio support.
+                    */}
                     {selectedGame === "STORY_RECALL" && storyData && (
                       <div className="mt-4">
                         <VoiceControls
@@ -501,8 +551,7 @@ function GamePage() {
 
                         {showClue && (
                           <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-                            Clue: The items were everyday objects mentioned in the
-                            story. First letters:{" "}
+                            Clue: The original words start with:{" "}
                             {storyData.targetWords
                               .map((item) => item.charAt(0).toUpperCase())
                               .join(", ")}

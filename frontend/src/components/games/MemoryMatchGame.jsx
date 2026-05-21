@@ -60,35 +60,24 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [moveCount, setMoveCount] = useState(0);
-  const [isBoardLocked, setIsBoardLocked] = useState(false);
+  const [isBoardLocked, setIsBoardLocked] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  const [isPreviewing, setIsPreviewing] = useState(true);
+  const [previewCountdown, setPreviewCountdown] = useState(5);
 
   const timerRef = useRef(null);
   const gameStartedRef = useRef(false);
 
   const totalPairs = difficultyConfig[difficulty]?.pairs || 4;
-  const columns = difficultyConfig[difficulty]?.columns || "grid-cols-2 sm:grid-cols-4";
+  const columns =
+    difficultyConfig[difficulty]?.columns || "grid-cols-2 sm:grid-cols-4";
 
   const accuracy = useMemo(() => {
     if (moveCount === 0) return 100;
-
     return Math.round((totalPairs / moveCount) * 100);
   }, [moveCount, totalPairs]);
-
-  useEffect(() => {
-    resetGame();
-  }, [difficulty]);
-
-  useEffect(() => {
-    if (!gameStartedRef.current || isCompleted) return;
-
-    timerRef.current = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1);
-    }, 1000);
-
-    return () => clearInterval(timerRef.current);
-  }, [isCompleted]);
 
   const resetGame = () => {
     clearInterval(timerRef.current);
@@ -97,14 +86,57 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
     setFlippedCards([]);
     setMatchedPairs([]);
     setMoveCount(0);
-    setIsBoardLocked(false);
+    setIsBoardLocked(true);
     setIsCompleted(false);
     setElapsedSeconds(0);
+    setIsPreviewing(true);
+    setPreviewCountdown(5);
 
-    gameStartedRef.current = true;
+    gameStartedRef.current = false;
   };
 
+  useEffect(() => {
+    resetGame();
+  }, [difficulty]);
+
+  useEffect(() => {
+    if (!isPreviewing) return;
+
+    let timeLeft = 5;
+    setPreviewCountdown(timeLeft);
+
+    const previewInterval = setInterval(() => {
+      timeLeft -= 1;
+      setPreviewCountdown(timeLeft);
+
+      if (timeLeft <= 0) {
+        clearInterval(previewInterval);
+
+        /*
+          Preview is finished, so cards flip face down
+          and the actual game timer begins.
+        */
+        setIsPreviewing(false);
+        setIsBoardLocked(false);
+        gameStartedRef.current = true;
+      }
+    }, 1000);
+
+    return () => clearInterval(previewInterval);
+  }, [cards, isPreviewing]);
+
+  useEffect(() => {
+    if (!gameStartedRef.current || isCompleted || isPreviewing) return;
+
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timerRef.current);
+  }, [isCompleted, isPreviewing]);
+
   const handleCardClick = (selectedCard) => {
+    if (isPreviewing) return;
     if (isBoardLocked) return;
     if (matchedPairs.includes(selectedCard.pairId)) return;
     if (flippedCards.some((card) => card.id === selectedCard.id)) return;
@@ -152,9 +184,8 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
     const finalAccuracy = Math.round((totalPairs / finalMoves) * 100);
 
     /*
-      Prepared result shape for backend GameResult integration.
-      Later this can be sent using saveGameResult once CARD_MATCH
-      is added to the backend game type enum.
+      Result shape matches the existing GameResult model.
+      GamePage can use this to save CARD_MATCH results and generate AI reflection.
     */
     const memoryMatchResult = {
       gameType: "CARD_MATCH",
@@ -174,6 +205,7 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
 
   const isCardVisible = (card) => {
     return (
+      isPreviewing ||
       matchedPairs.includes(card.pairId) ||
       flippedCards.some((flippedCard) => flippedCard.id === card.id)
     );
@@ -192,8 +224,8 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
           </h3>
 
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            Flip two cards at a time. If they match, they stay open. If not,
-            they gently turn back over. Take your time and focus on recognition.
+            Study the cards first. After the preview ends, flip two cards at a
+            time and find each matching pair.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -225,6 +257,14 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
             </div>
           </div>
         </div>
+
+        {isPreviewing && (
+          <div className="mb-5 rounded-3xl border border-amber-100 bg-amber-50 p-4 text-center">
+            <p className="text-sm font-bold text-amber-700">
+              Memorize the cards. They flip over in {previewCountdown} seconds.
+            </p>
+          </div>
+        )}
 
         <div className={`grid ${columns} gap-4`}>
           {cards.map((card) => (

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import VoiceControls from "../components/VoiceControls";
 import {
   saveGameResult,
   generateGameReflection
@@ -122,7 +123,11 @@ function GamePage() {
       );
     } catch (err) {
       console.error("Failed during game result/reflection flow:", err);
+      console.error("Error response:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+
       setResultMessage(
+        err.response?.data?.message ||
         "Game completed, but the result or reflection could not be saved."
       );
     } finally {
@@ -309,59 +314,65 @@ function GamePage() {
           </div>
 
           <div className="p-6 sm:p-8">
-            {gameStarted && isShowingPrompt && selectedGame === "PATTERN_RECALL" && (
-              <div className="animate-fade-in text-center">
-                <div className="mx-auto max-w-2xl rounded-[2rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-10 shadow-inner">
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-500">
-                    Memorize This Pattern
-                  </p>
+            {gameStarted &&
+              isShowingPrompt &&
+              selectedGame === "PATTERN_RECALL" && (
+                <div className="animate-fade-in text-center">
+                  <div className="mx-auto max-w-2xl rounded-[2rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-10 shadow-inner">
+                    <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-500">
+                      Memorize This Pattern
+                    </p>
 
-                  <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-                    {pattern.map((number, index) => (
-                      <div
-                        key={index}
-                        className="flex h-20 w-20 animate-pulse items-center justify-center rounded-3xl bg-white text-3xl font-black text-indigo-700 shadow-lg shadow-indigo-100"
-                      >
-                        {number}
-                      </div>
-                    ))}
+                    <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                      {pattern.map((number, index) => (
+                        <div
+                          key={index}
+                          className="flex h-20 w-20 animate-pulse items-center justify-center rounded-3xl bg-white text-3xl font-black text-indigo-700 shadow-lg shadow-indigo-100"
+                        >
+                          {number}
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="mt-8 text-sm font-medium text-slate-500">
+                      Focus and remember the sequence before it disappears.
+                    </p>
                   </div>
-
-                  <p className="mt-8 text-sm font-medium text-slate-500">
-                    Focus and remember the sequence before it disappears.
-                  </p>
                 </div>
-              </div>
-            )}
+              )}
 
-            {gameStarted && isShowingPrompt && selectedGame === "STORY_RECALL" && storyData && (
-              <div className="animate-fade-in text-center">
-                <div className="mx-auto max-w-3xl rounded-[2rem] bg-gradient-to-br from-emerald-50 to-sky-50 p-10 shadow-inner">
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-600">
-                    Read and Remember
-                  </p>
+            {gameStarted &&
+              isShowingPrompt &&
+              selectedGame === "STORY_RECALL" &&
+              storyData && (
+                <div className="animate-fade-in text-center">
+                  <div className="mx-auto max-w-3xl rounded-[2rem] bg-gradient-to-br from-emerald-50 to-sky-50 p-10 shadow-inner">
+                    <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-600">
+                      Read and Remember
+                    </p>
 
-                  <p className="mt-6 text-xl font-bold leading-9 text-slate-800">
-                    {storyData.story}
-                  </p>
+                    <p className="mt-6 text-xl font-bold leading-9 text-slate-800">
+                      {storyData.story}
+                    </p>
 
-                  <div className="mt-6 flex flex-wrap justify-center gap-3">
-                    {storyData.items.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm"
-                      >
-                        {item}
-                      </span>
-                    ))}
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                      {storyData.items.map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="mt-8 text-sm font-medium text-slate-500">
+                      Remember the three items. You will be asked for them
+                      shortly.
+                    </p>
                   </div>
-
-                  <p className="mt-8 text-sm font-medium text-slate-500">
-                    Remember the three items. You will be asked for them shortly.
-                  </p>
                 </div>
-              </div>
-            )}
+              )}
 
             {gameStarted && !isShowingPrompt && (
               <div className="animate-fade-in">
@@ -400,6 +411,24 @@ function GamePage() {
                       }`}
                   />
 
+                  {/*
+                    Speech-to-text support for Story Recall.
+                    Lets users speak their answer instead of typing.
+                    Also lets users hear the story again if they need audio support.
+                  */}
+                  {selectedGame === "STORY_RECALL" && storyData && (
+                    <div className="mt-4">
+                      <VoiceControls
+                        textToRead={storyData.story}
+                        onTranscript={(spokenText) => setUserInput(spokenText)}
+                        showTextToSpeech={true}
+                        showSpeechToText={true}
+                        readButtonLabel="Listen to Story"
+                        listenButtonLabel="Speak Answer"
+                      />
+                    </div>
+                  )}
+
                   {selectedGame === "STORY_RECALL" && storyData && (
                     <div className="mt-4">
                       <button
@@ -412,8 +441,8 @@ function GamePage() {
 
                       {showClue && (
                         <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-                          Clue: The items were everyday objects mentioned in the story.
-                          First letters:{" "}
+                          Clue: The items were everyday objects mentioned in the
+                          story. First letters:{" "}
                           {storyData.items
                             .map((item) => item.charAt(0).toUpperCase())
                             .join(", ")}
@@ -481,7 +510,20 @@ function GamePage() {
                     AI Reflection
                   </p>
 
-                  <h3 className="mt-2 text-2xl font-bold">
+                  {/*
+                    Voice controls for AI reflections.
+                    Allows users to listen to supportive AI responses.
+                  */}
+                  <div className="mt-3">
+                    <VoiceControls
+                      textToRead={aiReflection}
+                      showTextToSpeech={true}
+                      showSpeechToText={false}
+                      readButtonLabel="Listen to AI Reflection"
+                    />
+                  </div>
+
+                  <h3 className="mt-4 text-2xl font-bold">
                     CogniHaven Insight
                   </h3>
                 </div>

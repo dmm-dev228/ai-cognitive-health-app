@@ -482,6 +482,8 @@ export const resetPassword = async (token, newPassword) => {
     return response.text();
 };
 
+// ===== Story Recall Game =====
+
 /*
  * Generates a fresh AI-powered Story Recall round.
  *
@@ -490,14 +492,9 @@ export const resetPassword = async (token, newPassword) => {
  * - story: AI-generated story that will be read aloud
  */
 export const generateStoryRecallGame = async (difficulty) => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(`${API_BASE_URL}/api/games/story-recall/generate`, {
+  const response = await fetch(`${BASE_URL}/games/story-recall/generate`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ difficulty }),
   });
 

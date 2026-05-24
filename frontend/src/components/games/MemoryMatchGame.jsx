@@ -188,7 +188,7 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
       GamePage can use this to save CARD_MATCH results and generate AI reflection.
     */
     const memoryMatchResult = {
-      gameType: "CARD_MATCH",
+      gameType: "MEMORY_MATCH",
       difficulty,
       score: finalAccuracy,
       totalQuestions: totalPairs,

@@ -53,6 +53,7 @@ function AchievementsPage() {
         "PERFECT_GAME_SCORE",
         "PATTERN_RECALL_MASTER",
         "STORY_RECALL_MASTER",
+        "MEMORY_MATCH_MASTER",
 
         "FIRST_JOURNAL_ENTRY",
         "FIVE_JOURNAL_ENTRIES"

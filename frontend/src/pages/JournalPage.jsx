@@ -1,3 +1,6 @@
+/* When user first enters a entry for journal the ai does not respond until the second Entry
+ * Ai needs updating re says things previously stated not flowwing in convoy
+*/
 import { useEffect, useRef, useState } from "react";
 import VoiceControls from "../components/VoiceControls";
 import {

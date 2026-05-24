@@ -231,6 +231,7 @@ function AnalyticsPage() {
               <option value="ALL_GAMES">All Games</option>
               <option value="PATTERN_RECALL">Pattern Recall</option>
               <option value="STORY_RECALL">Story Recall</option>
+              <option value="MEMORY_MATCH">Memory Match</option>
             </select>
           </div>
 

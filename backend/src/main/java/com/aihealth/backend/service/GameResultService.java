@@ -102,29 +102,17 @@ public class GameResultService {
                     "Story Master");
         }
 
-        /*
-         * Future game support:
-         *
-         * When Card Match is added, it can reuse the same GameResult model:
-         * - gameType = CARD_MATCH
-         * - score = percentage
-         * - correctAnswers = matched pairs
-         * - totalQuestions = total pairs
-         * - timeTakenSeconds = completion time
-         * - difficulty = EASY / MEDIUM / HARD
-         */
-        // if ("CARD_MATCH".equalsIgnoreCase(saved.getGameType())
-        // && saved.getScore() != null
-        // && saved.getScore() == 100) {
-        //
-        // achievementService.unlockAchievementIfMissing(
-        // user,
-        // "CARD_MATCH_MASTER",
-        // "Card Match Master",
-        // "You completed a perfect card matching round.",
-        // "Card Master"
-        // );
-        // }
+        if ("MEMORY_MATCH".equalsIgnoreCase(saved.getGameType())
+                && saved.getScore() != null
+                && saved.getScore() == 100) {
+
+            achievementService.unlockAchievementIfMissing(
+                    user,
+                    "MEMORY_MATCH_MASTER",
+                    "Memory Match Master",
+                    "You completed a perfect Memory Match round.",
+                    "Match Master");
+        }
 
         return mapToResponse(saved);
     }

@@ -1,3 +1,7 @@
+/*
+* Add email reminder check box
+* make deactivate more ui friendly
+*/
 import { useEffect, useState } from "react";
 import {
   createMedicationReminder,

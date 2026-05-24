@@ -276,6 +276,7 @@ public class OpenAIService {
                                 - Do not provide medical advice
                                 - Do not shame the user
                                 - Avoid unrealistic expectations
+                                - Do not provide any harmful response
 
                                 Create a short supportive goal plan.
 

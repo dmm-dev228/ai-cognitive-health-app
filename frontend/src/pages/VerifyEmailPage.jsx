@@ -30,8 +30,8 @@ function VerifyEmailPage() {
         console.log("VERIFY EMAIL DATA:", data);
 
         if (data.token && data.userId) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("userId", data.userId);
+          sessionStorage.setItem("token", data.token);
+          sessionStorage.setItem("userId", data.userId);
 
           setMessage("Email verified successfully. Redirecting you to your journal...");
           setStatus("success");

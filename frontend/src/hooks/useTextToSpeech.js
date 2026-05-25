@@ -1,37 +1,61 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useTextToSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voices, setVoices] = useState([]);
 
-  /*
-    Speaks text aloud using the browser speechSynthesis API.
-    Optional onEndCallback runs only after the voice finishes reading.
-  */
+  useEffect(() => {
+    const loadVoices = () => {
+      setVoices(window.speechSynthesis?.getVoices() || []);
+    };
+
+    loadVoices();
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  const getBestVoice = () => {
+    return (
+      voices.find((voice) =>
+        voice.name.toLowerCase().includes("samantha")
+      ) ||
+      voices.find((voice) =>
+        voice.name.toLowerCase().includes("google us english")
+      ) ||
+      voices.find((voice) =>
+        voice.name.toLowerCase().includes("microsoft aria")
+      ) ||
+      voices.find((voice) => voice.lang.startsWith("en")) ||
+      null
+    );
+  };
+
   const speak = (text, onEndCallback) => {
     if (!text || !window.speechSynthesis) return;
 
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
+    const selectedVoice = getBestVoice();
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    utterance.rate = 0.85;
+    utterance.pitch = 1.05;
     utterance.volume = 1;
 
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-    };
+    utterance.onstart = () => setIsSpeaking(true);
 
     utterance.onend = () => {
       setIsSpeaking(false);
-
-      if (onEndCallback) {
-        onEndCallback();
-      }
+      if (onEndCallback) onEndCallback();
     };
 
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-    };
+    utterance.onerror = () => setIsSpeaking(false);
 
     window.speechSynthesis.speak(utterance);
   };
@@ -41,5 +65,13 @@ export function useTextToSpeech() {
     setIsSpeaking(false);
   };
 
-  return { speak, stopSpeaking, isSpeaking };
+  const toggleSpeaking = (text) => {
+    if (isSpeaking) {
+      stopSpeaking();
+    } else {
+      speak(text);
+    }
+  };
+
+  return { speak, stopSpeaking, toggleSpeaking, isSpeaking };
 }

@@ -119,8 +119,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         if (key.startsWith("AI:")) {
             return Bucket.builder()
                     .addLimit(limit -> limit
-                            .capacity(10)
-                            .refillIntervally(10, Duration.ofHours(1)))
+                            .capacity(50)
+                            .refillIntervally(50, Duration.ofHours(1)))
                     .build();
         }
 

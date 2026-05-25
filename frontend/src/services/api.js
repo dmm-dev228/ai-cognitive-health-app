@@ -2,12 +2,16 @@ const BASE_URL = "http://localhost:8080/api";
 
 // Gets JWT from browser storage and adds it to protected backend requests
 const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     return {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
     };
+};
+
+export const getToken = () => {
+    return sessionStorage.getItem("token");
 };
 
 // ===== AUTH =====
@@ -129,12 +133,12 @@ const handleResponse = async (response) => {
 };
 
 export const logoutUser = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("userId");
 };
 
 export const isLoggedIn = () => {
-    return Boolean(localStorage.getItem("token"));
+      return !!sessionStorage.getItem("token");
 };
 
 // Fetches all conversation messages (USER + AI) for a specific journal entry

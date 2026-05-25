@@ -15,7 +15,7 @@ import MyGoalsPage from "./pages/MyGoalsPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-
+import IdleSessionManager from "./components/IdleSessionManager";
 import Navbar from "./components/Navbar";
 import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
 
@@ -110,6 +110,8 @@ function App() {
             setVisibleNotifications={setVisibleNotifications}
           />
         )}
+        
+        {isLoggedIn() && <IdleSessionManager />}
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <Routes>

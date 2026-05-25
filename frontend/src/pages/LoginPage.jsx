@@ -36,10 +36,10 @@ function LoginPage() {
       console.log("LOGIN DATA:", data);
 
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        sessionStorage.setItem("token", data.token);
 
         if (data.userId) {
-          localStorage.setItem("userId", data.userId);
+          sessionStorage.setItem("userId", data.userId);
         }
 
         setMessage("Login successful.");

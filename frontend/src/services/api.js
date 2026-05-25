@@ -277,6 +277,12 @@ export const toggleMedicationReminder = async (id) => {
         headers: getAuthHeaders()
     });
 
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Toggle reminder failed:", response.status, errorText);
+        throw new Error("Failed to toggle medication reminder");
+    }
+
     return response.json();
 };
 

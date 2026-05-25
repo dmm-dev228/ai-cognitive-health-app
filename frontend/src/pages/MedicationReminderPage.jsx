@@ -1,7 +1,3 @@
-/*
-* Add email reminder check box
-* make deactivate more ui friendly
-*/
 import { useEffect, useState } from "react";
 import {
   createMedicationReminder,
@@ -14,6 +10,8 @@ function MedicationReminderPage() {
   const [reminders, setReminders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [togglingId, setTogglingId] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [formData, setFormData] = useState({
     medicationName: "",
@@ -105,7 +103,10 @@ function MedicationReminderPage() {
     return "";
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event) => {
+    if (event) {
+      event.preventDefault();
+    }
     const validationMessage = validateForm();
 
     if (validationMessage) {
@@ -144,8 +145,34 @@ function MedicationReminderPage() {
   };
 
   const handleToggle = async (id) => {
-    await toggleMedicationReminder(id);
-    fetchReminders();
+    try {
+      setTogglingId(id);
+
+      await toggleMedicationReminder(id);
+
+      const reminder = reminders.find(r => r.id === id);
+
+      setSuccessMessage(
+        reminder?.isActive
+          ? "Reminder paused successfully."
+          : "Reminder resumed successfully."
+      );
+
+      await fetchReminders();
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        "Could not update reminder status."
+      );
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   return (
@@ -168,6 +195,12 @@ function MedicationReminderPage() {
       {error && (
         <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
           {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="mb-6 animate-fade-in rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-700 shadow-md">
+          {successMessage}
         </div>
       )}
 
@@ -261,8 +294,63 @@ function MedicationReminderPage() {
               rows="4"
               className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
             />
+            <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+                Reminder Channels
+              </p>
 
+              <div className="mt-4 grid gap-3">
+                <div
+                  onClick={(event) => event.stopPropagation()}
+                  className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 shadow-sm"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">
+                      In-app notifications
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+                      Show reminders inside CogniHaven
+                    </p>
+                  </div>
+
+                  <input
+                    type="checkbox"
+                    name="inAppReminderEnabled"
+                    checked={formData.inAppReminderEnabled}
+                    onChange={handleCheckboxChange}
+                    onClick={(event) => event.stopPropagation()}
+                    className="h-5 w-5 accent-emerald-500"
+                  />
+                </div>
+
+                <div
+                  onClick={(event) => event.stopPropagation()}
+                  className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 shadow-sm"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">
+                      Email reminders
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+                      Send reminder emails
+                    </p>
+                  </div>
+
+                  <input
+                    type="checkbox"
+                    name="emailReminderEnabled"
+                    checked={formData.emailReminderEnabled}
+                    onChange={handleCheckboxChange}
+                    onClick={(event) => event.stopPropagation()}
+                    className="h-5 w-5 accent-emerald-500"
+                  />
+                </div>
+              </div>
+            </div>
             <button
+              type="button"
               onClick={handleSubmit}
               className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
             >
@@ -340,11 +428,18 @@ function MedicationReminderPage() {
                     </div>
 
                     <span
-                      className={`rounded-full px-4 py-2 text-xs font-bold ${r.isActive
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-slate-100 text-slate-600"
+                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${r.isActive
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-red-50 text-red-600"
                         }`}
                     >
+                      <span
+                        className={`h-2 w-2 rounded-full ${r.isActive
+                          ? "bg-emerald-500"
+                          : "bg-red-500"
+                          }`}
+                      />
+
                       {r.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
@@ -461,9 +556,14 @@ function MedicationReminderPage() {
                     <div className="flex flex-wrap gap-3 pt-2">
                       <button
                         onClick={() => handleToggle(r.id)}
-                        className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-emerald-600"
+                        className={`rounded-2xl px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 disabled:opacity-60 ${r.isActive
+                          ? "bg-amber-500 hover:bg-amber-600"
+                          : "bg-emerald-500 hover:bg-emerald-600"
+                          }`}
                       >
-                        {r.isActive ? "Deactivate" : "Activate"}
+                        {r.isActive
+                          ? "Pause Reminder"
+                          : "Resume Reminder"}
                       </button>
 
                       <button

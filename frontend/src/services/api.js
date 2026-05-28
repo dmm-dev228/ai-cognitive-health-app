@@ -415,6 +415,50 @@ export const getCommunityPosts = async () => {
     return response.json();
 };
 
+/*
+ * Toggle a supportive reaction on a community post.
+ *
+ * Future backend endpoint:
+ * POST /api/community/{postId}/reactions
+ *
+ * Expected behavior:
+ * - If user has no reaction, create one.
+ * - If user clicks same reaction again, remove it.
+ * - If user clicks a different reaction, replace it.
+ */
+export const toggleCommunityReaction = async (postId, reactionType) => {
+    const response = await fetch(`${BASE_URL}/community/${postId}/reactions`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ reactionType })
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to toggle community reaction");
+    }
+
+    return response.json();
+};
+
+/*
+ * Fetch reaction summary for a community post.
+ *
+ * Future backend endpoint:
+ * GET /api/community/{postId}/reactions
+ */
+export const getCommunityPostReactions = async (postId) => {
+    const response = await fetch(`${BASE_URL}/community/${postId}/reactions`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community reactions");
+    }
+
+    return response.json();
+};
+
 // ===== Goals =====
 
 /*

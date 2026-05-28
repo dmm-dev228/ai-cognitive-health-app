@@ -1,5 +1,6 @@
 package com.aihealth.backend.service;
 
+import com.aihealth.backend.dto.ConversationAnalysis;
 import com.aihealth.backend.dto.JournalEntryRequest;
 import com.aihealth.backend.dto.JournalEntryResponse;
 import com.aihealth.backend.model.JournalEntry;
@@ -8,9 +9,7 @@ import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
-import com.aihealth.backend.dto.ConversationAnalysis;
 
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,7 +35,6 @@ public class JournalEntryService {
             AchievementService achievementService,
             OpenAIService openAIService,
             ConversationAnalysisService conversationAnalysisService) {
-
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
@@ -48,9 +46,11 @@ public class JournalEntryService {
 
     /*
      * Creates a new journal entry for the currently authenticated user.
-     * The user's email is extracted from the JWT security context.
+     *
+     * This now also creates the first AI companion response so the journal
+     * begins as a real conversation thread instead of a static reflection.
      */
-    public JournalEntryResponse createEntry(@NonNull JournalEntryRequest request) {
+    public JournalEntryResponse createEntry(JournalEntryRequest request) {
         User user = getCurrentAuthenticatedUser();
 
         JournalEntry entry = new JournalEntry();
@@ -63,35 +63,55 @@ public class JournalEntryService {
         entry.setCreatedAt(LocalDateTime.now());
         entry.setUpdatedAt(LocalDateTime.now());
 
-        // Save journal first so it gets an ID
+        /*
+         * Save journal first so it receives an ID.
+         * Conversation messages need this saved entry relationship.
+         */
         JournalEntry saved = journalEntryRepository.save(entry);
 
-        // Save the user's journal content as the first conversation message
+        /*
+         * Save the user's journal content as the first conversation message.
+         */
         conversationMessageService.saveMessage(
                 saved,
                 "USER",
                 saved.getContent());
 
-        /*
-         * Build recent conversation context so the AI
-         * understands ongoing conversation flow.
-         */
-        String recentConversationContext = buildRecentConversationContext(saved);
+        Long journalEntryId = saved.getId();
+
+        if (journalEntryId == null) {
+            throw new IllegalStateException("Saved journal entry ID cannot be null.");
+        }
 
         /*
-         * Analyze the user's newest message before AI generation.
-         * This helps detect:
-         * - emotional tone
-         * - direct questions
-         * - emotional disclosure
-         * - conversational intent
+         * Build conversation context after saving the user's message.
+         * This allows the AI to respond to the current message as part of a thread.
+         */
+        String recentConversationContext = buildRecentConversationContext(journalEntryId);
+
+        /*
+         * Analyze the user's latest message before generation.
+         * The analysis gives the AI stronger instruction about tone and intent.
          */
         ConversationAnalysis analysis = conversationAnalysisService.analyze(
                 saved.getContent(),
                 recentConversationContext);
 
         /*
-         * Generate a more natural companion-style AI response.
+         * Combine conversation history with lightweight analysis.
+         * This keeps OpenAIService simple while still giving the prompt useful context.
+         */
+        String enrichedConversationContext = recentConversationContext
+                + "\n\nConversation analysis:"
+                + "\nIntent: " + analysis.getIntent()
+                + "\nEmotional tone: " + analysis.getEmotionalTone()
+                + "\nDirect question: " + analysis.isDirectQuestion()
+                + "\nActive disclosure: " + analysis.isActiveDisclosure()
+                + "\nContinue conversation: " + analysis.isContinueConversation()
+                + "\nUrgent safety concern: " + analysis.isUrgentSafetyConcern();
+
+        /*
+         * Generate the first companion-style AI response.
          */
         String aiResponse = openAIService.generateSupportiveJournalResponse(
                 saved.getTitle(),
@@ -99,13 +119,11 @@ public class JournalEntryService {
                 saved.getMood(),
                 "",
                 "",
-                recentConversationContext +
-                        "\n\nDetected Intent: " + analysis.getIntent() +
-                        "\nDetected Emotional Tone: " + analysis.getEmotionalTone());
+                enrichedConversationContext);
 
         /*
-         * Save the AI response into the conversation history
-         * so future messages continue naturally.
+         * Save the AI response into the conversation thread so future follow-ups
+         * have both the user's message and CogniHaven's previous response.
          */
         conversationMessageService.saveMessage(
                 saved,
@@ -146,6 +164,25 @@ public class JournalEntryService {
     }
 
     /*
+     * Builds lightweight recent conversation context for AI generation.
+     *
+     * Only the most recent messages are included so the AI has continuity
+     * without flooding the prompt with the entire journal history.
+     */
+    private String buildRecentConversationContext(Long journalEntryId) {
+        var messages = conversationMessageService.getConversationMessages(journalEntryId);
+
+        if (messages == null || messages.isEmpty()) {
+            return "";
+        }
+
+        return messages.stream()
+                .skip(Math.max(0, messages.size() - 6))
+                .map(message -> message.getSenderType() + ": " + message.getMessage())
+                .collect(Collectors.joining("\n"));
+    }
+
+    /*
      * Loads the currently authenticated user from the JWT email stored in the
      * security context.
      */
@@ -160,7 +197,7 @@ public class JournalEntryService {
      * Converts a JournalEntry entity into a response DTO.
      * Also attaches AI response if one exists for the entry.
      */
-    private JournalEntryResponse mapToResponse(@NonNull JournalEntry entry) {
+    private JournalEntryResponse mapToResponse(JournalEntry entry) {
         String aiResponse = null;
 
         var aiAnalysisList = aiAnalysisRepository.findByJournalEntryId(entry.getId());
@@ -179,23 +216,5 @@ public class JournalEntryService {
                 entry.getCreatedAt(),
                 entry.getUpdatedAt(),
                 aiResponse);
-    }
-
-    /*
-     * Builds lightweight recent conversation context
-     * so the AI can continue conversations naturally.
-     */
-    private String buildRecentConversationContext(JournalEntry entry) {
-
-        var messages = conversationMessageService.getConversationMessages(entry.getId());
-
-        if (messages == null || messages.isEmpty()) {
-            return "";
-        }
-
-        return messages.stream()
-                .skip(Math.max(0, messages.size() - 6))
-                .map(message -> message.getSenderType() + ": " + message.getMessage())
-                .collect(Collectors.joining("\n"));
     }
 }

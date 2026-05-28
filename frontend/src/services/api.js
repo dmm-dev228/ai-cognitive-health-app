@@ -34,20 +34,21 @@ export const loginUser = async (data) => {
 /*
  * Fetches today's AI-generated journal prompt for the authenticated user.
  *
- * Backend behavior:
- * - Returns existing prompt if today's prompt already exists
- * - Generates and stores a new prompt if one does not exist yet
- *
- * Requires valid JWT authentication token.
+ * This endpoint is protected because prompts belong to a specific user.
+ * The JWT token must be sent with the request.
  */
 export const getTodayDailyPrompt = async () => {
-
     const token = sessionStorage.getItem("token");
+
+    if (!token) {
+        throw new Error("No authentication token found for daily prompt request.");
+    }
 
     const response = await fetch(`${BASE_URL}/daily-prompts/today`, {
         method: "GET",
         headers: {
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
         }
     });
 
@@ -535,23 +536,6 @@ export const generateStoryRecallGame = async (difficulty) => {
 
   if (!response.ok) {
     throw new Error("Failed to generate Story Recall game");
-  }
-
-  return response.json();
-};
-
-export const getTodayDailyPrompt = async () => {
-  const token = sessionStorage.getItem("token");
-
-  const response = await fetch(`${API_BASE_URL}/daily-prompts/today`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to load daily prompt");
   }
 
   return response.json();

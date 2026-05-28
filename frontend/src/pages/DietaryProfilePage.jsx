@@ -7,6 +7,7 @@ import { getDietaryProfile, saveDietaryProfile } from "../services/api";
  * Allows users to:
  * - View their dietary profile
  * - Edit/update preferences
+ * - Track completion progress
  * - Persist data per authenticated user (JWT-based)
  */
 function DietaryProfilePage() {
@@ -23,12 +24,28 @@ function DietaryProfilePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  /*
+   * Calculates how complete the user's dietary profile is.
+   * This is used to make the profile feel more like a guided wellness setup.
+   */
+  const completedFields = Object.values(formData).filter(
+    (value) => value && value.trim() !== ""
+  ).length;
+
+  const totalFields = Object.keys(formData).length;
+
+  const completionPercentage = Math.round(
+    (completedFields / totalFields) * 100
+  );
+
+  const isProfileEmpty = completedFields === 0;
+
   useEffect(() => {
     fetchDietaryProfile();
   }, []);
 
   /*
-   * Fetch dietary profile for current user
+   * Fetch dietary profile for current user.
    */
   const fetchDietaryProfile = async () => {
     try {
@@ -56,7 +73,7 @@ function DietaryProfilePage() {
   };
 
   /*
-   * Handle form field updates
+   * Handle form field updates.
    */
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,7 +85,7 @@ function DietaryProfilePage() {
   };
 
   /*
-   * Save dietary profile
+   * Save dietary profile.
    */
   const handleSubmit = async () => {
     try {
@@ -116,8 +133,9 @@ function DietaryProfilePage() {
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            Help CogniHaven personalize wellness support, hydration reminders,
-            and nutrition-focused insights.
+            Build a gentle nutrition support profile that helps CogniHaven
+            personalize hydration reminders, food preferences, and wellness
+            reflections.
           </p>
         </div>
 
@@ -126,20 +144,107 @@ function DietaryProfilePage() {
             onClick={() => setIsEditing(true)}
             className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            Edit Dietary Profile
+            {isProfileEmpty ? "Create Dietary Profile" : "Edit Dietary Profile"}
           </button>
         )}
       </div>
 
+      {/* Error message */}
       {error && (
         <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
           {error}
         </div>
       )}
 
+      {/* Success message */}
       {message && (
         <div className="mb-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
           {message}
+        </div>
+      )}
+
+      {/* Wellness completion snapshot */}
+      <div className="mb-8 grid gap-4 lg:grid-cols-3">
+        <div className="glass-card rounded-3xl p-6 lg:col-span-2">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-500">
+            Daily Wellness Snapshot
+          </p>
+
+          <h3 className="mt-3 text-2xl font-bold text-slate-900">
+            Your nutrition support profile is {completionPercentage}% complete
+          </h3>
+
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            CogniHaven uses this information to make hydration reminders, food
+            preferences, and wellness reflections feel more personal,
+            supportive, and calm.
+          </p>
+
+          <div className="mt-5 h-3 overflow-hidden rounded-full bg-emerald-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+
+          {isProfileEmpty && (
+            <p className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
+              Start with just one or two sections. This profile is meant to
+              support your daily wellness, not pressure you to be perfect.
+            </p>
+          )}
+        </div>
+
+        <div className="glass-card rounded-3xl p-6">
+          <p className="text-sm font-semibold text-slate-500">
+            Completed Sections
+          </p>
+
+          <p className="mt-3 text-4xl font-bold text-slate-900">
+            {completedFields}/{totalFields}
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Small updates help CogniHaven better support your daily wellness
+            routine.
+          </p>
+        </div>
+      </div>
+
+      {/* Gentle wellness insight cards */}
+      {!isEditing && (
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl border border-emerald-100 bg-emerald-50/70 p-5">
+            <p className="text-2xl">💧</p>
+            <h4 className="mt-3 font-bold text-slate-900">
+              Hydration Awareness
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Hydration reminders can help support a steady daily routine.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-teal-100 bg-teal-50/70 p-5">
+            <p className="text-2xl">🥗</p>
+            <h4 className="mt-3 font-bold text-slate-900">
+              Food Preferences
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Favorite foods and foods to avoid help personalize future wellness
+              suggestions.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-amber-100 bg-amber-50/70 p-5">
+            <p className="text-2xl">🌤️</p>
+            <h4 className="mt-3 font-bold text-slate-900">
+              Gentle Consistency
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              CogniHaven focuses on supportive habits, not strict dieting or
+              pressure.
+            </p>
+          </div>
         </div>
       )}
 
@@ -273,7 +378,8 @@ function DietaryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.favoriteFoods || "Not set"}
+              {formData.favoriteFoods ||
+                "Not set yet. Add foods you enjoy so CogniHaven can better personalize your wellness experience."}
             </p>
           </div>
 
@@ -295,7 +401,8 @@ function DietaryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.foodsToAvoid || "Not set"}
+              {formData.foodsToAvoid ||
+                "Not set yet. You can add foods you prefer to avoid for a more respectful experience."}
             </p>
           </div>
 
@@ -317,7 +424,8 @@ function DietaryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.allergies || "Not set"}
+              {formData.allergies ||
+                "Not set yet. Add allergy information if you want CogniHaven to keep it in mind."}
             </p>
           </div>
 
@@ -339,7 +447,8 @@ function DietaryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.hydrationReminderPreference || "Not set"}
+              {formData.hydrationReminderPreference ||
+                "Not set yet. Example: Every 2 hours, morning and evening, or gentle daily reminders."}
             </p>
           </div>
 
@@ -361,7 +470,8 @@ function DietaryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.dietaryNotes || "Not set"}
+              {formData.dietaryNotes ||
+                "Not set yet. Add any extra notes that would help CogniHaven support your routine in a calm, personalized way."}
             </p>
           </div>
         </div>

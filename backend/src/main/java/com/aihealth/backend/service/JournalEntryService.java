@@ -8,6 +8,7 @@ import com.aihealth.backend.repository.AIAnalysisRepository;
 import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
+import com.aihealth.backend.dto.ConversationAnalysis;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -24,18 +25,25 @@ public class JournalEntryService {
     private final AIAnalysisRepository aiAnalysisRepository;
     private final ConversationMessageService conversationMessageService;
     private final AchievementService achievementService;
+    private final OpenAIService openAIService;
+    private final ConversationAnalysisService conversationAnalysisService;
 
     public JournalEntryService(
             JournalEntryRepository journalEntryRepository,
             UserRepository userRepository,
             AIAnalysisRepository aiAnalysisRepository,
             ConversationMessageService conversationMessageService,
-            AchievementService achievementService) {
+            AchievementService achievementService,
+            OpenAIService openAIService,
+            ConversationAnalysisService conversationAnalysisService) {
+
         this.journalEntryRepository = journalEntryRepository;
         this.userRepository = userRepository;
         this.aiAnalysisRepository = aiAnalysisRepository;
         this.conversationMessageService = conversationMessageService;
         this.achievementService = achievementService;
+        this.openAIService = openAIService;
+        this.conversationAnalysisService = conversationAnalysisService;
     }
 
     /*
@@ -63,6 +71,46 @@ public class JournalEntryService {
                 saved,
                 "USER",
                 saved.getContent());
+
+        /*
+         * Build recent conversation context so the AI
+         * understands ongoing conversation flow.
+         */
+        String recentConversationContext = buildRecentConversationContext(saved);
+
+        /*
+         * Analyze the user's newest message before AI generation.
+         * This helps detect:
+         * - emotional tone
+         * - direct questions
+         * - emotional disclosure
+         * - conversational intent
+         */
+        ConversationAnalysis analysis = conversationAnalysisService.analyze(
+                saved.getContent(),
+                recentConversationContext);
+
+        /*
+         * Generate a more natural companion-style AI response.
+         */
+        String aiResponse = openAIService.generateSupportiveJournalResponse(
+                saved.getTitle(),
+                saved.getContent(),
+                saved.getMood(),
+                "",
+                "",
+                recentConversationContext +
+                        "\n\nDetected Intent: " + analysis.getIntent() +
+                        "\nDetected Emotional Tone: " + analysis.getEmotionalTone());
+
+        /*
+         * Save the AI response into the conversation history
+         * so future messages continue naturally.
+         */
+        conversationMessageService.saveMessage(
+                saved,
+                "AI",
+                aiResponse);
 
         achievementService.unlockAchievementIfMissing(
                 user,
@@ -131,5 +179,23 @@ public class JournalEntryService {
                 entry.getCreatedAt(),
                 entry.getUpdatedAt(),
                 aiResponse);
+    }
+
+    /*
+     * Builds lightweight recent conversation context
+     * so the AI can continue conversations naturally.
+     */
+    private String buildRecentConversationContext(JournalEntry entry) {
+
+        var messages = conversationMessageService.getConversationMessages(entry.getId());
+
+        if (messages == null || messages.isEmpty()) {
+            return "";
+        }
+
+        return messages.stream()
+                .skip(Math.max(0, messages.size() - 6))
+                .map(message -> message.getSenderType() + ": " + message.getMessage())
+                .collect(Collectors.joining("\n"));
     }
 }

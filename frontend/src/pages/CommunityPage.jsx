@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CommunityHero from "../components/community/CommunityHero";
 import {
   createCommunityPost,
   getCommunityPosts
@@ -164,34 +165,7 @@ function CommunityPage() {
   return (
     <section className="animate-fade-in">
       {/* Community hero */}
-      <div className="relative mb-8 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-violet-500 via-indigo-500 to-emerald-400 p-8 text-white shadow-2xl shadow-violet-200">
-        <div className="absolute -left-16 top-8 h-56 w-56 rounded-full bg-white/20 blur-3xl animate-float" />
-        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
-
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
-              Supportive Wellness Community
-            </p>
-
-            <h2 className="mt-6 max-w-4xl text-5xl font-black leading-tight tracking-tight">
-              A calm place to share, encourage, and grow together.
-            </h2>
-
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/85">
-              Share routines, reflections, helpful wellness habits, and
-              encouragement in a supportive non-medical community space.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setIsComposerOpen(true)}
-            className="rounded-2xl bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            + Create Post
-          </button>
-        </div>
-      </div>
+      <CommunityHero onCreatePost={() => setIsComposerOpen(true)} />
 
       {error && (
         <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
@@ -212,11 +186,10 @@ function CommunityPage() {
                 <button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
-                  className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
-                    activeFilter === filter.key
+                  className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${activeFilter === filter.key
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
                       : "bg-white/70 text-slate-600 hover:bg-white hover:text-indigo-700"
-                  }`}
+                    }`}
                 >
                   <span>{filter.icon}</span>
                   <span>{filter.label}</span>

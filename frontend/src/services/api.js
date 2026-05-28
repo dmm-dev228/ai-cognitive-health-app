@@ -29,6 +29,31 @@ export const loginUser = async (data) => {
     return handleResponse(response);
 };
 
+// ===== DAILY PROMPTS =====
+
+/*
+ * Fetches today's AI-generated journal prompt for the authenticated user.
+ *
+ * Backend behavior:
+ * - Returns existing prompt if today's prompt already exists
+ * - Generates and stores a new prompt if one does not exist yet
+ *
+ * Requires valid JWT authentication token.
+ */
+export const getTodayDailyPrompt = async () => {
+
+    const token = sessionStorage.getItem("token");
+
+    const response = await fetch(`${BASE_URL}/daily-prompts/today`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    return handleResponse(response);
+};
+
 // Verify Email
 export const verifyEmail = async (token) => {
     const response = await fetch(`${BASE_URL}/auth/verify-email?token=${token}`, {
@@ -510,6 +535,23 @@ export const generateStoryRecallGame = async (difficulty) => {
 
   if (!response.ok) {
     throw new Error("Failed to generate Story Recall game");
+  }
+
+  return response.json();
+};
+
+export const getTodayDailyPrompt = async () => {
+  const token = sessionStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/daily-prompts/today`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load daily prompt");
   }
 
   return response.json();

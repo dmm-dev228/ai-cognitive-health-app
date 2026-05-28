@@ -4,7 +4,6 @@ import com.aihealth.backend.dto.AIAnalysisResponse;
 import com.aihealth.backend.service.AIAnalysisService;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -18,9 +17,15 @@ public class AIAnalysisController {
         this.aiAnalysisService = aiAnalysisService;
     }
 
+    /*
+     * Generates a supportive AI reflection for a journal conversation.
+     *
+     * Example:
+     * POST /api/ai-analysis/journal/5
+     */
     @PostMapping("/journal/{journalEntryId}")
     public ResponseEntity<AIAnalysisResponse> generateJournalReflection(
-            @PathVariable @NonNull Long journalEntryId) {
+            @PathVariable Long journalEntryId) {
 
         AIAnalysisResponse response = aiAnalysisService.generateJournalReflection(journalEntryId);
 
@@ -36,6 +41,7 @@ public class AIAnalysisController {
     @PostMapping("/game/{gameResultId}")
     public AIAnalysisResponse generateGameReflection(
             @PathVariable Long gameResultId) {
+
         return aiAnalysisService.generateGameReflection(gameResultId);
     }
 
@@ -49,5 +55,4 @@ public class AIAnalysisController {
     public AIAnalysisResponse generateAnalyticsSummary() {
         return aiAnalysisService.generateAnalyticsSummary();
     }
-
 }

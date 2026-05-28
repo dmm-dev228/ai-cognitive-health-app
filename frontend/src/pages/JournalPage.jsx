@@ -8,6 +8,7 @@ import {
   getJournalEntries,
   getConversationMessages,
   addConversationMessage,
+  getTodayDailyPrompt,
 } from "../services/api";
 
 const moodEmojis = {
@@ -95,8 +96,12 @@ function JournalPage() {
   const bottomRef = useRef(null);
   const activeTheme = journalThemes[journalTheme];
 
+  // AI-generated daily journal reflection prompt.
+  const [dailyPrompt, setDailyPrompt] = useState("");
+
   useEffect(() => {
     fetchEntries();
+    fetchDailyPrompt();
   }, []);
 
   const scrollToBottom = () => {
@@ -170,6 +175,30 @@ function JournalPage() {
       setError("Could not load journal entries.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /*
+ * Fetches today's AI-generated journal prompt.
+ *
+ * Backend returns:
+ * - existing prompt if already generated today
+ * - new AI-generated prompt if none exists yet
+ */
+  const fetchDailyPrompt = async () => {
+    try {
+      const data = await getTodayDailyPrompt();
+
+      setDailyPrompt(
+        data?.prompt ||
+        "What is one thought or feeling you want to make space for today?"
+      );
+    } catch (err) {
+      console.error("Failed to fetch daily prompt:", err);
+
+      setDailyPrompt(
+        "What is one thought or feeling you want to make space for today?"
+      );
     }
   };
 
@@ -460,8 +489,7 @@ function JournalPage() {
                       Today’s gentle prompt
                     </p>
                     <p className="mt-3 text-sm leading-7 text-slate-600">
-                      What is one small moment from today that you want to
-                      remember?
+                      {dailyPrompt || "Loading today's reflection prompt..."}
                     </p>
                   </div>
                 </div>

@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import CommunityHero from "../components/community/CommunityHero";
 import CommunityComposer from "../components/community/CommunityComposer";
-import CommunityPostCard from "../components/community/CommunityPostCard";
-import CommunityLoadingState from "../components/community/CommunityLoadingState";
-import CommunityEmptyState from "../components/community/CommunityEmptyState";
 import CommunitySidebar from "../components/community/CommunitySidebar";
 import CommunityNavigation from "../components/community/CommunityNavigation";
 import CommunityFeedHeader from "../components/community/CommunityFeedHeader";
+import CommunityFeed from "../components/community/CommunityFeed";
 import {
   createCommunityPost,
   getCommunityPosts
@@ -209,24 +207,13 @@ function CommunityPage() {
   getCategoryMeta={getCategoryMeta}
 />
 
-          {isLoading ? (
-            <CommunityLoadingState />
-          ) : filteredPosts.length === 0 ? (
-            <CommunityEmptyState activeFilter={activeFilter} />
-          ) : (
-            filteredPosts.map((post) => {
-              const meta = getCategoryMeta(post.category);
-
-              return (
-                <CommunityPostCard
-                  key={post.id}
-                  post={post}
-                  meta={meta}
-                  getInitial={getInitial}
-                />
-              );
-            })
-          )}
+<CommunityFeed
+  isLoading={isLoading}
+  filteredPosts={filteredPosts}
+  activeFilter={activeFilter}
+  getCategoryMeta={getCategoryMeta}
+  getInitial={getInitial}
+/>
         </main>
 
         {/* Right community panel */}

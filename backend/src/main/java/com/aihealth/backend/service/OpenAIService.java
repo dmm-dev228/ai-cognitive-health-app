@@ -194,6 +194,70 @@ public class OpenAIService {
     }
 
     /*
+     * Generates one gentle daily journal prompt.
+     *
+     * This is used once per user per day.
+     * Previous prompts are included so the AI avoids repeating or closely copying
+     * them.
+     */
+    public String generateDailyJournalPrompt(String previousPromptContext) {
+        String safePreviousPromptContext = normalizeContext(previousPromptContext);
+
+        String prompt = """
+                You are CogniHaven, a calm AI-powered cognitive wellness and daily support companion.
+
+                Generate ONE gentle journal prompt for today.
+
+                Purpose:
+                - Help the user reflect in a calm, emotionally safe way.
+                - Keep it broad enough for any user.
+                - Avoid sounding clinical, medical, or like therapy homework.
+                - Do not mention dementia, cognitive decline, diagnosis, treatment, or medical conditions.
+
+                Variety rules:
+                - Do not repeat or closely copy previous prompts.
+                - Avoid overusing gratitude prompts.
+                - Avoid generic prompts like "How are you feeling today?"
+                - Make the prompt feel warm, human, and thoughtful.
+
+                Previous prompts to avoid:
+                %s
+
+                Requirements:
+                - Return only the prompt text.
+                - One sentence only.
+                - No markdown.
+                - No quotes.
+                - Keep it under 30 words.
+                """
+                .formatted(safePreviousPromptContext);
+
+        ResponseCreateParams params = ResponseCreateParams.builder()
+                .model("gpt-4.1-mini")
+                .input(prompt)
+                .build();
+
+        Response response = client.responses().create(params);
+
+        if (response.output().isEmpty()) {
+            return "What is one thought or feeling you want to make space for today?";
+        }
+
+        var firstOutput = response.output().get(0);
+
+        if (firstOutput.asMessage().content().isEmpty()) {
+            return "What is one thought or feeling you want to make space for today?";
+        }
+
+        return firstOutput.asMessage()
+                .content()
+                .get(0)
+                .asOutputText()
+                .text()
+                .trim();
+    }
+
+    /*
      * Generates a supportive, non-medical reflection after a cognitive wellness
      * game.
      *

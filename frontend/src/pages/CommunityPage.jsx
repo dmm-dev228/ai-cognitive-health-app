@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import CommunityHero from "../components/community/CommunityHero";
 import CommunityComposer from "../components/community/CommunityComposer";
 import CommunityPostCard from "../components/community/CommunityPostCard";
+import CommunityLoadingState from "../components/community/CommunityLoadingState";
+import CommunityEmptyState from "../components/community/CommunityEmptyState";
 import {
   createCommunityPost,
   getCommunityPosts
@@ -262,26 +264,9 @@ function CommunityPage() {
           </div>
 
           {isLoading ? (
-            <div className="glass-card rounded-3xl p-10 text-center">
-              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-violet-100 border-t-violet-500" />
-              <p className="font-semibold text-slate-700">
-                Loading community posts...
-              </p>
-            </div>
+            <CommunityLoadingState />
           ) : filteredPosts.length === 0 ? (
-            <div className="glass-card rounded-3xl p-10 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-violet-50 text-3xl">
-                💬
-              </div>
-
-              <h3 className="text-2xl font-bold text-slate-900">
-                No posts here yet.
-              </h3>
-
-              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
-                Be the first to share something supportive in this space.
-              </p>
-            </div>
+            <CommunityEmptyState activeFilter={activeFilter} />
           ) : (
             filteredPosts.map((post) => {
               const meta = getCategoryMeta(post.category);

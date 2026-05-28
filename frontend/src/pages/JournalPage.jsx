@@ -244,19 +244,26 @@ function JournalPage() {
       return;
     }
 
+    const trimmedMessage = message.trim();
+
+    /*
+     * Optimistic user message.
+     * This shows the user's message immediately before waiting for CogniHaven.
+     */
+    const optimisticUserMessage = {
+      id: `temp-user-${Date.now()}`,
+      journalEntryId: entryId,
+      senderType: "USER",
+      message: trimmedMessage,
+      createdAt: new Date().toISOString(),
+    };
+
     try {
       setError("");
 
-      setLoadingMap((prev) => ({
-        ...prev,
-        [entryId]: true,
-      }));
-
-      const updatedMessages = await addConversationMessage(entryId, message);
-
       setConversationMap((prev) => ({
         ...prev,
-        [entryId]: updatedMessages,
+        [entryId]: [...(prev[entryId] || []), optimisticUserMessage],
       }));
 
       setFollowUpMap((prev) => ({
@@ -264,10 +271,34 @@ function JournalPage() {
         [entryId]: "",
       }));
 
+      setLoadingMap((prev) => ({
+        ...prev,
+        [entryId]: true,
+      }));
+
+      scrollToBottom();
+
+      const updatedMessages = await addConversationMessage(entryId, trimmedMessage);
+
+      setConversationMap((prev) => ({
+        ...prev,
+        [entryId]: updatedMessages,
+      }));
+
       scrollToBottom();
     } catch (err) {
       console.error("Failed to send follow-up message:", err);
       setError("Could not send follow-up message.");
+
+      /*
+       * Remove temporary optimistic message if the request fails.
+       */
+      setConversationMap((prev) => ({
+        ...prev,
+        [entryId]: (prev[entryId] || []).filter(
+          (msg) => msg.id !== optimisticUserMessage.id
+        ),
+      }));
     } finally {
       setLoadingMap((prev) => ({
         ...prev,

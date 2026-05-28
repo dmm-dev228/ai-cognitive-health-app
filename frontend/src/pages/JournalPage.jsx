@@ -71,7 +71,7 @@ const journalThemes = {
 };
 
 function JournalPage() {
-  const storedUserId = localStorage.getItem("userId");
+  const storedUserId = sessionStorage.getItem("userId");
 
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");

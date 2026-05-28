@@ -6,6 +6,7 @@ import CommunityLoadingState from "../components/community/CommunityLoadingState
 import CommunityEmptyState from "../components/community/CommunityEmptyState";
 import CommunitySidebar from "../components/community/CommunitySidebar";
 import CommunityNavigation from "../components/community/CommunityNavigation";
+import CommunityFeedHeader from "../components/community/CommunityFeedHeader";
 import {
   createCommunityPost,
   getCommunityPosts
@@ -202,25 +203,11 @@ function CommunityPage() {
             onCategoryChange={setCategory}
             onSubmit={handleSubmit}
           />
-
-          <div className="flex items-center justify-between rounded-3xl border border-white/60 bg-white/60 px-5 py-4 shadow-sm backdrop-blur">
-            <div>
-              <h3 className="text-xl font-bold text-slate-900">
-                Community Feed
-              </h3>
-              <p className="text-sm text-slate-500">
-                {activeFilter === "ALL"
-                  ? "Newest supportive posts appear first."
-                  : `Showing ${getCategoryMeta(
-                    activeFilter
-                  ).label.toLowerCase()} posts.`}
-              </p>
-            </div>
-
-            <span className="rounded-full bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-700">
-              {filteredPosts.length} posts
-            </span>
-          </div>
+<CommunityFeedHeader
+  activeFilter={activeFilter}
+  filteredPostCount={filteredPosts.length}
+  getCategoryMeta={getCategoryMeta}
+/>
 
           {isLoading ? (
             <CommunityLoadingState />

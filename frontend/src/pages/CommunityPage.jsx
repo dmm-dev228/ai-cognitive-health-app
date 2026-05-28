@@ -5,6 +5,7 @@ import CommunitySidebar from "../components/community/CommunitySidebar";
 import CommunityNavigation from "../components/community/CommunityNavigation";
 import CommunityFeedHeader from "../components/community/CommunityFeedHeader";
 import CommunityFeed from "../components/community/CommunityFeed";
+import CommunityGuidelinesModal from "../components/community/CommunityGuidelinesModal";
 import {
   createCommunityPost,
   getCommunityPosts
@@ -36,6 +37,10 @@ function CommunityPage() {
 
   // Controls whether the social-style composer is expanded.
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+
+  const [showGuidelines, setShowGuidelines] = useState(() => {
+  return sessionStorage.getItem("communityGuidelinesAccepted") !== "true";
+});
 
   useEffect(() => {
     fetchPosts();
@@ -166,9 +171,18 @@ function CommunityPage() {
       ring: "border-slate-100"
     };
   };
+  const handleAcceptGuidelines = () => {
+  sessionStorage.setItem("communityGuidelinesAccepted", "true");
+  setShowGuidelines(false);
+};
 
   return (
     <section className="animate-fade-in">
+      
+<CommunityGuidelinesModal
+  isOpen={showGuidelines}
+  onAccept={handleAcceptGuidelines}
+/>
       <CommunityHero onCreatePost={() => setIsComposerOpen(true)} />
 
       {error && (
@@ -201,6 +215,7 @@ function CommunityPage() {
             onCategoryChange={setCategory}
             onSubmit={handleSubmit}
           />
+          
 <CommunityFeedHeader
   activeFilter={activeFilter}
   filteredPostCount={filteredPosts.length}

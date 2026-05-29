@@ -22,15 +22,15 @@ function CommunityCommentSection({ postId }) {
     const [showComments, setShowComments] = useState(false);
     const commentsBottomRef = useRef(null);
 
-    // Automatically scrolls to the newest comment.
+    // Automatically scrolls to the newest comment when comments are visible.
     useEffect(() => {
-        if (commentsBottomRef.current) {
+        if (showComments && commentsBottomRef.current) {
             commentsBottomRef.current.scrollIntoView({
                 behavior: "smooth",
                 block: "end"
             });
         }
-    }, [comments]);
+    }, [comments, showComments]);
     const fetchComments = async () => {
         try {
             const data = await getCommunityComments(postId);
@@ -40,11 +40,10 @@ function CommunityCommentSection({ postId }) {
         }
     };
 
+    // Loads comments when the post card renders.
     useEffect(() => {
-        if (showComments) {
-            fetchComments();
-        }
-    }, [showComments]);
+        fetchComments();
+    }, [postId]);
 
     const handleSubmit = async () => {
         if (!content.trim()) {
@@ -78,7 +77,7 @@ function CommunityCommentSection({ postId }) {
                 onClick={() => setShowComments(!showComments)}
                 className="text-sm font-semibold text-violet-700 hover:text-violet-900"
             >
-                💬 Comments ({comments.length})
+                💬 {comments.length === 1 ? "1 comment" : `${comments.length} comments`}
             </button>
 
             {showComments && (

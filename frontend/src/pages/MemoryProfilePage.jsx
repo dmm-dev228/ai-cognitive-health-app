@@ -6,7 +6,7 @@ import { getMemoryProfile, saveMemoryProfile } from "../services/api";
  * -----------------
  * Allows users to personalize supportive AI experiences
  * by storing meaningful memories, people, places,
- * music, and calming activities.
+ * music, comforting activities, and triggers to avoid.
  */
 function MemoryProfilePage() {
   const [saveMessage, setSaveMessage] = useState("");
@@ -22,6 +22,22 @@ function MemoryProfilePage() {
     comfortingActivities: "",
     triggersToAvoid: ""
   });
+
+  /*
+   * Calculates how complete the user's memory profile is.
+   * This helps the page feel like a guided personalization experience.
+   */
+  const completedFields = Object.values(formData).filter(
+    (value) => value && value.trim() !== ""
+  ).length;
+
+  const totalFields = Object.keys(formData).length;
+
+  const completionPercentage = Math.round(
+    (completedFields / totalFields) * 100
+  );
+
+  const isProfileEmpty = completedFields === 0;
 
   useEffect(() => {
     fetchMemoryProfile();
@@ -61,10 +77,10 @@ function MemoryProfilePage() {
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
   /*
@@ -118,8 +134,8 @@ function MemoryProfilePage() {
           </h2>
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            Help CogniHaven better understand the people, places, activities,
-            and memories that feel meaningful and comforting to you.
+            Help CogniHaven understand the people, places, memories, music, and
+            activities that feel meaningful, grounding, and comforting to you.
           </p>
         </div>
 
@@ -128,7 +144,7 @@ function MemoryProfilePage() {
             onClick={() => setIsEditing(true)}
             className="rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
-            Edit Memory Profile
+            {isProfileEmpty ? "Create Memory Profile" : "Edit Memory Profile"}
           </button>
         )}
       </div>
@@ -146,8 +162,93 @@ function MemoryProfilePage() {
         </div>
       )}
 
-      {/* Edit Mode */}
+      {/* Memory completion snapshot */}
+      <div className="mb-8 grid gap-4 lg:grid-cols-3">
+        <div className="glass-card rounded-3xl p-6 lg:col-span-2">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-violet-500">
+            Personal Memory Snapshot
+          </p>
+
+          <h3 className="mt-3 text-2xl font-bold text-slate-900">
+            Your memory profile is {completionPercentage}% complete
+          </h3>
+
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            CogniHaven uses this profile to make reflections feel more personal,
+            emotionally aware, and grounded in what matters to you.
+          </p>
+
+          <div className="mt-5 h-3 overflow-hidden rounded-full bg-violet-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 transition-all duration-500"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+
+          {isProfileEmpty && (
+            <p className="mt-4 rounded-2xl bg-violet-50 px-4 py-3 text-sm leading-6 text-violet-700">
+              Start small. Add one person, place, song, or memory that brings
+              comfort. This profile is meant to support you, not collect
+              everything at once.
+            </p>
+          )}
+        </div>
+
+        <div className="glass-card rounded-3xl p-6">
+          <p className="text-sm font-semibold text-slate-500">
+            Completed Sections
+          </p>
+
+          <p className="mt-3 text-4xl font-bold text-slate-900">
+            {completedFields}/{totalFields}
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Meaningful details help CogniHaven personalize support with care.
+          </p>
+        </div>
+      </div>
+
+      {/* Emotional memory support cards */}
+      {!isEditing && (
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl border border-violet-100 bg-violet-50/70 p-5">
+            <p className="text-2xl">💜</p>
+            <h4 className="mt-3 font-bold text-slate-900">
+              Personal Comfort
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Favorite people, places, and activities help CogniHaven respond
+              with warmer support.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-indigo-100 bg-indigo-50/70 p-5">
+            <p className="text-2xl">🧠</p>
+            <h4 className="mt-3 font-bold text-slate-900">
+              Memory Reinforcement
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Positive memories can become gentle anchors for reflection,
+              identity, and emotional grounding.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-rose-100 bg-rose-50/70 p-5">
+            <p className="text-2xl">🛡️</p>
+            <h4 className="mt-3 font-bold text-slate-900">
+              Safe Personalization
+            </h4>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Triggers to avoid help the AI stay respectful, careful, and
+              emotionally safe.
+            </p>
+          </div>
+        </div>
+      )}
+
       {isEditing ? (
+        /* Edit Mode */
         <div className="glass-card rounded-3xl p-6 sm:p-8">
           <div className="mb-8">
             <h3 className="text-2xl font-bold text-slate-900">
@@ -171,7 +272,7 @@ function MemoryProfilePage() {
                 value={formData.favoritePeople}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Family, friends, or meaningful people..."
+                placeholder="Family, friends, mentors, or meaningful people..."
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
               />
             </label>
@@ -186,7 +287,7 @@ function MemoryProfilePage() {
                 value={formData.favoritePlaces}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Places that feel meaningful or calming..."
+                placeholder="Places that feel meaningful, peaceful, or familiar..."
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
               />
             </label>
@@ -201,7 +302,7 @@ function MemoryProfilePage() {
                 value={formData.calmingMemories}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Positive memories or experiences..."
+                placeholder="Positive memories, special moments, or comforting experiences..."
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
               />
             </label>
@@ -216,7 +317,7 @@ function MemoryProfilePage() {
                 value={formData.favoriteMusic}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Artists, songs, or music genres..."
+                placeholder="Artists, songs, genres, or sounds that feel comforting..."
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
               />
             </label>
@@ -231,7 +332,7 @@ function MemoryProfilePage() {
                 value={formData.comfortingActivities}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Activities that feel relaxing or grounding..."
+                placeholder="Activities that help you feel calm, focused, or grounded..."
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
               />
             </label>
@@ -246,7 +347,7 @@ function MemoryProfilePage() {
                 value={formData.triggersToAvoid}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Situations or topics you'd prefer to avoid..."
+                placeholder="Topics, situations, or reminders you'd prefer CogniHaven avoid..."
                 className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
               />
             </label>
@@ -289,7 +390,8 @@ function MemoryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.favoritePeople || "Not added yet"}
+              {formData.favoritePeople ||
+                "Not added yet. Add people who feel meaningful, supportive, or important to your story."}
             </p>
           </div>
 
@@ -311,7 +413,8 @@ function MemoryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.favoritePlaces || "Not added yet"}
+              {formData.favoritePlaces ||
+                "Not added yet. Add places that feel peaceful, familiar, nostalgic, or grounding."}
             </p>
           </div>
 
@@ -333,7 +436,8 @@ function MemoryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.calmingMemories || "Not added yet"}
+              {formData.calmingMemories ||
+                "Not added yet. Add memories that bring comfort, pride, peace, or joy."}
             </p>
           </div>
 
@@ -355,7 +459,8 @@ function MemoryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.favoriteMusic || "Not added yet"}
+              {formData.favoriteMusic ||
+                "Not added yet. Add songs, artists, or genres that help you feel calm or connected."}
             </p>
           </div>
 
@@ -377,7 +482,8 @@ function MemoryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.comfortingActivities || "Not added yet"}
+              {formData.comfortingActivities ||
+                "Not added yet. Add activities that help you relax, reset, focus, or feel like yourself."}
             </p>
           </div>
 
@@ -399,7 +505,8 @@ function MemoryProfilePage() {
             </div>
 
             <p className="text-sm leading-7 text-slate-600">
-              {formData.triggersToAvoid || "Not added yet"}
+              {formData.triggersToAvoid ||
+                "Not added yet. Add anything CogniHaven should avoid referencing when offering support."}
             </p>
           </div>
         </div>

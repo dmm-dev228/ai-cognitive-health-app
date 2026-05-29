@@ -38,9 +38,7 @@ public class CommunityCommentService {
         this.userRepository = userRepository;
     }
 
-    /*
-     * Creates a new comment on a community post.
-     */
+    // Creates a new comment on a community post.
     public CommunityCommentResponse createComment(
             Long postId,
             String content
@@ -66,9 +64,7 @@ public class CommunityCommentService {
         return mapToResponse(savedComment);
     }
 
-    /*
-     * Gets visible comments for a community post.
-     */
+    // Gets visible comments for a community post.
     public List<CommunityCommentResponse> getComments(Long postId) {
 
         CommunityPost post = postRepository.findById(postId)
@@ -84,9 +80,7 @@ public class CommunityCommentService {
                 .toList();
     }
 
-    /*
-     * Maps entity -> DTO.
-     */
+    // Maps entity -> DTO.
     private CommunityCommentResponse mapToResponse(
             CommunityComment comment
     ) {

@@ -395,7 +395,8 @@ export const createCommunityPost = async (data) => {
     });
 
     if (!response.ok) {
-        throw new Error("Failed to create community post");
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to create community post");
     }
 
     return response.json();
@@ -474,7 +475,8 @@ export const createCommunityComment = async (
     );
 
     if (!response.ok) {
-        throw new Error("Failed to create comment");
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to create comment");
     }
 
     return response.json();

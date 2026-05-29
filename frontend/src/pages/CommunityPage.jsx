@@ -113,8 +113,7 @@ function CommunityPage() {
       await fetchPosts();
     } catch (err) {
       console.error("Failed to create community post:", err);
-      setError("Could not create post. Please try again.");
-    } finally {
+setError(err.message || "Could not create post. Please try again.");    } finally {
       setIsPosting(false);
     }
   };

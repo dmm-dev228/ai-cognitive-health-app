@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  getCommunityPostReactions,
+  toggleCommunityReaction
+} from "../../services/api";
 
 /*
  * CommunityReactionBar
  * --------------------
  * Soft, supportive reaction buttons for community posts.
  *
- * For now, this component stores selected reaction locally.
- * Later, selectedReaction and counts will come from the backend.
+ * Now connected to backend reaction endpoints.
+ * Users can select, remove, or change their supportive reaction.
  */
-function CommunityReactionBar() {
+function CommunityReactionBar({ postId }) {
   const [selectedReaction, setSelectedReaction] = useState(null);
+  const [reactionCounts, setReactionCounts] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const reactions = [
     {
@@ -56,22 +62,54 @@ function CommunityReactionBar() {
     }
   ];
 
-  const handleReactionClick = (reactionType) => {
-    const nextReaction =
-      selectedReaction === reactionType ? null : reactionType;
+  /*
+   * Loads reaction counts when each post card renders.
+   */
+  useEffect(() => {
+    const fetchReactions = async () => {
+      try {
+        const data = await getCommunityPostReactions(postId);
 
-    setSelectedReaction(nextReaction);
+        const counts = {};
+        data.forEach((reaction) => {
+          counts[reaction.reactionType] = reaction.count;
+        });
 
-    console.log("Selected community reaction:", nextReaction);
+        setReactionCounts(counts);
+      } catch (err) {
+        console.error("Failed to load community reactions:", err);
+      }
+    };
 
-    /*
-     * Future backend integration:
-     *
-     * toggleCommunityReaction(postId, reactionType)
-     *
-     * If user clicks the same reaction again, backend should remove it.
-     * If user clicks a different reaction, backend should replace it.
-     */
+    if (postId) {
+      fetchReactions();
+    }
+  }, [postId]);
+
+  /*
+   * Toggles the user's reaction and refreshes counts from backend response.
+   */
+  const handleReactionClick = async (reactionType) => {
+    try {
+      setIsLoading(true);
+
+      const nextReaction =
+        selectedReaction === reactionType ? null : reactionType;
+
+      const data = await toggleCommunityReaction(postId, reactionType);
+
+      const counts = {};
+      data.forEach((reaction) => {
+        counts[reaction.reactionType] = reaction.count;
+      });
+
+      setReactionCounts(counts);
+      setSelectedReaction(nextReaction);
+    } catch (err) {
+      console.error("Failed to toggle community reaction:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -83,27 +121,24 @@ function CommunityReactionBar() {
       <div className="flex flex-wrap gap-3">
         {reactions.map((reaction) => {
           const isSelected = selectedReaction === reaction.reactionType;
+          const count = reactionCounts[reaction.reactionType] || 0;
 
           return (
             <button
               key={reaction.reactionType}
               type="button"
+              disabled={isLoading}
               onClick={() => handleReactionClick(reaction.reactionType)}
-              className={`rounded-full px-4 py-2 text-xs font-bold shadow-sm transition ${
+              className={`rounded-full px-4 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-70 ${
                 isSelected ? reaction.activeStyle : reaction.style
               }`}
             >
               {reaction.icon} {reaction.label}
+              {count > 0 && <span className="ml-1">· {count}</span>}
             </button>
           );
         })}
       </div>
-
-      {selectedReaction && (
-        <p className="mt-3 text-xs font-medium text-slate-500">
-          Your support has been added locally. Backend syncing comes next.
-        </p>
-      )}
     </div>
   );
 }

@@ -387,6 +387,7 @@ export const generateAnalyticsSummary = async () => {
  * Create a new community post.
  * JWT identifies the authenticated user.
  */
+
 export const createCommunityPost = async (data) => {
     const response = await fetch(`${BASE_URL}/community`, {
         method: "POST",
@@ -395,8 +396,12 @@ export const createCommunityPost = async (data) => {
     });
 
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Failed to create community post");
+        const errorMessage = await getErrorMessage(
+            response,
+            "Failed to create community post"
+        );
+
+        throw new Error(errorMessage);
     }
 
     return response.json();
@@ -475,8 +480,12 @@ export const createCommunityComment = async (
     );
 
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Failed to create comment");
+        const errorMessage = await getErrorMessage(
+            response,
+            "Failed to create comment"
+        );
+
+        throw new Error(errorMessage);
     }
 
     return response.json();
@@ -499,6 +508,18 @@ export const getCommunityComments = async (
     }
 
     return response.json();
+};
+
+// Extracts a clean error message from Spring Boot error responses.
+const getErrorMessage = async (response, fallbackMessage) => {
+    const errorText = await response.text();
+
+    try {
+        const errorJson = JSON.parse(errorText);
+        return errorJson.message || fallbackMessage;
+    } catch {
+        return errorText || fallbackMessage;
+    }
 };
 
 // ===== Goals =====

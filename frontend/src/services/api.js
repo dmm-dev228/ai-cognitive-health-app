@@ -459,6 +459,46 @@ export const getCommunityPostReactions = async (postId) => {
     return response.json();
 };
 
+// Creates a new comment on a community post.
+export const createCommunityComment = async (
+    postId,
+    content
+) => {
+    const response = await fetch(
+        `${BASE_URL}/community/${postId}/comments`,
+        {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ content })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to create comment");
+    }
+
+    return response.json();
+};
+
+// Gets comments for a community post.
+export const getCommunityComments = async (
+    postId
+) => {
+    const response = await fetch(
+        `${BASE_URL}/community/${postId}/comments`,
+        {
+            method: "GET",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch comments");
+    }
+
+    return response.json();
+};
+
 // ===== Goals =====
 
 /*

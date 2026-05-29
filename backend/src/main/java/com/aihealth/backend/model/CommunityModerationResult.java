@@ -1,6 +1,6 @@
 package com.aihealth.backend.model;
 
-// Result of checking community content before publishing.
+// AI moderation outcomes.
 public enum CommunityModerationResult {
     APPROVED,
     NEEDS_REVISION,

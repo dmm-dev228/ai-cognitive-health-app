@@ -616,4 +616,100 @@ public class OpenAIService {
                 java.util.List.of("apple", "chair", "river"),
                 "Maya walked through a sunny park and followed the sound of soft music near the river. She passed a quiet chair under a tree and noticed an apple sitting beside a picnic basket. The moment felt peaceful, bright, and full of small surprises.");
     }
+
+    /*
+ * Moderates community content before publication.
+ *
+ * Returns:
+ * APPROVED
+ * NEEDS_REVISION
+ * CRISIS
+ * BLOCKED
+ */
+public String moderateCommunityContent(String content) {
+
+    String prompt = """
+            You are an AI moderation system for CogniHaven.
+
+            CogniHaven is:
+            - a cognitive wellness platform
+            - an emotionally safe community
+            - a supportive environment
+
+            Community rules:
+            - supportive conversation only
+            - no harassment
+            - no bullying
+            - no hate speech
+            - no threats
+            - no explicit content
+            - no medical advice
+            - no diagnosing people
+            - no dangerous instructions
+
+            Classification rules:
+
+            APPROVED
+            - supportive
+            - neutral
+            - encouragement
+            - routine sharing
+            - wellness discussion
+
+            NEEDS_REVISION
+            - rude language
+            - unnecessarily aggressive tone
+            - unkind wording
+            - borderline community violations
+
+            CRISIS
+            - self-harm
+            - suicide
+            - immediate danger
+            - threats of violence
+            - severe crisis situations
+
+            BLOCKED
+            - harassment
+            - hate speech
+            - explicit content
+            - dangerous instructions
+            - malicious content
+
+            Return ONLY one word:
+
+            APPROVED
+            NEEDS_REVISION
+            CRISIS
+            BLOCKED
+
+            Content:
+            %s
+            """
+            .formatted(content);
+
+    ResponseCreateParams params = ResponseCreateParams.builder()
+            .model("gpt-4.1-mini")
+            .input(prompt)
+            .build();
+
+    Response response = client.responses().create(params);
+
+    if (response.output().isEmpty()) {
+        return "NEEDS_REVISION";
+    }
+
+    var firstOutput = response.output().get(0);
+
+    if (firstOutput.asMessage().content().isEmpty()) {
+        return "NEEDS_REVISION";
+    }
+
+    return firstOutput.asMessage()
+            .content()
+            .get(0)
+            .asOutputText()
+            .text()
+            .trim();
+}
 }

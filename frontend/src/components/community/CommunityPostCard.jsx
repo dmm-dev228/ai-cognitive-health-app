@@ -1,4 +1,5 @@
 import CommunityReactionBar from "./CommunityReactionBar";
+import CommunityCommentSection from "./CommunityCommentSection";
 
 /*
  * CommunityPostCard
@@ -51,7 +52,10 @@ function CommunityPostCard({ post, meta, getInitial }) {
                 {post.content}
             </p>
 
-            <CommunityReactionBar postId={post.id} />    </article>
+            <CommunityReactionBar postId={post.id} />
+            <CommunityCommentSection postId={post.id} />
+                </article>
+            
     );
 }
 

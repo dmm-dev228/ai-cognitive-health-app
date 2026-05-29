@@ -35,8 +35,7 @@ public class CommunityReactionService {
     public CommunityReactionService(
             CommunityReactionRepository reactionRepository,
             CommunityPostRepository postRepository,
-            UserRepository userRepository
-    ) {
+            UserRepository userRepository) {
         this.reactionRepository = reactionRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
@@ -45,8 +44,7 @@ public class CommunityReactionService {
     @Transactional
     public List<CommunityReactionResponse> toggleReaction(
             Long postId,
-            CommunityReactionType reactionType
-    ) {
+            CommunityReactionType reactionType) {
         String email = SecurityUtils.getCurrentUserEmail();
 
         User user = userRepository.findByEmail(email)
@@ -64,8 +62,7 @@ public class CommunityReactionService {
                         reactionRepository.save(existingReaction);
                     }
                 }, () -> {
-                    CommunityReaction newReaction =
-                            new CommunityReaction(user, post, reactionType);
+                    CommunityReaction newReaction = new CommunityReaction(user, post, reactionType);
 
                     reactionRepository.save(newReaction);
                 });
@@ -74,14 +71,24 @@ public class CommunityReactionService {
     }
 
     public List<CommunityReactionResponse> getReactionSummary(Long postId) {
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         CommunityPost post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Community post not found"));
+
+        CommunityReactionType selectedType = reactionRepository
+                .findByUserAndPost(user, post)
+                .map(CommunityReaction::getReactionType)
+                .orElse(null);
 
         return Arrays.stream(CommunityReactionType.values())
                 .map(type -> new CommunityReactionResponse(
                         type,
-                        reactionRepository.countByPostAndReactionType(post, type)
-                ))
+                        reactionRepository.countByPostAndReactionType(post, type),
+                        type == selectedType))
                 .toList();
     }
 }

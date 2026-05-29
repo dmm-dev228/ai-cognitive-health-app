@@ -5,28 +5,27 @@ import com.aihealth.backend.model.CommunityReactionType;
 /*
  * CommunityReactionResponse
  * -------------------------
- * Simple DTO returned to the frontend for reaction summaries.
+ * DTO returned to the frontend for reaction summaries.
  *
- * Example:
- * {
- *   "reactionType": "SUPPORT",
- *   "count": 12
- * }
+ * Includes whether the currently logged-in user selected this reaction.
  */
 public class CommunityReactionResponse {
 
     private CommunityReactionType reactionType;
     private long count;
+    private boolean selectedByCurrentUser;
 
     public CommunityReactionResponse() {
     }
 
     public CommunityReactionResponse(
             CommunityReactionType reactionType,
-            long count
+            long count,
+            boolean selectedByCurrentUser
     ) {
         this.reactionType = reactionType;
         this.count = count;
+        this.selectedByCurrentUser = selectedByCurrentUser;
     }
 
     public CommunityReactionType getReactionType() {
@@ -43,5 +42,13 @@ public class CommunityReactionResponse {
 
     public void setCount(long count) {
         this.count = count;
+    }
+
+    public boolean isSelectedByCurrentUser() {
+        return selectedByCurrentUser;
+    }
+
+    public void setSelectedByCurrentUser(boolean selectedByCurrentUser) {
+        this.selectedByCurrentUser = selectedByCurrentUser;
     }
 }

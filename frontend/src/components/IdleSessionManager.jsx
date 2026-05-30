@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { isLoggedIn, logoutUser } from "../services/api";
 
 /*
@@ -11,11 +10,9 @@ import { isLoggedIn, logoutUser } from "../services/api";
  * - 15 minutes inactive → warning popup
  * - 60 second countdown
  * - user can stay signed in
- * - no response → logout
+ * - no response → logout and return to home page
  */
 function IdleSessionManager() {
-  const navigate = useNavigate();
-
   const IDLE_LIMIT_MS = 15 * 60 * 1000;
   const WARNING_SECONDS = 60;
 
@@ -33,10 +30,15 @@ function IdleSessionManager() {
       clearInterval(countdownTimer);
     };
 
-    const logoutDueToIdle = () => {
+    const returnToHomeAfterLogout = () => {
       clearTimers();
       logoutUser();
-      navigate("/login");
+
+      /*
+       * Force a full reload so App/Navbar re-check auth state.
+       * This prevents protected pages from showing stale UI after logout.
+       */
+      window.location.href = "/";
     };
 
     const startCountdown = () => {
@@ -46,7 +48,7 @@ function IdleSessionManager() {
       countdownTimer = setInterval(() => {
         setSecondsLeft((prev) => {
           if (prev <= 1) {
-            logoutDueToIdle();
+            returnToHomeAfterLogout();
             return 0;
           }
 
@@ -88,17 +90,25 @@ function IdleSessionManager() {
         window.removeEventListener(event, resetIdleTimer);
       });
     };
-  }, [navigate]);
+  }, []);
 
   const staySignedIn = () => {
     setShowWarning(false);
     setSecondsLeft(WARNING_SECONDS);
+
+    /*
+     * Reuse normal activity tracking so the idle timer fully resets.
+     */
     window.dispatchEvent(new Event("mousemove"));
   };
 
   const logoutNow = () => {
     logoutUser();
-    navigate("/login");
+
+    /*
+     * Full reload ensures navbar switches from Logout to Login/Sign Up.
+     */
+    window.location.href = "/";
   };
 
   if (!showWarning) return null;
@@ -119,7 +129,8 @@ function IdleSessionManager() {
         </h2>
 
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          For your privacy, CogniHaven will sign you out in{" "}
+          For your privacy, CogniHaven will sign you out and return you to the
+          home page in{" "}
           <span className="font-bold text-amber-600">{secondsLeft}</span>{" "}
           seconds.
         </p>

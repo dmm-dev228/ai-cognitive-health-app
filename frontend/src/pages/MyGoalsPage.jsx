@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { createGoal, getGoals, logGoalProgress } from "../services/api";
+import CogniHavenLogo from "../components/CogniHavenLogo";
+
 
 /*
  * MyGoalsPage
@@ -299,19 +301,22 @@ function MyGoalsPage() {
                         </p>
                     </div>
 
-                    <div className="rounded-[2rem] bg-white/15 p-5 backdrop-blur-xl">
+                    <div className="flex flex-col items-center">  
+                        <CogniHavenLogo className="mb-4 h-40 w-40 object-contain drop-shadow-2xl animate-float" />
+
                         <p className="text-sm font-semibold text-white/80">
                             Overall Progress
                         </p>
 
                         <div className="mt-4 flex items-end gap-3">
                             <p className="text-5xl font-black">{averageProgress}%</p>
+
                             <p className="pb-2 text-sm font-semibold text-white/75">
                                 across all goals
                             </p>
                         </div>
 
-                        <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/20">
+                        <div className="mt-5 h-3 w-full overflow-hidden rounded-full bg-white/20">
                             <div
                                 className="h-full rounded-full bg-white transition-all duration-700"
                                 style={{ width: `${averageProgress}%` }}

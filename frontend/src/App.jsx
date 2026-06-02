@@ -1,6 +1,6 @@
 import { Routes, Route, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import CogniHavenLogo from "./components/CogniHavenLogo";
 import JournalPage from "./pages/JournalPage";
 import MemoryProfilePage from "./pages/MemoryProfilePage";
 import LoginPage from "./pages/LoginPage";
@@ -123,6 +123,7 @@ function App() {
                   <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 px-8 py-16 text-white shadow-2xl shadow-indigo-200 sm:px-12 lg:px-16">
                     <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-white/20 blur-3xl animate-float" />
                     <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
+                    
 
                     <div className="relative z-10 max-w-4xl">
                       <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">

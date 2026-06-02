@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { isLoggedIn } from "../services/api";
+import CogniHavenLogo from "./CogniHavenLogo";
 
 /*
  * Navbar
@@ -18,42 +19,38 @@ function Navbar({
   handleDeleteAccount
 }) {
   const navLinkClass = ({ isActive }) =>
-    `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-      isActive
-        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-        : isDarkMode
-          ? "text-slate-300 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
-          : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-indigo-700 hover:shadow-sm"
+    `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${isActive
+      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+      : isDarkMode
+        ? "text-slate-300 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
+        : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-indigo-700 hover:shadow-sm"
     }`;
 
   return (
     <header
-      className={`sticky top-0 z-40 border-b shadow-sm backdrop-blur-xl transition-colors duration-300 ${
-        isDarkMode
-          ? "border-white/10 bg-slate-950/75 shadow-black/30"
-          : "border-white/60 bg-white/75 shadow-slate-200/40"
-      }`}
+      className={`sticky top-0 z-40 border-b shadow-sm backdrop-blur-xl transition-colors duration-300 ${isDarkMode
+        ? "border-white/10 bg-slate-950/75 shadow-black/30"
+        : "border-white/60 bg-white/75 shadow-slate-200/40"
+        }`}
     >
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <Link to="/" className="group flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-emerald-500 text-xl font-black text-white shadow-lg shadow-indigo-200 transition group-hover:scale-105">
-              CH
+            <div className="transition group-hover:scale-105">
+              <CogniHavenLogo className="h-30 w-60 object-contain" />
             </div>
 
             <div>
               <h1
-                className={`text-2xl font-black tracking-tight sm:text-3xl ${
-                  isDarkMode ? "text-white" : "text-slate-900"
-                }`}
+                className={`text-2xl font-black tracking-tight sm:text-3xl ${isDarkMode ? "text-white" : "text-slate-900"
+                  }`}
               >
                 Cogni<span className="text-indigo-500">Haven</span>
               </h1>
 
               <p
-                className={`text-xs font-medium sm:text-sm ${
-                  isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+                className={`text-xs font-medium sm:text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
               >
                 AI-powered cognitive wellness and daily support.
               </p>
@@ -106,11 +103,10 @@ function Navbar({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setIsDarkMode((prev) => !prev)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${
-                  isDarkMode
-                    ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
-                    : "bg-white text-slate-700 hover:text-indigo-700"
-                }`}
+                className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${isDarkMode
+                  ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
+                  : "bg-white text-slate-700 hover:text-indigo-700"
+                  }`}
               >
                 {isDarkMode ? "☀️ Light" : "🌙 Dark"}
               </button>
@@ -119,11 +115,10 @@ function Navbar({
                 <>
                   <NavLink
                     to="/login"
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                      isDarkMode
-                        ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
-                        : "border-indigo-100 bg-white text-indigo-700"
-                    }`}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDarkMode
+                      ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
+                      : "border-indigo-100 bg-white text-indigo-700"
+                      }`}
                   >
                     Login
                   </NavLink>
@@ -141,11 +136,10 @@ function Navbar({
                 <>
                   <button
                     onClick={handleLogout}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                      isDarkMode
-                        ? "border-white/10 bg-white/10 text-slate-200 hover:bg-white/15"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700"
-                    }`}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDarkMode
+                      ? "border-white/10 bg-white/10 text-slate-200 hover:bg-white/15"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700"
+                      }`}
                   >
                     Logout
                   </button>

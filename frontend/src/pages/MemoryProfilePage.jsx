@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getMemoryProfile, saveMemoryProfile } from "../services/api";
+import CogniHavenLogo from "../components/CogniHavenLogo";
 
 /*
  * MemoryProfilePage
@@ -128,10 +129,14 @@ function MemoryProfilePage() {
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-violet-500">
             Personalized Wellness
           </p>
+          <div className="mt-3 flex items-center gap-4">
+
+  <CogniHavenLogo className="h-14 w-14 object-contain" />
 
           <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
             Memory Profile
           </h2>
+          </div>
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
             Help CogniHaven understand the people, places, memories, music, and

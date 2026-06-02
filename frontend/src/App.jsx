@@ -110,7 +110,7 @@ function App() {
             setVisibleNotifications={setVisibleNotifications}
           />
         )}
-        
+
         {isLoggedIn() && <IdleSessionManager />}
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -120,42 +120,46 @@ function App() {
               element={
                 <div className="animate-fade-in space-y-10">
                   {/* Hero Section */}
+                  {/* Hero Section */}
                   <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 px-8 py-16 text-white shadow-2xl shadow-indigo-200 sm:px-12 lg:px-16">
                     <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-white/20 blur-3xl animate-float" />
                     <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
-                    
 
-                    <div className="relative z-10 max-w-4xl">
-                      <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
-                        AI-powered cognitive wellness platform
-                      </p>
+                    <div className="relative z-10 grid items-center gap-10 lg:grid-cols-[1fr_350px]">
+                      <div>
+                        <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
+                          AI-powered cognitive wellness platform
+                        </p>
 
-                      <h2 className="mt-8 max-w-4xl text-5xl font-black leading-tight tracking-tight sm:text-6xl">
-                        A calm daily space for reflection, routines, and
-                        supportive AI insights.
-                      </h2>
+                        <h2 className="mt-8 max-w-4xl text-5xl font-black leading-tight tracking-tight sm:text-6xl">
+                          A calm daily space for reflection, routines, and supportive AI insights.
+                        </h2>
 
-                      <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
-                        CogniHaven is a calm, AI-powered wellness ecosystem
-                        focused on reflection, cognitive engagement, supportive
-                        routines, community encouragement, goal tracking, and
-                        emotionally safe AI-guided insights.
-                      </p>
+                        <p className="mt-6 max-w-2xl text-lg leading-8 text-white/85">
+                          CogniHaven is a calm, AI-powered wellness ecosystem focused on
+                          reflection, cognitive engagement, supportive routines, community
+                          encouragement, goal tracking, and emotionally safe AI-guided insights.
+                        </p>
 
-                      <div className="mt-8 flex flex-wrap gap-4">
-                        <Link
-                          to="/signup"
-                          className="rounded-2xl bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
-                        >
-                          Get Started
-                        </Link>
+                        <div className="mt-8 flex flex-wrap gap-4">
+                          <Link
+                            to="/signup"
+                            className="rounded-2xl bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
+                          >
+                            Get Started
+                          </Link>
 
-                        <Link
-                          to="/journal"
-                          className="rounded-2xl border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/20"
-                        >
-                          Open Journal
-                        </Link>
+                          <Link
+                            to="/journal"
+                            className="rounded-2xl border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/20"
+                          >
+                            Open Journal
+                          </Link>
+                        </div>
+                      </div>
+
+                      <div className="hidden justify-center lg:flex">
+                        <CogniHavenLogo className="h-85 w-85 object-contain animate-float drop-shadow-2xl" />
                       </div>
                     </div>
                   </section>

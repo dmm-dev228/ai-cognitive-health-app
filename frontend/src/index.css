@@ -170,3 +170,21 @@ select:focus {
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+.word-bloom-flip {
+  animation: wordBloomFlip 0.55s ease forwards;
+}
+
+@keyframes wordBloomFlip {
+  0% {
+    transform: rotateX(0deg);
+  }
+
+  50% {
+    transform: rotateX(90deg);
+  }
+
+  100% {
+    transform: rotateX(0deg);
+  }
+}

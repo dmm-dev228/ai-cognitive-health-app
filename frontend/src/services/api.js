@@ -536,6 +536,23 @@ export const getCommunityHeadlines = async () => {
     return response.json();
 };
 
+// Fetches dynamic community trends.
+export const getCommunityTrends = async () => {
+    const response = await fetch(
+        `${BASE_URL}/community/trends`,
+        {
+            method: "GET",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community trends");
+    }
+
+    return response.json();
+};
+
 // ===== Goals =====
 
 /*

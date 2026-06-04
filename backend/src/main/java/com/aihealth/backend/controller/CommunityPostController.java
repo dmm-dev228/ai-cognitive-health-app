@@ -3,6 +3,7 @@ package com.aihealth.backend.controller;
 import com.aihealth.backend.dto.CommunityPostRequest;
 import com.aihealth.backend.dto.CommunityPostResponse;
 import com.aihealth.backend.service.CommunityPostService;
+import com.aihealth.backend.dto.CommunityTrendResponse;
 
 import jakarta.validation.Valid;
 
@@ -34,8 +35,7 @@ public class CommunityPostController {
     public ResponseEntity<CommunityPostResponse> createPost(
             @Valid @RequestBody CommunityPostRequest request) {
 
-        CommunityPostResponse response =
-                communityPostService.createPost(request);
+        CommunityPostResponse response = communityPostService.createPost(request);
 
         return ResponseEntity.ok(response);
     }
@@ -44,9 +44,14 @@ public class CommunityPostController {
     @GetMapping
     public ResponseEntity<List<CommunityPostResponse>> getAllPosts() {
 
-        List<CommunityPostResponse> responses =
-                communityPostService.getAllPosts();
+        List<CommunityPostResponse> responses = communityPostService.getAllPosts();
 
         return ResponseEntity.ok(responses);
+    }
+
+    // Gets dynamic community category trends.
+    @GetMapping("/trends")
+    public List<CommunityTrendResponse> getCommunityTrends() {
+        return communityPostService.getCommunityTrends();
     }
 }

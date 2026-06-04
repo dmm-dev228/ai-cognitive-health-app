@@ -130,21 +130,49 @@ function CommunityDiscoverCard() {
         </a>
       </div>
 
-      <div className="mt-4 flex gap-2">
-        {articles.map((article, index) => (
-          <button
-            key={`${article.url}-${index}`}
-            type="button"
-            onClick={() => setActiveIndex(index)}
-            className={`h-2 rounded-full transition ${
-              activeIndex === index
-                ? "w-6 bg-violet-500"
-                : "w-2 bg-slate-200 hover:bg-slate-300"
-            }`}
-            aria-label={`View article ${index + 1}`}
-          />
-        ))}
-      </div>
+  <div className="mt-4 flex items-center justify-between gap-3">
+  <button
+    type="button"
+    onClick={() =>
+      setActiveIndex((currentIndex) =>
+        currentIndex === 0 ? articles.length - 1 : currentIndex - 1
+      )
+    }
+    className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-violet-700 shadow-sm transition hover:bg-violet-50"
+    aria-label="Previous article"
+  >
+    ←
+  </button>
+
+  <div className="flex gap-2">
+    {articles.map((article, index) => (
+      <button
+        key={`${article.url}-${index}`}
+        type="button"
+        onClick={() => setActiveIndex(index)}
+        className={`h-2 rounded-full transition ${
+          activeIndex === index
+            ? "w-6 bg-violet-500"
+            : "w-2 bg-slate-200 hover:bg-slate-300"
+        }`}
+        aria-label={`View article ${index + 1}`}
+      />
+    ))}
+  </div>
+
+  <button
+    type="button"
+    onClick={() =>
+      setActiveIndex((currentIndex) =>
+        currentIndex === articles.length - 1 ? 0 : currentIndex + 1
+      )
+    }
+    className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-violet-700 shadow-sm transition hover:bg-violet-50"
+    aria-label="Next article"
+  >
+    →
+  </button>
+</div>
     </div>
   );
 }

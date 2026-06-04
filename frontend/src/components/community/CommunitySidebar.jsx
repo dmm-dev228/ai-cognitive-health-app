@@ -1,3 +1,4 @@
+import CommunityNewsCarousel from "./CommunityNewsCarousel";
 /*
  * CommunitySidebar
  * ----------------
@@ -18,18 +19,7 @@ function CommunitySidebar() {
 
   return (
     <aside className="hidden space-y-5 xl:block xl:sticky xl:top-28 xl:h-fit">
-      <div className="glass-card rounded-[2rem] p-5">
-        <p className="text-sm font-bold text-slate-900">
-          Today’s Community Prompt
-        </p>
-
-        <div className="mt-4 rounded-3xl bg-gradient-to-br from-violet-50 to-emerald-50 p-5">
-          <p className="text-2xl">🌤️</p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
-            What is one small routine that helped you feel more grounded today?
-          </p>
-        </div>
-      </div>
+   <CommunityNewsCarousel />
 
       <div className="glass-card rounded-[2rem] p-5">
         <p className="text-sm font-bold text-slate-900">

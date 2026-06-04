@@ -63,9 +63,22 @@ function CommunityNewsCarousel() {
     );
   }
 
-  if (headlines.length === 0) {
-    return null;
-  }
+if (headlines.length === 0) {
+  return (
+    <div className="glass-card rounded-[2rem] p-5">
+      <p className="text-sm font-bold text-slate-900">
+        Today’s Headlines
+      </p>
+
+      <div className="mt-4 rounded-3xl bg-gradient-to-br from-violet-50 to-emerald-50 p-5">
+        <p className="text-2xl">📰</p>
+        <p className="mt-3 text-sm leading-7 text-slate-600">
+          Headlines are unavailable right now. Check back soon for calm updates.
+        </p>
+      </div>
+    </div>
+  );
+}
 
   const activeHeadline = headlines[activeIndex];
 

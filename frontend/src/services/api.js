@@ -522,6 +522,20 @@ const getErrorMessage = async (response, fallbackMessage) => {
     }
 };
 
+// Fetches headline-only community news from backend Guardian integration.
+export const getCommunityHeadlines = async () => {
+    const response = await fetch(`${BASE_URL}/news/community-headlines`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community headlines");
+    }
+
+    return response.json();
+};
+
 // ===== Goals =====
 
 /*

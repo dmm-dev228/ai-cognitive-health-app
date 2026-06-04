@@ -11,15 +11,42 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
+
 @Service
 public class OpenAIService {
 
     private final OpenAIClient client;
+    // Tracks recent Word Bloom answers so the game feels fresh across rounds.
+    private static final Queue<String> recentWordBloomWords = new LinkedList<>();
+
+    private static final int MAX_RECENT_WORD_BLOOM_WORDS = 12;
 
     public OpenAIService(@Value("${openai.api.key}") String apiKey) {
         this.client = OpenAIOkHttpClient.builder()
                 .apiKey(apiKey)
                 .build();
+
+    }
+
+    // Saves a generated Word Bloom answer so future rounds can avoid repeating it.
+    private void rememberWordBloomWord(String word) {
+        if (word == null || word.isBlank()) {
+            return;
+        }
+
+        String cleanedWord = word.trim().toUpperCase();
+
+        recentWordBloomWords.remove(cleanedWord);
+        recentWordBloomWords.add(cleanedWord);
+
+        while (recentWordBloomWords.size() > MAX_RECENT_WORD_BLOOM_WORDS) {
+            recentWordBloomWords.poll();
+        }
     }
 
     /*
@@ -728,7 +755,9 @@ public class OpenAIService {
      * - score calculation
      */
     public WordBloomResponse generateWordBloomGame(String difficulty) {
-
+        String recentWordsText = recentWordBloomWords.isEmpty()
+                ? "None"
+                : String.join(", ", recentWordBloomWords);
         String prompt = """
                 You are creating a safe word guessing game for CogniHaven.
 
@@ -746,6 +775,10 @@ public class OpenAIService {
                 - Do not use explicit, violent, scary, medical, traumatic, or triggering words.
                 - Do not use words related to death, injury, emergencies, illness, weapons, drugs, or adult content.
                 - Avoid obscure vocabulary.
+                - Do not choose SMILE, PLANT, GRACE, BRAVE, HAPPY, LIGHT, or PEACE.
+                - Choose a different word every time.
+                - Use variety across categories like nature, objects, actions, feelings, places, and simple daily life words.
+                - Avoid repeating common safe examples.
 
                 Difficulty:
                 - EASY: very common everyday word.
@@ -753,22 +786,33 @@ public class OpenAIService {
                 - HARD: still common, but slightly more thoughtful.
 
                 Hint rules:
-                - Hint should gently describe the word.
-                - Do not reveal the exact word.
-                - Do not mention individual letters.
-                - Keep hint under 18 words.
-                - Hint should be safe, calm, and simple.
+                - Hint should be subtle.
+                - Hint should not directly define the word.
+                - Hint should not describe the object so clearly that the answer becomes obvious.
+                - Hint should focus on an associated characteristic, feeling, use, behavior, or observation.
+                - Hint should require some thought.
+                - Hint should never mention letters.
+                - Hint should never rhyme with the answer.
+                - Keep hint under 10 words.
+                - Keep hint calm and family friendly.
+                - Never reveal category names such as fruit, animal, object, place, emotion, or food.
 
                 Return ONLY valid JSON in this exact format:
                 {
-                  "secretWord": "BRAVE",
-                  "hint": "A word for someone who keeps going even when things feel difficult."
+                  "secretWord": "RIVER",
+                  "hint": "Often follows a winding path."
                 }
+
+                - Do not use any of these recently used words:
+                %s
+                - Do not choose SMILE, PLANT, GRACE, BRAVE, HAPPY, LIGHT, or PEACE.
+                - Choose a fresh word that feels different from recent rounds.
+                - Use variety across simple daily life, nature, movement, calm objects, and common experiences.
 
                 Selected difficulty:
                 %s
                 """
-                .formatted(difficulty);
+                .formatted(recentWordsText, difficulty);
 
         ResponseCreateParams params = ResponseCreateParams.builder()
                 .model("gpt-4.1-mini")
@@ -808,7 +852,7 @@ public class OpenAIService {
             }
 
             wordBloomResponse.setSecretWord(cleanedWord);
-
+            rememberWordBloomWord(cleanedWord);
             return wordBloomResponse;
         } catch (Exception err) {
             return getFallbackWordBloomGame(difficulty);
@@ -816,21 +860,42 @@ public class OpenAIService {
     }
 
     // Fallback keeps Word Bloom playable if AI generation or JSON parsing fails.
+    // Fallback keeps Word Bloom playable if AI generation or JSON parsing fails.
     private WordBloomResponse getFallbackWordBloomGame(String difficulty) {
-        if ("HARD".equalsIgnoreCase(difficulty)) {
-            return new WordBloomResponse(
-                    "GRACE",
-                    "A gentle quality connected to kindness, patience, and calm movement.");
+        List<WordBloomResponse> fallbackWords = new ArrayList<>(List.of(
+                new WordBloomResponse("CLOUD", "Constantly changing shape."),
+                new WordBloomResponse("BREAD", "Often shared during simple moments."),
+                new WordBloomResponse("CHAIR", "Common near gathering spaces."),
+                new WordBloomResponse("RIVER", "Often follows a winding path."),
+                new WordBloomResponse("MUSIC", "Often enjoyed without being seen."),
+                new WordBloomResponse("LEMON", "Often linked with freshness."),
+                new WordBloomResponse("TABLE", "Often central to daily activity."),
+                new WordBloomResponse("STONE", "Found naturally in many places."),
+                new WordBloomResponse("FIELD", "Open space with room to wander."),
+                new WordBloomResponse("HOUSE", "A familiar place of comfort.")));
+
+        fallbackWords.removeIf(word -> recentWordBloomWords.contains(word.getSecretWord().toUpperCase()));
+
+        if (fallbackWords.isEmpty()) {
+            recentWordBloomWords.clear();
+
+            fallbackWords = new ArrayList<>(List.of(
+                    new WordBloomResponse("CLOUD", "Constantly changing shape."),
+                    new WordBloomResponse("BREAD", "Often shared during simple moments."),
+                    new WordBloomResponse("CHAIR", "Common near gathering spaces."),
+                    new WordBloomResponse("RIVER", "Often follows a winding path."),
+                    new WordBloomResponse("MUSIC", "Often enjoyed without being seen."),
+                    new WordBloomResponse("LEMON", "Often linked with freshness."),
+                    new WordBloomResponse("TABLE", "Often central to daily activity."),
+                    new WordBloomResponse("STONE", "Found naturally in many places."),
+                    new WordBloomResponse("FIELD", "Open space with room to wander."),
+                    new WordBloomResponse("HOUSE", "A familiar place of comfort.")));
         }
 
-        if ("MEDIUM".equalsIgnoreCase(difficulty)) {
-            return new WordBloomResponse(
-                    "PLANT",
-                    "Something living that grows with care, light, and water.");
-        }
+        WordBloomResponse selectedFallback = fallbackWords.get(new Random().nextInt(fallbackWords.size()));
 
-        return new WordBloomResponse(
-                "SMILE",
-                "A simple expression that can show warmth or happiness.");
+        rememberWordBloomWord(selectedFallback.getSecretWord());
+
+        return selectedFallback;
     }
 }

@@ -2,10 +2,12 @@ import { useRef, useEffect, useState } from "react";
 import VoiceControls from "../components/VoiceControls";
 import MemoryMatchGame from "../components/games/MemoryMatchGame";
 import { useTextToSpeech } from "../hooks/useTextToSpeech";
+import WordBloomGame from "../components/games/WordBloomGame";
 import {
   saveGameResult,
   generateGameReflection,
   generateStoryRecallGame,
+  generateWordBloomGame,
 } from "../services/api";
 
 function GamePage() {
@@ -35,6 +37,9 @@ function GamePage() {
   const storyNarrationRef = useRef(null);
   const storyRecallRef = useRef(null);
 
+  const [wordBloomData, setWordBloomData] = useState(null);
+
+
   const { speak } = useTextToSpeech();
 
   const scrollToGameArea = () => {
@@ -63,13 +68,15 @@ function GamePage() {
   };
   const getGameLabel = () => {
     if (selectedGame === "STORY_RECALL") return "Story Recall";
-    if (selectedGame === "MEMORY_MATCH") return "Memory Match";
+    if (selectedGame === "CARD_MATCH") return "Memory Match";
+    if (selectedGame === "WORD_BLOOM") return "Word Bloom";
     return "Pattern Recall";
   };
 
   const getGameHeading = () => {
     if (selectedGame === "STORY_RECALL") return "Story Memory Challenge";
-    if (selectedGame === "MEMORY_MATCH") return "Memory Match Challenge";
+    if (selectedGame === "CARD_MATCH") return "Memory Match Challenge";
+    if (selectedGame === "WORD_BLOOM") return "Word Bloom Challenge";
     return "Memory Challenge";
   };
 
@@ -78,8 +85,12 @@ function GamePage() {
       return "Memorize the target words, listen to the story, then recall the original words.";
     }
 
-    if (selectedGame === "MEMORY_MATCH") {
+    if (selectedGame === "CARD_MATCH") {
       return "Flip cards, find matching pairs, and practice focus, recognition, and memory.";
+    }
+
+    if (selectedGame === "WORD_BLOOM") {
+      return "Guess the hidden five-letter word using calm focus, pattern recognition, and feedback.";
     }
 
     return "Memorize the number sequence, then enter it from memory after it disappears.";
@@ -124,6 +135,7 @@ function GamePage() {
     setStoryPhase("WORDS");
     setCountdown(0);
     setSpokenStory("");
+    setWordBloomData(null);
   };
   useEffect(() => {
     if (
@@ -155,6 +167,23 @@ function GamePage() {
       setIsShowingPrompt(false);
       setAnswerStartTime(Date.now());
       scrollToMemoryMatch();
+      return;
+    }
+
+    if (selectedGame === "WORD_BLOOM") {
+      try {
+        const generatedWordGame = await generateWordBloomGame(difficulty);
+
+        setWordBloomData(generatedWordGame);
+        setIsShowingPrompt(false);
+        setAnswerStartTime(Date.now());
+      } catch (err) {
+        console.error("Failed to generate Word Bloom game:", err);
+        setResultMessage("Could not generate Word Bloom. Please try again.");
+        setGameStarted(false);
+        setIsShowingPrompt(false);
+      }
+
       return;
     }
 
@@ -401,6 +430,10 @@ function GamePage() {
                       <option className="text-slate-900" value="MEMORY_MATCH">
                         Memory Match
                       </option>
+
+                      <option className="text-slate-900" value="WORD_BLOOM">
+                        Word Bloom
+                      </option>
                     </select>
                   </label>
 
@@ -462,6 +495,52 @@ function GamePage() {
                   }}
                 />
               </div>
+            )}
+
+            {gameStarted && selectedGame === "WORD_BLOOM" && wordBloomData && (
+              <>
+                <WordBloomGame
+                  difficulty={difficulty}
+                  wordData={wordBloomData}
+                  onComplete={async (result) => {
+                    const message = result.didWin
+                      ? `Great work! You solved Word Bloom in ${result.attemptsUsed} guesses.`
+                      : `Good effort! The Word Bloom answer was ${result.secretWord}.`;
+
+                    const gameResult = {
+                      gameType: "WORD_BLOOM",
+                      score: result.score,
+                      totalQuestions: result.totalQuestions,
+                      correctAnswers: result.correctAnswers,
+                      timeTakenSeconds: result.timeTakenSeconds,
+                      difficulty,
+                    };
+
+                    await saveResultAndReflect(gameResult, message);
+                  }}
+                />
+
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    onClick={startGame}
+                    disabled={isGeneratingReflection}
+                    className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Play Again
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setGameStarted(false);
+                      resetGameState();
+                    }}
+                    disabled={isGeneratingReflection}
+                    className="rounded-2xl bg-red-50 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Change Game
+                  </button>
+                </div>
+              </>
             )}
 
             {gameStarted &&
@@ -556,7 +635,8 @@ function GamePage() {
               )}
 
             {gameStarted &&
-              selectedGame !== "MEMORY_MATCH" &&
+              selectedGame !== "CARD_MATCH" &&
+              selectedGame !== "WORD_BLOOM" &&
               !isShowingPrompt &&
               (selectedGame !== "STORY_RECALL" || storyPhase === "RECALL") && (
                 <div
@@ -602,8 +682,8 @@ function GamePage() {
                           }
                           disabled={isGeneratingReflection}
                           className={`w-full rounded-[1.5rem] border border-slate-200 bg-white px-5 py-4 pr-16 text-center font-bold text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 ${selectedGame === "STORY_RECALL"
-                              ? "text-lg"
-                              : "text-3xl tracking-[0.5em]"
+                            ? "text-lg"
+                            : "text-3xl tracking-[0.5em]"
                             }`}
                         />
 

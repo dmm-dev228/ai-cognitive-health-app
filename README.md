@@ -3,186 +3,367 @@
 **Tagline:**
 *A calm, AI-powered cognitive wellness and daily support platform.*
 
-CogniHaven is a full-stack AI-powered wellness ecosystem designed to support reflection, cognitive engagement, healthy routines, and emotionally safe AI-guided experiences. The platform focuses on cognitive wellness rather than medical diagnosis and creates a supportive daily environment for users.
+CogniHaven is a full-stack AI-powered wellness ecosystem designed to support reflection, cognitive engagement, healthy routines, memory reinforcement, community support, and emotionally safe AI-guided experiences.
+
+The platform focuses on cognitive wellness rather than medical diagnosis and provides users with a calm daily environment for growth, reflection, encouragement, and healthy habit building.
 
 ---
+
+# 🎥 Demos
+
+## Journal System Demo
+
+[![Watch Demo](./assets/JournalDemo.png)](https://www.youtube.com/watch?v=wLBaWi6hfa8)
+
+## Authentication & Email Verification Demo
+
+[![Watch Demo](./assets/EmailVerificationDemo.png)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+
+### Cognitive Games Demo
+
+🎬 **Watch Demo**
+(Add Link)
+
+### Community Experience Demo
+
+🎬 **Watch Demo**
+(Add Link)
+
+---
+
+# 🔒 Authentication & Security
 
 ## Features
 
-### Authentication & Security
-
-* JWT-based authentication
-* Protected routes
-* Email verification system
-* Resend verification flow
-* Automatic login after verification
-* Password reset flow
-* Password strength validation meter
-* Session-based authentication
-* Idle session timeout protection
-* Automatic logout after inactivity
-* Login rate limiting
-* API request rate limiting
+* JWT Authentication
+* Protected Routes
+* Email Verification
+* Resend Verification Flow
+* Automatic Login After Verification
+* Password Reset Flow
+* Password Strength Validation
+* Session-Based Authentication
+* Idle Session Timeout Protection
+* Automatic Logout After Inactivity
+* Login Rate Limiting
+* API Rate Limiting
+* Spring Security Integration
 
 ---
 
-## Journal & AI Reflection System
+# 🧠 Conversational AI Journal System
 
-### Journal Features
+CogniHaven includes a custom conversational AI companion designed to create emotionally supportive, context-aware conversations rather than isolated AI-generated reflections.
 
-* Create journal entries
-* Mood selection
-* View previous entries
-* Conversation continuation support
-* User-specific journal isolation
+## Journal Features
+
+* Create Journal Entries
+* Mood Tracking
+* Conversation Continuation
+* User-Specific Journal History
+* Daily Reflection Experience
+* Dynamic Daily Prompts
+
+## AI Features
+
+### Multi-Turn Conversations
+
+* Conversation Threads
+* Context Awareness
+* Follow-Up Understanding
+* Emotional Continuity
+
+### Conversation Analysis
+
+The AI analyzes:
+
+* User Intent
+* Emotional Tone
+* Direct Questions
+* Emotional Disclosures
+* Safety Signals
+* Conversation Continuation
 
 ### AI Reflection Features
 
-* AI-generated supportive responses
-* Dynamic conversation flow
-* Context-aware reflections
-* Memory profile integration
-* Game performance awareness
-* Reduced repetitive responses
-* Wellness-focused responses
-* Direct question handling
-* Natural conversational responses
+* Context-Aware Responses
+* Reduced Repetition
+* Natural Conversation Flow
+* Direct Question Handling
+* Wellness-Focused Responses
+* Memory-Aware Responses
+* Game Performance Awareness
+
+### Emotional Tone Support
+
+Supported emotional states include:
+
+* Positive
+* Neutral
+* Sad
+* Stressed
+* Worried
+* Angry
 
 ---
 
-## Notification System
+# 🌐 Community System
 
-### Unified Notification Center
+The Community experience is designed around emotional safety, encouragement, personal growth, and meaningful interaction.
 
-* In-app notifications
-* Medication reminder notifications
-* Journal notifications
-* Dismiss notifications
-* Auto polling system
-* Notification popup UI
+## Community Feed
+
+Users can share:
+
+* Reflections
+* Encouragement
+* Wellness Tips
+* Personal Growth Updates
+* Daily Wins
+
+## Community Guidelines Onboarding
+
+First-time visitors receive onboarding guidelines emphasizing:
+
+* Support Over Judgment
+* Respectful Communication
+* Safe Sharing
+* Encouragement
+* No Medical Advice
+
+## Community Discover
+
+Curated discovery experience focused on:
+
+🌱 Growth & Support
+
+🤖 Tech & AI
+
+💜 Wellbeing & Resilience
+
+Powered by:
+
+* Guardian Open Platform API
+* Backend Safety Filtering
+* Curated Positive Discovery
+
+## Community Trends
+
+Dynamic trend tracking powered by:
+
+* Spring Data JPA Aggregation
+* Backend Analytics
+* Real-Time Community Activity
+
+## AI Moderation System
+
+Moderation outcomes:
+
+* APPROVED
+* NEEDS_REVISION
+* BLOCKED
+* CRISIS
+
+The moderation system helps:
+
+* Reduce Toxicity
+* Prevent Harassment
+* Detect Harmful Content
+* Encourage Respectful Interaction
+* Preserve Emotional Safety
 
 ---
 
-## Medication Reminder System
+# 💊 Medication Reminder System
 
-### Reminder Creation
+## Reminder Creation
 
 Users can create:
 
-* Medication name
+* Medication Name
 * Dosage
-* Pill shape
-* Pill color
-* Pill size
+* Pill Shape
+* Pill Color
+* Pill Size
 * Notes
-* Reminder frequency
-* Multiple reminder times
+* Reminder Frequency
+* Multiple Reminder Times
 
-### Reminder Channels
+## Reminder Channels
 
-Supported reminder delivery:
+Supported delivery methods:
 
-* In-app notifications
-* Email reminders
+* In-App Notifications
+* Email Reminders
 
-### Reminder Management
+## Reminder Management
 
-* Active status indicators
-* Pause reminder
-* Resume reminder
-* Delete reminder
-* Reminder channel display
-* Success/error feedback messages
+* Active Status Indicators
+* Pause Reminder
+* Resume Reminder
+* Delete Reminder
+* Reminder Channel Display
+* Success/Error Feedback
 
-### Reminder Automation
+## Automation
 
-Backend scheduler automatically:
+Backend schedulers automatically:
 
-* Checks reminder schedules
-* Sends notifications
-* Sends reminder emails
-* Handles active/inactive reminders
+* Check Reminder Schedules
+* Send Notifications
+* Send Reminder Emails
+* Manage Active/Inactive Reminders
 
 ---
 
-## Cognitive Games
+# 🔔 Notification System
 
-### Memory Match
+## Unified Notification Center
+
+Supports:
+
+* Medication Notifications
+* Journal Notifications
+* Community Notifications (Future)
+* Dismiss Actions
+* Auto Polling
+* Popup Notification UI
+
+---
+
+# 🎮 Cognitive Games
+
+CogniHaven includes multiple cognitive engagement experiences.
+
+---
+
+## Story Recall
 
 Features:
 
-* Card matching gameplay
-* Initial memorization preview
-* Auto-scroll to game area
-* Play again functionality
-* Change game functionality
-* Analytics tracking
-* AI-generated reflection
+* AI-Generated Stories
+* Dynamic Target Words
+* Difficulty Scaling
+* Speech Narration
+* Replay Audio
+* Speech-to-Text Answers
+* Clue System
+* AI Reflections
+* Analytics Tracking
 
-Metrics tracked:
+Metrics:
 
 * Accuracy
-* Completion time
+* Recall Score
+* Completion Time
+
+---
+
+## Memory Match
+
+Features:
+
+* Card Matching Gameplay
+* Difficulty Levels
+* Memorization Preview Phase
+* Countdown System
+* Timer
+* Move Tracking
+* Score Tracking
+* AI Reflections
+* Analytics Tracking
+
+Metrics:
+
+* Accuracy
+* Completion Time
 * Score
 
 ---
 
-### Story Recall
+## Pattern Recall
 
 Features:
 
-* AI-generated stories
-* Speech narration
-* Replay story audio
-* Speech-to-text answers
-* Microphone input support
-* Clue system
-* Auto-scroll progression
-* Keyboard Enter submission
-* AI-generated reflections
-
-Metrics tracked:
-
-* Accuracy
-* Recall score
-* Completion time
+* Visual Pattern Memorization
+* Recall Challenges
+* Cognitive Engagement Tracking
+* AI Reflection Support
 
 ---
 
-## Analytics Dashboard
+## Word Bloom
+
+CogniHaven's wellness-focused word puzzle experience.
+
+Features:
+
+* AI-Generated Secret Words
+* AI-Generated Subtle Hints
+* Difficulty Scaling
+* Dynamic Hint Unlocking
+* Keyboard-First Gameplay
+* Timer
+* Scoring
+* AI Reflections
+* Analytics Integration
+
+Word Bloom avoids direct-definition hints and instead provides observation-based clues designed to encourage deeper cognitive engagement.
+
+---
+
+# 📈 Analytics Dashboard
 
 Tracks:
 
-* Total games played
-* Accuracy trends
-* Completion statistics
-* Cognitive activity history
-* Game performance summaries
-* AI insights
+* Total Games Played
+* Accuracy Trends
+* Completion Statistics
+* Cognitive Activity History
+* Performance Summaries
+* AI Insights
+
+Designed to encourage awareness rather than competition.
 
 ---
 
-## Voice Features
+# 🎙 Voice Features
 
-### Text-to-Speech
+## Text-to-Speech
 
-* Speaker icon controls
-* Click once to read
-* Click again to stop
-* Active speaker indicators
-* Automatic voice selection
-* Improved voice quality selection
+* Speaker Toggle Controls
+* Click To Read
+* Click To Stop
+* Active Speaker Indicators
+* Automatic Voice Selection
+* Enhanced Voice Quality Selection
 
-### Speech-to-Text
+## Speech-to-Text
 
-* Embedded microphone controls
-* Direct input field integration
-* Auto transcription
-* Browser speech support
+* Embedded Microphone Controls
+* Direct Input Integration
+* Auto Transcription
+* Browser Speech Recognition Support
 
 ---
 
-## Frontend Stack
+# 🧠 AI Integration
+
+Powered by:
+
+* OpenAI API
+* Context-Aware Prompting
+* Conversation Analysis
+* Dynamic Reflection Generation
+* Dynamic Story Generation
+* Dynamic Daily Prompt Generation
+* Memory-Aware Responses
+* Cognitive Activity Awareness
+* Community Moderation Analysis
+
+---
+
+# 💻 Frontend Stack
 
 * React
 * Vite
@@ -192,7 +373,7 @@ Tracks:
 
 ---
 
-## Backend Stack
+# ⚙ Backend Stack
 
 * Java
 * Spring Boot
@@ -205,42 +386,53 @@ Tracks:
 
 ---
 
-## AI Integration
+# 🚀 Deployment Roadmap
 
-* OpenAI API
-* Context-aware prompting
-* Dynamic reflection generation
-* Cognitive activity awareness
-* Memory-aware response generation
+Upcoming deployment objectives:
 
----
-
-## Future Planned Features
-
-### Goal System
-
-* Personalized goals
-* AI-generated plans
-* Goal progress tracking
-* Goal reminders
-* Milestone rewards
-* Consistency analytics
-
-### Community Features
-
-* Support communities
-* Encouragement systems
-* Safe interaction spaces
-
-### Future Games
-
-* Additional cognitive exercises
-* Expanded analytics
-* Difficulty progression
+* Cloud Hosting
+* Production Database
+* CI/CD Pipelines
+* Automated Testing
+* Monitoring & Logging
+* Usage Analytics
 
 ---
 
-## Project Positioning
+# 🔮 Future Roadmap
+
+## Goal System
+
+* Personalized Goals
+* AI Goal Planning
+* Goal Progress Tracking
+* Goal Reminders
+* Milestone Rewards
+* Consistency Analytics
+
+## Dietary Wellness
+
+* Wellness Nutrition Tracking
+* Hydration Tracking
+* Healthy Habit Reinforcement
+
+## Memory Reinforcement
+
+* Favorite Things Tracking
+* Meaningful Memories
+* AI Memory Relevance System
+* Memory Timeline
+
+## Community Expansion
+
+* Community Wins
+* Reaction Analytics
+* Wellness Circles
+* Positive Contribution Recognition
+
+---
+
+# 🎯 Project Positioning
 
 CogniHaven is intentionally positioned as:
 
@@ -248,12 +440,13 @@ CogniHaven is intentionally positioned as:
 
 The platform is designed to support:
 
-* Cognitive wellness
-* Daily reflection
-* Routine building
-* Memory reinforcement
-* Emotional support
-* Healthy habits
-* Engagement and growth
+* Cognitive Wellness
+* Reflection
+* Memory Reinforcement
+* Healthy Routines
+* Emotional Support
+* Community Engagement
+* Personal Growth
+* Daily Encouragement
 
-CogniHaven is **not intended as a medical diagnostic system.**
+CogniHaven is **not intended as a medical diagnostic platform and does not provide medical advice.**

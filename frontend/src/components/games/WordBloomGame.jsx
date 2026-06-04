@@ -42,7 +42,7 @@ function evaluateGuess(guess, secretWord) {
   const secretLetters = secretWord.split("");
   const usedSecretIndexes = new Set();
 
-  // First pass handles exact matches.
+  // First pass marks exact matches.
   result.forEach((tile, index) => {
     if (tile.letter === secretLetters[index]) {
       tile.status = "green";
@@ -50,7 +50,7 @@ function evaluateGuess(guess, secretWord) {
     }
   });
 
-  // Second pass handles correct letters in the wrong position.
+  // Second pass marks correct letters in the wrong position.
   result.forEach((tile, index) => {
     if (tile.status === "green") return;
 
@@ -84,6 +84,22 @@ function getTileColor(status) {
   return "border-slate-200 bg-white text-slate-800";
 }
 
+function getHintStatusText(difficulty, currentAttempt) {
+  if (difficulty === "EASY") {
+    return "Hint is available whenever you want it.";
+  }
+
+  if (difficulty === "MEDIUM") {
+    return currentAttempt >= 3
+      ? "Hint is available now."
+      : `Hint becomes available after 3 guesses. Guesses used: ${currentAttempt}/3.`;
+  }
+
+  return currentAttempt >= 5
+    ? "Hint is available now. Use it only if you want one final clue."
+    : `Hint becomes available after 5 guesses. Guesses used: ${currentAttempt}/5.`;
+}
+
 function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
   const [board, setBoard] = useState(createEmptyBoard);
   const [currentGuess, setCurrentGuess] = useState("");
@@ -96,6 +112,7 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   const timerRef = useRef(null);
+  const gameContainerRef = useRef(null);
 
   const secretWord = wordData?.secretWord?.toUpperCase() || "";
   const hint = wordData?.hint || "";
@@ -104,16 +121,18 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
   const isHintAvailable = currentAttempt >= guessesUntilHint;
 
   const hintText = useMemo(() => {
-    if (difficulty === "EASY") {
-      return "Hint is available anytime on Easy.";
-    }
-
-    if (difficulty === "MEDIUM") {
-      return `Hint unlocks after 3 guesses. Guesses used: ${currentAttempt}/3.`;
-    }
-
-    return `Hint unlocks after 5 guesses. Guesses used: ${currentAttempt}/5.`;
+    return getHintStatusText(difficulty, currentAttempt);
   }, [difficulty, currentAttempt]);
+
+  useEffect(() => {
+    // Auto-scroll to Word Bloom when the game loads.
+    setTimeout(() => {
+      gameContainerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 150);
+  }, []);
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -123,20 +142,45 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
     return () => clearInterval(timerRef.current);
   }, []);
 
-  const handleGuessChange = (event) => {
-    const cleanedValue = event.target.value
-      .toUpperCase()
-      .replace(/[^A-Z]/g, "")
-      .slice(0, WORD_LENGTH);
+  useEffect(() => {
+    // Keyboard-first gameplay: the page listens for letters, Backspace, and Enter.
+    const handleGlobalKeyDown = (event) => {
+      if (isCompleted || isRevealing) return;
 
-    setCurrentGuess(cleanedValue);
-  };
+      const key = event.key;
+
+      if (/^[a-zA-Z]$/.test(key)) {
+        setCurrentGuess((prev) => {
+          if (prev.length >= WORD_LENGTH) return prev;
+          return `${prev}${key.toUpperCase()}`;
+        });
+
+        setMessage("");
+        return;
+      }
+
+      if (key === "Backspace") {
+        setCurrentGuess((prev) => prev.slice(0, -1));
+        return;
+      }
+
+      if (key === "Enter") {
+        submitGuess();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [currentGuess, currentAttempt, isCompleted, isRevealing, board]);
 
   const submitGuess = () => {
     if (isCompleted || isRevealing) return;
 
     if (currentGuess.length !== WORD_LENGTH) {
-      setMessage("Enter a full 5-letter word.");
+      setMessage("Enter a full 5-letter word before submitting.");
       return;
     }
 
@@ -202,12 +246,6 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
     }
   };
 
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      submitGuess();
-    }
-  };
-
   const resetLocalGame = () => {
     setBoard(createEmptyBoard());
     setCurrentGuess("");
@@ -226,9 +264,17 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
     }, 1000);
   };
 
+  const getDisplayLetter = (tile, rowIndex, tileIndex) => {
+    if (rowIndex === currentAttempt && !tile.letter) {
+      return currentGuess[tileIndex] || "";
+    }
+
+    return tile.letter;
+  };
+
   return (
-    <div className="animate-fade-in">
-      <div className="mx-auto max-w-3xl">
+    <div ref={gameContainerRef} className="animate-fade-in scroll-mt-28">
+      <div className="mx-auto max-w-4xl">
         <div className="mb-6 rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-50 to-emerald-50 p-6 shadow-inner">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-violet-500">
             Word Bloom
@@ -239,9 +285,8 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
           </h3>
 
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            You have six tries. Green means the letter is in the right spot,
-            yellow means the letter is in the word, and gray means it is not in
-            the word.
+            Type letters directly into the board. Press Enter or click Submit
+            Guess when your five-letter word is ready.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -274,105 +319,89 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
           </div>
         </div>
 
-        <div className="mx-auto grid max-w-sm gap-2">
-          {board.map((row, rowIndex) => (
-            <div key={rowIndex} className="grid grid-cols-5 gap-2">
-              {row.map((tile, tileIndex) => {
-                const isActiveRow = rowIndex === currentAttempt && !tile.letter;
-                const displayLetter =
-                  isActiveRow && currentGuess[tileIndex]
-                    ? currentGuess[tileIndex]
-                    : tile.letter;
+        <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+          <div>
+            <div className="mx-auto grid max-w-sm gap-2">
+              {board.map((row, rowIndex) => (
+                <div key={rowIndex} className="grid grid-cols-5 gap-2">
+                  {row.map((tile, tileIndex) => {
+                    const displayLetter = getDisplayLetter(tile, rowIndex, tileIndex);
 
-                const shouldAnimate =
-                  rowIndex === currentAttempt && tile.status && isRevealing;
+                    const shouldAnimate =
+                      rowIndex === currentAttempt && tile.status && isRevealing;
 
-                return (
-                  <div
-                    key={`${rowIndex}-${tileIndex}`}
-                    className={`flex aspect-square items-center justify-center rounded-2xl border-2 text-2xl font-black shadow-sm transition-all duration-300 ${
-                      tile.status
-                        ? getTileColor(tile.status)
-                        : displayLetter
-                        ? "border-violet-300 bg-white text-slate-900"
-                        : "border-slate-200 bg-white text-slate-400"
-                    } ${shouldAnimate ? "word-bloom-flip" : ""}`}
-                    style={{
-                      animationDelay: shouldAnimate
-                        ? `${tileIndex * 140}ms`
-                        : "0ms",
-                    }}
-                  >
-                    {displayLetter}
-                  </div>
-                );
-              })}
+                    return (
+                      <div
+                        key={`${rowIndex}-${tileIndex}`}
+                        className={`flex aspect-square items-center justify-center rounded-2xl border-2 text-2xl font-black shadow-sm transition-all duration-300 ${
+                          tile.status
+                            ? getTileColor(tile.status)
+                            : displayLetter
+                            ? "border-violet-300 bg-white text-slate-900"
+                            : rowIndex === currentAttempt
+                            ? "border-violet-200 bg-violet-50 text-slate-400"
+                            : "border-slate-200 bg-white text-slate-400"
+                        } ${shouldAnimate ? "word-bloom-flip" : ""}`}
+                        style={{
+                          animationDelay: shouldAnimate ? `${tileIndex * 140}ms` : "0ms",
+                        }}
+                      >
+                        {displayLetter}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="mx-auto mt-6 max-w-sm">
-          <input
-            type="text"
-            value={currentGuess}
-            onChange={handleGuessChange}
-            onKeyDown={handleKeyDown}
-            disabled={isCompleted || isRevealing}
-            placeholder="Type 5 letters"
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center text-2xl font-black uppercase tracking-[0.35em] text-slate-800 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60"
-          />
+            {message && (
+              <div
+                className={`mx-auto mt-4 max-w-sm rounded-3xl p-4 text-center text-sm font-semibold ${
+                  didWin
+                    ? "border border-emerald-100 bg-emerald-50 text-emerald-700"
+                    : "border border-indigo-100 bg-indigo-50 text-indigo-700"
+                }`}
+              >
+                {message}
+              </div>
+            )}
+          </div>
 
-          <button
-            type="button"
-            onClick={submitGuess}
-            disabled={isCompleted || isRevealing}
-            className="mt-3 w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Submit Guess
-          </button>
+          <aside className="rounded-[2rem] border border-amber-100 bg-amber-50 p-5 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-700">
+              Hint
+            </p>
 
-          <div className="mt-4 rounded-3xl border border-amber-100 bg-amber-50 p-4 text-center">
-            <p className="text-sm font-semibold text-amber-700">
+            <p className="mt-3 text-sm leading-6 text-amber-800">
               {hintText}
             </p>
 
             <button
               type="button"
               onClick={() => setShowHint(true)}
-              disabled={!isHintAvailable}
-              className="mt-3 rounded-2xl bg-white px-4 py-2 text-sm font-bold text-amber-700 shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!isHintAvailable || showHint}
+              className="mt-4 w-full rounded-2xl bg-white px-4 py-3 text-sm font-bold text-amber-700 shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Need a Hint?
+              {showHint ? "Hint Revealed" : "Need a Hint?"}
             </button>
 
             {showHint && (
-              <p className="mt-3 text-sm leading-6 text-slate-700">
+              <p className="mt-4 rounded-2xl bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm">
                 {hint}
               </p>
             )}
-          </div>
 
-          {message && (
-            <div
-              className={`mt-4 rounded-3xl p-4 text-center text-sm font-semibold ${
-                didWin
-                  ? "border border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : "border border-indigo-100 bg-indigo-50 text-indigo-700"
-              }`}
-            >
-              {message}
+            <div className="mt-5 border-t border-amber-200/70 pt-4">
+              <button
+                type="button"
+                onClick={submitGuess}
+                disabled={isCompleted || isRevealing}
+                className="w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Submit Guess
+              </button>
             </div>
-          )}
-
-          {isCompleted && (
-            <button
-              type="button"
-              onClick={resetLocalGame}
-              className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
-            >
-              Replay Same Word
-            </button>
-          )}
+          </aside>
         </div>
       </div>
     </div>

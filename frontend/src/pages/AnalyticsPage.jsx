@@ -232,6 +232,7 @@ function AnalyticsPage() {
               <option value="PATTERN_RECALL">Pattern Recall</option>
               <option value="STORY_RECALL">Story Recall</option>
               <option value="MEMORY_MATCH">Memory Match</option>
+              <option value="WORD_BLOOM">Word Bloom</option>
             </select>
           </div>
 

@@ -361,35 +361,15 @@ export const getGameResults = async () => {
     return response.json();
 };
 
-export const generateWordBloomGame = async (difficulty) => {
-  const response = await fetch(
-    `${BASE_URL}/games/word-bloom/generate`,
-    {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ difficulty }),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to generate Word Bloom game");
-  }
-
-  return response.json();
-};
-
 // ===== Word Bloom =====
 
 // Generate a fresh AI-powered Word Bloom game.
 export const generateWordBloomGame = async (difficulty) => {
-    const response = await fetch(
-        `${BASE_URL}/games/word-bloom/generate`,
-        {
-            method: "POST",
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ difficulty })
-        }
-    );
+    const response = await fetch(`${BASE_URL}/games/word-bloom/generate`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ difficulty }),
+    });
 
     if (!response.ok) {
         throw new Error("Failed to generate Word Bloom game");
@@ -397,6 +377,7 @@ export const generateWordBloomGame = async (difficulty) => {
 
     return response.json();
 };
+
 
 // ===== Analytics AI =====
 

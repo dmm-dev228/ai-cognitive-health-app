@@ -9,6 +9,7 @@ import com.aihealth.backend.repository.CommunityPostRepository;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
 import org.springframework.stereotype.Service;
+import com.aihealth.backend.dto.CommunityTrendResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,8 +35,7 @@ public class CommunityPostService {
     public CommunityPostService(
             CommunityPostRepository communityPostRepository,
             UserRepository userRepository,
-            CommunityModerationService moderationService
-    ) {
+            CommunityModerationService moderationService) {
         this.communityPostRepository = communityPostRepository;
         this.userRepository = userRepository;
         this.moderationService = moderationService;
@@ -43,8 +43,7 @@ public class CommunityPostService {
 
     // Creates a new community post for the authenticated user.
     public CommunityPostResponse createPost(
-            CommunityPostRequest request
-    ) {
+            CommunityPostRequest request) {
         User user = getCurrentAuthenticatedUser();
 
         validatePostRequest(request);
@@ -52,11 +51,9 @@ public class CommunityPostService {
         String trimmedTitle = request.getTitle().trim();
         String trimmedContent = request.getContent().trim();
 
-        String combinedContentForModeration =
-                trimmedTitle + "\n\n" + trimmedContent;
+        String combinedContentForModeration = trimmedTitle + "\n\n" + trimmedContent;
 
-        CommunityModerationResult moderationResult =
-                moderationService.moderateContent(combinedContentForModeration);
+        CommunityModerationResult moderationResult = moderationService.moderateContent(combinedContentForModeration);
 
         handleModerationResult(moderationResult);
 
@@ -68,8 +65,7 @@ public class CommunityPostService {
         post.setCategory(request.getCategory());
         post.setCreatedAt(LocalDateTime.now());
 
-        CommunityPost saved =
-                communityPostRepository.save(post);
+        CommunityPost saved = communityPostRepository.save(post);
 
         return mapToResponse(saved);
     }
@@ -85,8 +81,7 @@ public class CommunityPostService {
 
     // Validates the post request before moderation and saving.
     private void validatePostRequest(
-            CommunityPostRequest request
-    ) {
+            CommunityPostRequest request) {
         if (request == null) {
             throw new RuntimeException("Post request cannot be empty");
         }
@@ -114,33 +109,28 @@ public class CommunityPostService {
 
     // Converts AI moderation outcomes into user-safe post error messages.
     private void handleModerationResult(
-            CommunityModerationResult moderationResult
-    ) {
+            CommunityModerationResult moderationResult) {
         if (moderationResult == CommunityModerationResult.APPROVED) {
             return;
         }
 
         if (moderationResult == CommunityModerationResult.NEEDS_REVISION) {
             throw new RuntimeException(
-                    "This community is designed for supportive conversation. Please revise your post before sharing."
-            );
+                    "This community is designed for supportive conversation. Please revise your post before sharing.");
         }
 
         if (moderationResult == CommunityModerationResult.CRISIS) {
             throw new RuntimeException(
-                    "This sounds like a difficult moment. Please reach out to someone you trust or emergency support if you may be in immediate danger."
-            );
+                    "This sounds like a difficult moment. Please reach out to someone you trust or emergency support if you may be in immediate danger.");
         }
 
         throw new RuntimeException(
-                "This post cannot be shared because it does not match the safety expectations of this community."
-        );
+                "This post cannot be shared because it does not match the safety expectations of this community.");
     }
 
     // Converts entity -> safe frontend response DTO.
     private CommunityPostResponse mapToResponse(
-            CommunityPost post
-    ) {
+            CommunityPost post) {
         return new CommunityPostResponse(
                 post.getId(),
                 post.getUser().getId(),
@@ -148,19 +138,20 @@ public class CommunityPostService {
                 post.getTitle(),
                 post.getContent(),
                 post.getCategory(),
-                post.getCreatedAt()
-        );
+                post.getCreatedAt());
     }
 
     // Loads currently authenticated user from JWT context.
     private User getCurrentAuthenticatedUser() {
-        String email =
-                SecurityUtils.getCurrentUserEmail();
+        String email = SecurityUtils.getCurrentUserEmail();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Authenticated user not found"
-                        ));
+                .orElseThrow(() -> new RuntimeException(
+                        "Authenticated user not found"));
+    }
+
+    // Returns the most active community categories.
+    public List<CommunityTrendResponse> getCommunityTrends() {
+        return communityPostRepository.findCommunityTrends();
     }
 }

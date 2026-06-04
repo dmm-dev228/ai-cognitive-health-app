@@ -1,4 +1,4 @@
-import CommunityNewsCarousel from "./CommunityNewsCarousel";
+import CommunityDiscoverCard from "./CommunityDiscoverCard";
 /*
  * CommunitySidebar
  * ----------------
@@ -19,7 +19,7 @@ function CommunitySidebar() {
 
   return (
     <aside className="hidden space-y-5 xl:block xl:sticky xl:top-28 xl:h-fit">
-   <CommunityNewsCarousel />
+   <CommunityDiscoverCard />
 
       <div className="glass-card rounded-[2rem] p-5">
         <p className="text-sm font-bold text-slate-900">

@@ -10,6 +10,7 @@ public class NewsArticleResponse {
     private String title;
     private String url;
     private String section;
+    private String imageUrl;
 
     public NewsArticleResponse() {
     }
@@ -17,11 +18,12 @@ public class NewsArticleResponse {
     public NewsArticleResponse(
             String title,
             String url,
-            String section
-    ) {
+            String section,
+            String imageUrl) {
         this.title = title;
         this.url = url;
         this.section = section;
+        this.imageUrl = imageUrl;
     }
 
     public String getTitle() {
@@ -34,5 +36,9 @@ public class NewsArticleResponse {
 
     public String getSection() {
         return section;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 }

@@ -12,13 +12,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 /*
  * NewsService
  * -----------
- * Fetches safe headline-only content from The Guardian Open Platform API.
+ * Fetches curated headline-only content from The Guardian Open Platform API.
  *
  * API keys stay on the backend so the frontend never exposes credentials.
  */
@@ -37,20 +36,48 @@ public class NewsService {
         this.httpClient = HttpClient.newHttpClient();
     }
 
-    // Fetches calm headline-only articles for the Community sidebar.
+    // Fetches one curated article for each Discover lane.
     public List<NewsArticleResponse> getCommunityHeadlines() {
+        return List.of(
+                fetchArticleForLane(
+                        "personal growth OR habits OR self improvement OR support",
+                        "lifeandstyle",
+                        "Growth & Support",
+                        getGrowthFallback()
+                ),
+                fetchArticleForLane(
+                        "artificial intelligence OR technology OR innovation",
+                        "technology|science",
+                        "Tech & AI",
+                        getTechFallback()
+                ),
+                fetchArticleForLane(
+                        "wellbeing OR resilience OR mindfulness OR gratitude OR healthy habits",
+                        "lifeandstyle",
+                        "Wellbeing & Resilience",
+                        getWellbeingFallback()
+                )
+        );
+    }
+
+    // Fetches one safe Guardian article for a specific Discover lane.
+    private NewsArticleResponse fetchArticleForLane(
+            String rawQuery,
+            String sections,
+            String laneLabel,
+            NewsArticleResponse fallbackArticle
+    ) {
         try {
-            String query = URLEncoder.encode(
-                    "wellbeing OR science OR technology OR environment",
-                    StandardCharsets.UTF_8
-            );
+            String query =
+                    URLEncoder.encode(rawQuery, StandardCharsets.UTF_8);
 
             String requestUrl =
                     "https://content.guardianapis.com/search"
                             + "?q=" + query
-                            + "&section=science|technology|environment|lifeandstyle"
-                            + "&page-size=5"
+                            + "&section=" + sections
+                            + "&page-size=15"
                             + "&order-by=newest"
+                            + "&show-fields=thumbnail"
                             + "&api-key=" + guardianApiKey;
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -65,7 +92,7 @@ public class NewsService {
                     );
 
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                return getFallbackHeadlines();
+                return fallbackArticle;
             }
 
             JsonNode root =
@@ -74,9 +101,6 @@ public class NewsService {
             JsonNode results =
                     root.path("response").path("results");
 
-            List<NewsArticleResponse> articles =
-                    new ArrayList<>();
-
             for (JsonNode result : results) {
                 String title =
                         result.path("webTitle").asText();
@@ -84,48 +108,107 @@ public class NewsService {
                 String url =
                         result.path("webUrl").asText();
 
-                String section =
-                        result.path("sectionName").asText();
+                String imageUrl =
+                        result.path("fields")
+                                .path("thumbnail")
+                                .asText("");
+
+                if (isUnsafeArticle(title, url, laneLabel)) {
+                    continue;
+                }
 
                 if (!title.isBlank() && !url.isBlank()) {
-                    articles.add(
-                            new NewsArticleResponse(
-                                    title,
-                                    url,
-                                    section
-                            )
+                    return new NewsArticleResponse(
+                            title,
+                            url,
+                            laneLabel,
+                            imageUrl
                     );
                 }
             }
 
-            if (articles.isEmpty()) {
-                return getFallbackHeadlines();
-            }
-
-            return articles;
+            return fallbackArticle;
         } catch (Exception err) {
-            return getFallbackHeadlines();
+            return fallbackArticle;
         }
     }
 
-    // Keeps the UI useful if the external API is unavailable.
-    private List<NewsArticleResponse> getFallbackHeadlines() {
-        return List.of(
-                new NewsArticleResponse(
-                        "Small daily routines can support steadier wellness habits",
-                        "https://www.theguardian.com",
-                        "Wellness"
-                ),
-                new NewsArticleResponse(
-                        "Science and technology continue shaping healthier daily tools",
-                        "https://www.theguardian.com",
-                        "Science"
-                ),
-                new NewsArticleResponse(
-                        "Community spaces can help people feel more connected",
-                        "https://www.theguardian.com",
-                        "Community"
-                )
+    private NewsArticleResponse getGrowthFallback() {
+        return new NewsArticleResponse(
+                "Explore supportive ideas for personal growth and steadier routines",
+                "https://www.theguardian.com/lifeandstyle",
+                "Growth & Support",
+                ""
         );
+    }
+
+    private NewsArticleResponse getTechFallback() {
+        return new NewsArticleResponse(
+                "Discover technology and AI stories shaping the future",
+                "https://www.theguardian.com/technology/artificialintelligenceai",
+                "Tech & AI",
+                ""
+        );
+    }
+
+    private NewsArticleResponse getWellbeingFallback() {
+        return new NewsArticleResponse(
+                "Find uplifting wellbeing ideas for calmer daily living",
+                "https://www.theguardian.com/lifeandstyle/health-and-wellbeing",
+                "Wellbeing & Resilience",
+                ""
+        );
+    }
+
+    // Filters out articles that do not fit CogniHaven's calm Discover experience.
+    private boolean isUnsafeArticle(
+            String title,
+            String url,
+            String section
+    ) {
+        String combinedText =
+                ((title == null ? "" : title) + " "
+                        + (url == null ? "" : url) + " "
+                        + (section == null ? "" : section))
+                        .toLowerCase();
+
+        String[] blockedTerms = {
+                "murder",
+                "murdered",
+                "homicide",
+                "killed",
+                "kill",
+                "death",
+                "dead",
+                "shooting",
+                "stabbed",
+                "attack",
+                "attacked",
+                "war",
+                "bomb",
+                "abuse",
+                "rape",
+                "assault",
+                "crime",
+                "court",
+                "trial",
+                "police",
+                "terror",
+                "violence",
+                "violent",
+                "suicide",
+                "self-harm",
+                "scandal",
+                "fraud",
+                "lawsuit"
+        };
+
+        for (String term : blockedTerms) {
+            if (combinedText.contains(term)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

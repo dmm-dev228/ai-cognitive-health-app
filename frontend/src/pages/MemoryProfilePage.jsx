@@ -130,9 +130,6 @@ function MemoryProfilePage() {
             Personalized Wellness
           </p>
           <div className="mt-3 flex items-center gap-4">
-
-  <CogniHavenLogo className="h-14 w-14 object-contain drop-shadow-2xl animate-float" />
-
           <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
             Memory Profile
           </h2>

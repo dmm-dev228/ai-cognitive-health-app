@@ -1,3 +1,5 @@
+import CogniHavenLogo from "../CogniHavenLogo";
+
 /*
  * CommunityHero
  * -------------
@@ -12,30 +14,33 @@ function CommunityHero({ onCreatePost }) {
             <div className="absolute -left-16 top-8 h-56 w-56 rounded-full bg-white/20 blur-3xl animate-float" />
             <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
 
-            <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_280px] lg:items-end">
                 <div>
-                    <div className="mb-5 flex items-center gap-4">
-                        <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
-                            Supportive Wellness Community
-                        </p>
-                    </div>
+                    <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
+                        Supportive Wellness Community
+                    </p>
 
-                    <h2 className="max-w-4xl text-5xl font-black leading-tight tracking-tight">
+                    <h2 className="mt-6 max-w-4xl text-5xl font-black leading-tight tracking-tight">
                         A calm place to share, encourage, and grow together.
                     </h2>
 
                     <p className="mt-4 max-w-2xl text-sm leading-7 text-white/85">
-                        Share routines, reflections, helpful wellness habits, and
-                        encouragement in a supportive non-medical community space.
+                        Share routines, reflections, helpful wellness habits,
+                        and encouragement in a supportive non-medical community
+                        space.
                     </p>
                 </div>
 
-                <button
-                    onClick={onCreatePost}
-                    className="rounded-2xl bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
-                >
-                    + Create Post
-                </button>
+                <div className="flex flex-col items-center">
+                    <CogniHavenLogo className="mb-4 h-36 w-36 object-contain drop-shadow-2xl animate-float" />
+
+                    <button
+                        onClick={onCreatePost}
+                        className="rounded-2xl bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
+                    >
+                        + Create Post
+                    </button>
+                </div>
             </div>
         </div>
     );

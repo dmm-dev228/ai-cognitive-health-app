@@ -1,4 +1,6 @@
 import CommunityDiscoverCard from "./CommunityDiscoverCard";
+import { useEffect, useState } from "react";
+import { getCommunityTrends } from "../../services/api";
 /*
  * CommunitySidebar
  * ----------------
@@ -9,48 +11,52 @@ import CommunityDiscoverCard from "./CommunityDiscoverCard";
  * - safety guidelines
  * - supportive spaces
  */
-function CommunitySidebar() {
-  const trendingSpaces = [
-    "#reflection",
-    "#routines",
-    "#memory",
-    "#encouragement"
-  ];
+useEffect(() => {
+  const fetchTrends = async () => {
+    try {
+      const data = await getCommunityTrends();
+      setTrends(data || []);
+    } catch (err) {
+      console.error("Failed to load community trends", err);
+    }
+  };
 
-  return (
-    <aside className="hidden space-y-5 xl:block xl:sticky xl:top-28 xl:h-fit">
-   <CommunityDiscoverCard />
+  fetchTrends();
+}, []);
+return (
+  <aside className="hidden space-y-5 xl:block xl:sticky xl:top-28 xl:h-fit">
+    <CommunityDiscoverCard />
 
-      <div className="glass-card rounded-[2rem] p-5">
-        <p className="text-sm font-bold text-slate-900">
-          Community Guidelines
-        </p>
+    <div className="glass-card rounded-[2rem] p-5">
+      <p className="text-sm font-bold text-slate-900">
+        Community Guidelines
+      </p>
 
-        <div className="mt-4 space-y-3 text-sm text-slate-600">
-          <p>💜 Be supportive and respectful.</p>
-          <p>🌿 Share wellness experiences, not medical advice.</p>
-          <p>✨ Encourage progress and consistency.</p>
-        </div>
+      <div className="mt-4 space-y-3 text-sm text-slate-600">
+        <p>💜 Be supportive and respectful.</p>
+        <p>🌿 Share wellness experiences, not medical advice.</p>
+        <p>✨ Encourage progress and consistency.</p>
       </div>
+    </div>
 
-      <div className="glass-card rounded-[2rem] p-5">
-        <p className="text-sm font-bold text-slate-900">
-          Trending Spaces
-        </p>
+    <div className="glass-card rounded-[2rem] p-5">
+      <p className="text-sm font-bold text-slate-900">
+        Trending Spaces
+      </p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {trendingSpaces.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-white px-3 py-2 text-xs font-bold text-violet-700 shadow-sm"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {trendingSpaces.map((tag) => (
+          <span
+            key={tag}
+            className="rounded-full bg-white px-3 py-2 text-xs font-bold text-violet-700 shadow-sm"
+          >
+            {tag}
+          </span>
+        ))}
       </div>
-    </aside>
-  );
-}
+    </div>
+  </aside>
+);
+
 
 export default CommunitySidebar;

@@ -5,6 +5,7 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 import com.aihealth.backend.dto.StoryRecallResponse;
+import com.aihealth.backend.dto.WordBloomResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -618,98 +619,218 @@ public class OpenAIService {
     }
 
     /*
- * Moderates community content before publication.
- *
- * Returns:
- * APPROVED
- * NEEDS_REVISION
- * CRISIS
- * BLOCKED
- */
-public String moderateCommunityContent(String content) {
+     * Moderates community content before publication.
+     *
+     * Returns:
+     * APPROVED
+     * NEEDS_REVISION
+     * CRISIS
+     * BLOCKED
+     */
+    public String moderateCommunityContent(String content) {
 
-    String prompt = """
-            You are an AI moderation system for CogniHaven.
+        String prompt = """
+                You are an AI moderation system for CogniHaven.
 
-            CogniHaven is:
-            - a cognitive wellness platform
-            - an emotionally safe community
-            - a supportive environment
+                CogniHaven is:
+                - a cognitive wellness platform
+                - an emotionally safe community
+                - a supportive environment
 
-            Community rules:
-            - supportive conversation only
-            - no harassment
-            - no bullying
-            - no hate speech
-            - no threats
-            - no explicit content
-            - no medical advice
-            - no diagnosing people
-            - no dangerous instructions
+                Community rules:
+                - supportive conversation only
+                - no harassment
+                - no bullying
+                - no hate speech
+                - no threats
+                - no explicit content
+                - no medical advice
+                - no diagnosing people
+                - no dangerous instructions
 
-            Classification rules:
+                Classification rules:
 
-            APPROVED
-            - supportive
-            - neutral
-            - encouragement
-            - routine sharing
-            - wellness discussion
+                APPROVED
+                - supportive
+                - neutral
+                - encouragement
+                - routine sharing
+                - wellness discussion
 
-            NEEDS_REVISION
-            - rude language
-            - unnecessarily aggressive tone
-            - unkind wording
-            - borderline community violations
+                NEEDS_REVISION
+                - rude language
+                - unnecessarily aggressive tone
+                - unkind wording
+                - borderline community violations
 
-            CRISIS
-            - self-harm
-            - suicide
-            - immediate danger
-            - threats of violence
-            - severe crisis situations
+                CRISIS
+                - self-harm
+                - suicide
+                - immediate danger
+                - threats of violence
+                - severe crisis situations
 
-            BLOCKED
-            - harassment
-            - hate speech
-            - explicit content
-            - dangerous instructions
-            - malicious content
+                BLOCKED
+                - harassment
+                - hate speech
+                - explicit content
+                - dangerous instructions
+                - malicious content
 
-            Return ONLY one word:
+                Return ONLY one word:
 
-            APPROVED
-            NEEDS_REVISION
-            CRISIS
-            BLOCKED
+                APPROVED
+                NEEDS_REVISION
+                CRISIS
+                BLOCKED
 
-            Content:
-            %s
-            """
-            .formatted(content);
+                Content:
+                %s
+                """
+                .formatted(content);
 
-    ResponseCreateParams params = ResponseCreateParams.builder()
-            .model("gpt-4.1-mini")
-            .input(prompt)
-            .build();
+        ResponseCreateParams params = ResponseCreateParams.builder()
+                .model("gpt-4.1-mini")
+                .input(prompt)
+                .build();
 
-    Response response = client.responses().create(params);
+        Response response = client.responses().create(params);
 
-    if (response.output().isEmpty()) {
-        return "NEEDS_REVISION";
+        if (response.output().isEmpty()) {
+            return "NEEDS_REVISION";
+        }
+
+        var firstOutput = response.output().get(0);
+
+        if (firstOutput.asMessage().content().isEmpty()) {
+            return "NEEDS_REVISION";
+        }
+
+        return firstOutput.asMessage()
+                .content()
+                .get(0)
+                .asOutputText()
+                .text()
+                .trim();
     }
 
-    var firstOutput = response.output().get(0);
+    /*
+     * Generates a dynamic Word Bloom game using AI.
+     *
+     * The AI creates:
+     * - one safe 5-letter secret word
+     * - one gentle hint that stays hidden unless the user asks for it
+     *
+     * The frontend handles:
+     * - six guesses
+     * - green/yellow/gray feedback
+     * - flip animations
+     * - score calculation
+     */
+    public WordBloomResponse generateWordBloomGame(String difficulty) {
 
-    if (firstOutput.asMessage().content().isEmpty()) {
-        return "NEEDS_REVISION";
+        String prompt = """
+                You are creating a safe word guessing game for CogniHaven.
+
+                Generate one Word Bloom round.
+
+                Requirements:
+                - Secret word must be exactly 5 letters.
+                - Secret word must be a real, common English word.
+                - Secret word must be easy to spell.
+                - Secret word must only contain letters A-Z.
+                - Do not use proper nouns.
+                - Do not use acronyms.
+                - Do not use hyphenated words.
+                - Do not use plural-only words.
+                - Do not use explicit, violent, scary, medical, traumatic, or triggering words.
+                - Do not use words related to death, injury, emergencies, illness, weapons, drugs, or adult content.
+                - Avoid obscure vocabulary.
+
+                Difficulty:
+                - EASY: very common everyday word.
+                - MEDIUM: common word with moderate challenge.
+                - HARD: still common, but slightly more thoughtful.
+
+                Hint rules:
+                - Hint should gently describe the word.
+                - Do not reveal the exact word.
+                - Do not mention individual letters.
+                - Keep hint under 18 words.
+                - Hint should be safe, calm, and simple.
+
+                Return ONLY valid JSON in this exact format:
+                {
+                  "secretWord": "BRAVE",
+                  "hint": "A word for someone who keeps going even when things feel difficult."
+                }
+
+                Selected difficulty:
+                %s
+                """
+                .formatted(difficulty);
+
+        ResponseCreateParams params = ResponseCreateParams.builder()
+                .model("gpt-4.1-mini")
+                .input(prompt)
+                .build();
+
+        Response response = client.responses().create(params);
+
+        if (response.output().isEmpty()) {
+            return getFallbackWordBloomGame(difficulty);
+        }
+
+        var firstOutput = response.output().get(0);
+
+        if (firstOutput.asMessage().content().isEmpty()) {
+            return getFallbackWordBloomGame(difficulty);
+        }
+
+        String jsonText = firstOutput.asMessage()
+                .content()
+                .get(0)
+                .asOutputText()
+                .text();
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            WordBloomResponse wordBloomResponse = objectMapper.readValue(jsonText, WordBloomResponse.class);
+
+            String cleanedWord = wordBloomResponse.getSecretWord() == null
+                    ? ""
+                    : wordBloomResponse.getSecretWord().trim().toUpperCase();
+
+            if (!cleanedWord.matches("^[A-Z]{5}$") ||
+                    wordBloomResponse.getHint() == null ||
+                    wordBloomResponse.getHint().isBlank()) {
+                return getFallbackWordBloomGame(difficulty);
+            }
+
+            wordBloomResponse.setSecretWord(cleanedWord);
+
+            return wordBloomResponse;
+        } catch (Exception err) {
+            return getFallbackWordBloomGame(difficulty);
+        }
     }
 
-    return firstOutput.asMessage()
-            .content()
-            .get(0)
-            .asOutputText()
-            .text()
-            .trim();
-}
+    // Fallback keeps Word Bloom playable if AI generation or JSON parsing fails.
+    private WordBloomResponse getFallbackWordBloomGame(String difficulty) {
+        if ("HARD".equalsIgnoreCase(difficulty)) {
+            return new WordBloomResponse(
+                    "GRACE",
+                    "A gentle quality connected to kindness, patience, and calm movement.");
+        }
+
+        if ("MEDIUM".equalsIgnoreCase(difficulty)) {
+            return new WordBloomResponse(
+                    "PLANT",
+                    "Something living that grows with care, light, and water.");
+        }
+
+        return new WordBloomResponse(
+                "SMILE",
+                "A simple expression that can show warmth or happiness.");
+    }
 }

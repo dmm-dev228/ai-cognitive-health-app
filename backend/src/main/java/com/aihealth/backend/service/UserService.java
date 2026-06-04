@@ -1,5 +1,7 @@
 package com.aihealth.backend.service;
 
+import com.aihealth.backend.dto.ForgotPasswordRequest;
+import com.aihealth.backend.dto.ResetPasswordRequest;
 import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.model.User;
@@ -134,4 +136,58 @@ public class UserService {
                 user.getEmail(),
                 verificationToken);
     }
+    /*
+ * Starts password reset flow.
+ *
+ * Security note:
+ * We do not reveal whether the email exists.
+ * This prevents account enumeration.
+ */
+public void forgotPassword(ForgotPasswordRequest request) {
+
+    userRepository.findByEmail(request.getEmail())
+            .ifPresent(user -> {
+                String resetToken = UUID.randomUUID().toString();
+
+                user.setPasswordResetToken(resetToken);
+                user.setPasswordResetTokenExpiresAt(
+                        LocalDateTime.now().plusMinutes(30)
+                );
+
+                userRepository.save(user);
+
+                emailService.sendPasswordResetEmail(
+                        user.getEmail(),
+                        resetToken
+                );
+            });
+}
+
+/*
+ * Completes password reset using a valid reset token.
+ */
+public void resetPassword(ResetPasswordRequest request) {
+
+    User user = userRepository
+            .findByPasswordResetToken(request.getToken())
+            .orElseThrow(() ->
+                    new RuntimeException("Invalid or expired reset token")
+            );
+
+    if (user.getPasswordResetTokenExpiresAt() == null
+            || user.getPasswordResetTokenExpiresAt()
+                    .isBefore(LocalDateTime.now())) {
+
+        throw new RuntimeException("Invalid or expired reset token");
+    }
+
+    user.setPassword(
+            passwordEncoder.encode(request.getNewPassword())
+    );
+
+    user.setPasswordResetToken(null);
+    user.setPasswordResetTokenExpiresAt(null);
+
+    userRepository.save(user);
+}
 }

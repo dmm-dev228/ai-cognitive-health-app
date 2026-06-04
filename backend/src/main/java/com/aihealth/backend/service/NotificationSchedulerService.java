@@ -1,106 +1,94 @@
 package com.aihealth.backend.service;
 
+import com.aihealth.backend.model.Goal;
 import com.aihealth.backend.model.MedicationReminder;
+import com.aihealth.backend.repository.GoalRepository;
 import com.aihealth.backend.repository.MedicationReminderRepository;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.aihealth.backend.model.GoalLog;
+import com.aihealth.backend.repository.GoalLogRepository;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 /*
  * NotificationSchedulerService
  * ----------------------------
- * Background scheduler that checks medication reminders.
+ * Background scheduler for automated reminder checks.
  *
- * MVP behavior:
- * - Runs every minute
- * - Finds active reminders
- * - Checks ALL reminder times for each medication
- * - Logs reminders when the current time matches one of the reminder times
- * - Sends email reminders when email reminders are enabled
- * - Uses cooldown protection to prevent duplicate reminder spam
- *
- * Important:
- * Medication reminders now support multiple reminder times per day.
+ * Current behavior:
+ * - Checks medication reminders every minute
+ * - Supports multiple medication reminder times per day
+ * - Sends medication reminder emails when enabled
+ * - Uses cooldown protection to prevent duplicate medication emails
+ * - Checks active goals and sends supportive goal reminder emails
  */
 @Service
 public class NotificationSchedulerService {
 
     private final MedicationReminderRepository medicationReminderRepository;
+    private final GoalRepository goalRepository;
     private final EmailService emailService;
+    private final GoalLogRepository goalLogRepository;
 
     public NotificationSchedulerService(
             MedicationReminderRepository medicationReminderRepository,
-            EmailService emailService) {
+            GoalRepository goalRepository,
+            EmailService emailService,
+            GoalLogRepository goalLogRepository) {
 
         this.medicationReminderRepository = medicationReminderRepository;
+        this.goalRepository = goalRepository;
         this.emailService = emailService;
+        this.goalLogRepository = goalLogRepository;
     }
 
     /*
      * Runs every 60 seconds.
-     * Checks active medication reminders against the current local time.
      *
      * @Transactional keeps the Hibernate session open while reading
      * reminderTimes, which is an ElementCollection.
      */
     @Transactional
     @Scheduled(fixedRate = 60000)
-    public void checkMedicationReminders() {
+    public void checkReminders() {
+        processMedicationReminders();
+        processGoalReminders();
+    }
 
-        // Truncate seconds/nanoseconds so 08:00:25 still compares as 08:00.
+    /*
+     * Checks active medication reminders against the current local time.
+     */
+    private void processMedicationReminders() {
         LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
-
-        // Used for cooldown comparison and saving lastTriggeredAt.
         LocalDateTime nowDateTime = LocalDateTime.now();
 
         List<MedicationReminder> reminders = medicationReminderRepository.findAll();
 
         for (MedicationReminder reminder : reminders) {
-
-            // Skip reminders that are turned off.
             if (!Boolean.TRUE.equals(reminder.getIsActive())) {
                 continue;
             }
 
-            // Skip reminders with no configured reminder times.
             if (reminder.getReminderTimes() == null
                     || reminder.getReminderTimes().isEmpty()) {
                 continue;
             }
 
-            /*
-             * Each medication can now have multiple reminder times.
-             *
-             * Example:
-             * Medication: Vitamin D
-             * frequencyPerDay: 2
-             * reminderTimes: [08:00, 20:00]
-             */
             for (LocalTime reminderTime : reminder.getReminderTimes()) {
-
                 if (reminderTime == null) {
                     continue;
                 }
 
-                LocalTime scheduledTime =
-                        reminderTime.truncatedTo(ChronoUnit.MINUTES);
+                LocalTime scheduledTime = reminderTime.truncatedTo(ChronoUnit.MINUTES);
 
                 if (now.equals(scheduledTime)) {
-
-                    /*
-                     * Cooldown protection:
-                     * If this medication reminder was triggered within
-                     * the last 5 minutes, skip it.
-                     *
-                     * This prevents duplicate emails/logs/popups from
-                     * repeated scheduler runs or accidental duplicate times.
-                     */
                     if (reminder.getLastTriggeredAt() != null
                             && reminder.getLastTriggeredAt()
                                     .isAfter(nowDateTime.minusMinutes(5))) {
@@ -125,8 +113,7 @@ public class NotificationSchedulerService {
                     }
 
                     if (Boolean.TRUE.equals(reminder.getEmailReminderEnabled())) {
-                        System.out.println("→ Email reminder enabled");
-                        System.out.println("→ Sending email reminder");
+                        System.out.println("→ Sending medication email reminder");
 
                         emailService.sendMedicationReminderEmail(
                                 reminder.getUser().getEmail(),
@@ -137,22 +124,98 @@ public class NotificationSchedulerService {
                         System.out.println("→ SMS reminder enabled");
                     }
 
-                    /*
-                     * Save the last trigger timestamp after the reminder fires.
-                     * This allows the next scheduler run to know this reminder
-                     * already triggered recently.
-                     */
                     reminder.setLastTriggeredAt(nowDateTime);
                     medicationReminderRepository.save(reminder);
 
-                    /*
-                     * Stop checking this medication after one matching time.
-                     * This prevents duplicate notifications if duplicate times
-                     * are accidentally saved for the same medication.
-                     */
                     break;
                 }
             }
         }
     }
+
+/*
+ * Sends supportive goal reminder emails using smart reminder rules.
+ *
+ * Reminder rules:
+ * - Goal must be ACTIVE
+ * - Email reminders must be enabled
+ * - Do not remind the same goal more than once every 24 hours
+ * - If no progress has ever been logged, remind after 24 hours from creation
+ * - If progress exists, remind only after 48 hours without new progress
+ *
+ * This prevents annoying reminder spam.
+ */
+private void processGoalReminders() {
+
+    LocalDateTime now = LocalDateTime.now();
+
+    List<Goal> goals = goalRepository.findAll();
+
+    for (Goal goal : goals) {
+
+        if (!"ACTIVE".equalsIgnoreCase(goal.getStatus())) {
+            continue;
+        }
+
+        if (!Boolean.TRUE.equals(goal.getEmailReminderEnabled())) {
+            continue;
+        }
+
+        /*
+         * Cooldown:
+         * If we already reminded this goal in the last 24 hours,
+         * skip it.
+         */
+        if (goal.getLastRemindedAt() != null
+                && goal.getLastRemindedAt().isAfter(now.minusHours(24))) {
+            continue;
+        }
+
+        Optional<GoalLog> latestLog =
+                goalLogRepository.findTopByGoalIdOrderByLoggedAtDesc(goal.getId());
+
+        boolean shouldRemind;
+
+        if (latestLog.isEmpty()) {
+            /*
+             * No progress logged yet.
+             * Remind only if goal was created more than 24 hours ago.
+             */
+            shouldRemind = goal.getCreatedAt() != null
+                    && goal.getCreatedAt().isBefore(now.minusHours(24));
+        } else {
+            /*
+             * Progress exists.
+             * Remind only if the last progress log was more than 48 hours ago.
+             */
+            shouldRemind = latestLog.get()
+                    .getLoggedAt()
+                    .isBefore(now.minusHours(48));
+        }
+
+        if (!shouldRemind) {
+            continue;
+        }
+
+        try {
+            emailService.sendGoalReminderEmail(
+                    goal.getUser().getEmail(),
+                    goal.getTitle());
+
+            goal.setLastRemindedAt(now);
+            goalRepository.save(goal);
+
+            System.out.println(
+                    "[GOAL REMINDER] Email sent for goal: "
+                            + goal.getTitle());
+
+        } catch (Exception e) {
+            System.out.println(
+                    "[GOAL REMINDER ERROR] Failed for goal: "
+                            + goal.getTitle());
+
+            e.printStackTrace();
+        }
+    }
+}
 }

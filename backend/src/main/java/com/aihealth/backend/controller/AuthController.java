@@ -6,6 +6,8 @@ import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.JwtUtil;
 import com.aihealth.backend.service.UserService;
+import com.aihealth.backend.dto.ForgotPasswordRequest;
+import com.aihealth.backend.dto.ResetPasswordRequest;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -71,5 +73,30 @@ public class AuthController {
 
         return ResponseEntity.ok(
                 "Verification email sent if account exists.");
+    }
+
+    /*
+     * Starts password reset process.
+     * Always returns success message for security reasons.
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @RequestBody ForgotPasswordRequest request) {
+
+        userService.forgotPassword(request);
+
+        return ResponseEntity.ok(
+                "If an account exists with that email, a reset link has been sent.");
+    }
+
+    // Resets password using valid reset token.
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @RequestBody ResetPasswordRequest request) {
+
+        userService.resetPassword(request);
+
+        return ResponseEntity.ok(
+                "Password reset successfully.");
     }
 }

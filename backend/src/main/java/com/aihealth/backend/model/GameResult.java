@@ -22,7 +22,7 @@ public class GameResult {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Example: MEMORY_MATCH, PATTERN_RECALL
+    // Example: PATTERN_RECALL, STORY_RECALL, CARD_MATCH, WORD_BLOOM
     @Column(name = "game_type", nullable = false, length = 50)
     private String gameType;
 
@@ -46,31 +46,74 @@ public class GameResult {
     @Column(name = "played_at")
     private LocalDateTime playedAt;
 
-    public GameResult() {}
+    public GameResult() {
+    }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public User getUser() {
+        return user;
+    }
 
-    public String getGameType() { return gameType; }
-    public void setGameType(String gameType) { this.gameType = gameType; }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    public Integer getScore() { return score; }
-    public void setScore(Integer score) { this.score = score; }
+    public String getGameType() {
+        return gameType;
+    }
 
-    public Integer getTotalQuestions() { return totalQuestions; }
-    public void setTotalQuestions(Integer totalQuestions) { this.totalQuestions = totalQuestions; }
+    public void setGameType(String gameType) {
+        this.gameType = gameType;
+    }
 
-    public Integer getCorrectAnswers() { return correctAnswers; }
-    public void setCorrectAnswers(Integer correctAnswers) { this.correctAnswers = correctAnswers; }
+    public Integer getScore() {
+        return score;
+    }
 
-    public Integer getTimeTakenSeconds() { return timeTakenSeconds; }
-    public void setTimeTakenSeconds(Integer timeTakenSeconds) { this.timeTakenSeconds = timeTakenSeconds; }
+    public void setScore(Integer score) {
+        this.score = score;
+    }
 
-    public String getDifficulty() { return difficulty; }
-    public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
+    public Integer getTotalQuestions() {
+        return totalQuestions;
+    }
 
-    public LocalDateTime getPlayedAt() { return playedAt; }
-    public void setPlayedAt(LocalDateTime playedAt) { this.playedAt = playedAt; }
+    public void setTotalQuestions(Integer totalQuestions) {
+        this.totalQuestions = totalQuestions;
+    }
+
+    public Integer getCorrectAnswers() {
+        return correctAnswers;
+    }
+
+    public void setCorrectAnswers(Integer correctAnswers) {
+        this.correctAnswers = correctAnswers;
+    }
+
+    public Integer getTimeTakenSeconds() {
+        return timeTakenSeconds;
+    }
+
+    public void setTimeTakenSeconds(Integer timeTakenSeconds) {
+        this.timeTakenSeconds = timeTakenSeconds;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public LocalDateTime getPlayedAt() {
+        return playedAt;
+    }
+
+    public void setPlayedAt(LocalDateTime playedAt) {
+        this.playedAt = playedAt;
+    }
 }

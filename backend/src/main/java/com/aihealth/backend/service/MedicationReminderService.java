@@ -1,7 +1,7 @@
 package com.aihealth.backend.service;
 
+import com.aihealth.backend.controller.MedicationReminderResponse;
 import com.aihealth.backend.dto.MedicationReminderRequest;
-import com.aihealth.backend.dto.MedicationReminderResponse;
 import com.aihealth.backend.model.MedicationReminder;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.MedicationReminderRepository;

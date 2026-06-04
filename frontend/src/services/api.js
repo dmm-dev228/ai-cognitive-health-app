@@ -2,12 +2,16 @@ const BASE_URL = "http://localhost:8080/api";
 
 // Gets JWT from browser storage and adds it to protected backend requests
 const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     return {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
     };
+};
+
+export const getToken = () => {
+    return sessionStorage.getItem("token");
 };
 
 // ===== AUTH =====
@@ -20,6 +24,32 @@ export const loginUser = async (data) => {
         },
         body: JSON.stringify(data)
 
+    });
+
+    return handleResponse(response);
+};
+
+// ===== DAILY PROMPTS =====
+
+/*
+ * Fetches today's AI-generated journal prompt for the authenticated user.
+ *
+ * This endpoint is protected because prompts belong to a specific user.
+ * The JWT token must be sent with the request.
+ */
+export const getTodayDailyPrompt = async () => {
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+        throw new Error("No authentication token found for daily prompt request.");
+    }
+
+    const response = await fetch(`${BASE_URL}/daily-prompts/today`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
     });
 
     return handleResponse(response);
@@ -129,12 +159,12 @@ const handleResponse = async (response) => {
 };
 
 export const logoutUser = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("userId");
 };
 
 export const isLoggedIn = () => {
-    return Boolean(localStorage.getItem("token"));
+      return !!sessionStorage.getItem("token");
 };
 
 // Fetches all conversation messages (USER + AI) for a specific journal entry
@@ -175,6 +205,25 @@ export const addConversationMessage = async (journalEntryId, message) => {
 
     if (!response.ok) {
         throw new Error("Failed to send conversation message");
+    }
+
+    return response.json();
+};
+
+
+// Generate a supportive AI reflection for a completed game.
+
+export const generateGameReflection = async (gameResultId) => {
+    const response = await fetch(
+        `${BASE_URL}/ai-analysis/game/${gameResultId}`,
+        {
+            method: "POST",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to generate game reflection");
     }
 
     return response.json();
@@ -254,6 +303,12 @@ export const toggleMedicationReminder = async (id) => {
         headers: getAuthHeaders()
     });
 
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Toggle reminder failed:", response.status, errorText);
+        throw new Error("Failed to toggle medication reminder");
+    }
+
     return response.json();
 };
 
@@ -304,4 +359,339 @@ export const getGameResults = async () => {
     }
 
     return response.json();
+};
+
+// ===== Word Bloom =====
+
+// Generate a fresh AI-powered Word Bloom game.
+export const generateWordBloomGame = async (difficulty) => {
+    const response = await fetch(`${BASE_URL}/games/word-bloom/generate`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ difficulty }),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to generate Word Bloom game");
+    }
+
+    return response.json();
+};
+
+
+// ===== Analytics AI =====
+
+// Generate AI analytics summary.
+export const generateAnalyticsSummary = async () => {
+    const response = await fetch(
+        `${BASE_URL}/ai-analysis/analytics-summary`,
+        {
+            method: "POST",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to generate analytics summary");
+    }
+
+    return response.json();
+};
+
+// ===== Community =====
+
+/*
+ * Create a new community post.
+ * JWT identifies the authenticated user.
+ */
+
+export const createCommunityPost = async (data) => {
+    const response = await fetch(`${BASE_URL}/community`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(
+            response,
+            "Failed to create community post"
+        );
+
+        throw new Error(errorMessage);
+    }
+
+    return response.json();
+};
+
+// Fetch all community posts newest first.
+export const getCommunityPosts = async () => {
+    const response = await fetch(`${BASE_URL}/community`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community posts");
+    }
+
+    return response.json();
+};
+
+/*
+ * Toggle a supportive reaction on a community post.
+ *
+ * Future backend endpoint:
+ * POST /api/community/{postId}/reactions
+ *
+ * Expected behavior:
+ * - If user has no reaction, create one.
+ * - If user clicks same reaction again, remove it.
+ * - If user clicks a different reaction, replace it.
+ */
+export const toggleCommunityReaction = async (postId, reactionType) => {
+    const response = await fetch(`${BASE_URL}/community/${postId}/reactions`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ reactionType })
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to toggle community reaction");
+    }
+
+    return response.json();
+};
+
+/*
+ * Fetch reaction summary for a community post.
+ *
+ * Future backend endpoint:
+ * GET /api/community/{postId}/reactions
+ */
+export const getCommunityPostReactions = async (postId) => {
+    const response = await fetch(`${BASE_URL}/community/${postId}/reactions`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community reactions");
+    }
+
+    return response.json();
+};
+
+// Creates a new comment on a community post.
+export const createCommunityComment = async (
+    postId,
+    content
+) => {
+    const response = await fetch(
+        `${BASE_URL}/community/${postId}/comments`,
+        {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ content })
+        }
+    );
+
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(
+            response,
+            "Failed to create comment"
+        );
+
+        throw new Error(errorMessage);
+    }
+
+    return response.json();
+};
+
+// Gets comments for a community post.
+export const getCommunityComments = async (
+    postId
+) => {
+    const response = await fetch(
+        `${BASE_URL}/community/${postId}/comments`,
+        {
+            method: "GET",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch comments");
+    }
+
+    return response.json();
+};
+
+// Extracts a clean error message from Spring Boot error responses.
+const getErrorMessage = async (response, fallbackMessage) => {
+    const errorText = await response.text();
+
+    try {
+        const errorJson = JSON.parse(errorText);
+        return errorJson.message || fallbackMessage;
+    } catch {
+        return errorText || fallbackMessage;
+    }
+};
+
+// Fetches headline-only community news from backend Guardian integration.
+export const getCommunityHeadlines = async () => {
+    const response = await fetch(`${BASE_URL}/news/community-headlines`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community headlines");
+    }
+
+    return response.json();
+};
+
+// Fetches dynamic community trends.
+export const getCommunityTrends = async () => {
+    const response = await fetch(
+        `${BASE_URL}/community/trends`,
+        {
+            method: "GET",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch community trends");
+    }
+
+    return response.json();
+};
+
+// ===== Goals =====
+
+/*
+ * Create a new wellness goal.
+ * Backend uses JWT to attach the goal to the logged-in user.
+ */
+export const createGoal = async (data) => {
+    const response = await fetch(`${BASE_URL}/goals`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to create goal");
+    }
+
+    return response.json();
+};
+
+// Fetch all goals for the logged-in user.
+export const getGoals = async () => {
+    const response = await fetch(`${BASE_URL}/goals`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch goals");
+    }
+
+    return response.json();
+};
+
+// Log progress toward a specific goal.
+export const logGoalProgress = async (goalId, data) => {
+    const response = await fetch(`${BASE_URL}/goals/${goalId}/logs`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to log goal progress");
+    }
+
+    return response.json();
+};
+
+
+// ===== Achievements  =====
+
+// Fetch unlocked achievements for the logged-in user.
+export const getAchievements = async () => {
+    const response = await fetch(`${BASE_URL}/achievements`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch achievements");
+    }
+
+    return response.json();
+};
+
+// ===== Password Reset  =====
+
+export const forgotPassword = async (email) => {
+    const response = await fetch(`${BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to request password reset");
+    }
+
+    return response.text();
+};
+
+export const resetPassword = async (token, newPassword) => {
+    const response = await fetch(`${BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            token,
+            newPassword
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to reset password");
+    }
+
+    return response.text();
+};
+
+// ===== Story Recall Game =====
+
+/*
+ * Generates a fresh AI-powered Story Recall round.
+ *
+ * Backend returns:
+ * - targetWords: words the user must remember
+ * - story: AI-generated story that will be read aloud
+ */
+export const generateStoryRecallGame = async (difficulty) => {
+  const response = await fetch(`${BASE_URL}/games/story-recall/generate`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ difficulty }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to generate Story Recall game");
+  }
+
+  return response.json();
 };

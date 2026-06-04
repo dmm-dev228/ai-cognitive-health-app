@@ -4,6 +4,8 @@ import com.aihealth.backend.dto.GameResultRequest;
 import com.aihealth.backend.dto.GameResultResponse;
 import com.aihealth.backend.service.GameResultService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,12 +31,12 @@ public class GameResultController {
      */
     @PostMapping
     public GameResultResponse saveGameResult(
-            @RequestBody GameResultRequest request) {
+            @Valid @RequestBody GameResultRequest request) {
 
         return gameResultService.saveGameResult(request);
     }
 
-    //Get all game results for the logged-in user.
+    // Get all game results for the logged-in user.
     @GetMapping
     public List<GameResultResponse> getGameResults() {
         return gameResultService.getGameResultsForCurrentUser();

@@ -1,4 +1,4 @@
-package com.aihealth.backend.dto;
+package com.aihealth.backend.controller;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;

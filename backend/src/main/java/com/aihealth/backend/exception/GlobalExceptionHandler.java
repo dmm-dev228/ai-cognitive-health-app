@@ -31,6 +31,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleMailException(MailException ex) {
         ex.printStackTrace();
 
+        Throwable cause = ex.getCause();
+
+        while (cause != null) {
+            System.out.println("MAIL ROOT CAUSE: " + cause.getClass().getName());
+            System.out.println("MAIL ROOT MESSAGE: " + cause.getMessage());
+            cause = cause.getCause();
+        }
+
         ApiErrorResponse error = new ApiErrorResponse(
                 "Email could not be sent. Please check mail configuration.",
                 HttpStatus.BAD_GATEWAY.value());

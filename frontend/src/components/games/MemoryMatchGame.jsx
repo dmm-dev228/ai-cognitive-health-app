@@ -55,7 +55,7 @@ function createDeck(difficulty) {
   return shuffleCards(pairedCards);
 }
 
-function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
+function MemoryMatchGame({ difficulty = "EASY", onComplete, onChangeGame }) {
   const [cards, setCards] = useState(() => createDeck(difficulty));
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState([]);
@@ -69,6 +69,7 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
 
   const timerRef = useRef(null);
   const gameStartedRef = useRef(false);
+  const completionCardRef = useRef(null);
 
   const totalPairs = difficultyConfig[difficulty]?.pairs || 4;
   const columns =
@@ -112,10 +113,7 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
       if (timeLeft <= 0) {
         clearInterval(previewInterval);
 
-        /*
-          Preview is finished, so cards flip face down
-          and the actual game timer begins.
-        */
+        // Preview is finished, so the cards flip face down and gameplay begins.
         setIsPreviewing(false);
         setIsBoardLocked(false);
         gameStartedRef.current = true;
@@ -134,6 +132,17 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
 
     return () => clearInterval(timerRef.current);
   }, [isCompleted, isPreviewing]);
+
+  useEffect(() => {
+    if (!isCompleted) return;
+
+    setTimeout(() => {
+      completionCardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 250);
+  }, [isCompleted]);
 
   const handleCardClick = (selectedCard) => {
     if (isPreviewing) return;
@@ -183,10 +192,7 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
     const finalMoves = moveCount + 1;
     const finalAccuracy = Math.round((totalPairs / finalMoves) * 100);
 
-    /*
-      Result shape matches the existing GameResult model.
-      GamePage can use this to save CARD_MATCH results and generate AI reflection.
-    */
+    // Result shape matches the existing GameResult model.
     const memoryMatchResult = {
       gameType: "MEMORY_MATCH",
       difficulty,
@@ -279,7 +285,10 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
         </div>
 
         {isCompleted && (
-          <div className="mt-8 rounded-[2rem] border border-emerald-100 bg-emerald-50 p-6 text-center shadow-sm">
+          <div
+            ref={completionCardRef}
+            className="mt-8 rounded-[2rem] border border-emerald-100 bg-emerald-50 p-6 text-center shadow-sm scroll-mt-28"
+          >
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-600">
               Game Complete
             </p>
@@ -317,13 +326,23 @@ function MemoryMatchGame({ difficulty = "EASY", onComplete }) {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={resetGame}
-              className="mt-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5"
-            >
-              Play Again
-            </button>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={resetGame}
+                className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5"
+              >
+                Play Again
+              </button>
+
+              <button
+                type="button"
+                onClick={onChangeGame}
+                className="rounded-2xl bg-red-50 px-6 py-3 text-sm font-semibold text-red-600 transition hover:-translate-y-0.5 hover:bg-red-100"
+              >
+                Change Game
+              </button>
+            </div>
           </div>
         )}
       </div>

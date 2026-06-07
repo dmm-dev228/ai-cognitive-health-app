@@ -477,6 +477,10 @@ function GamePage() {
               <div ref={memoryMatchRef} className="scroll-mt-28">
                 <MemoryMatchGame
                   difficulty={difficulty}
+                  onChangeGame={() => {
+                    setGameStarted(false);
+                    resetGameState();
+                  }}
                   onComplete={async (result) => {
                     console.log("Memory Match completed:", result);
 
@@ -635,7 +639,7 @@ function GamePage() {
               )}
 
             {gameStarted &&
-              selectedGame !== "CARD_MATCH" &&
+              selectedGame !== "MEMORY_MATCH" &&
               selectedGame !== "WORD_BLOOM" &&
               !isShowingPrompt &&
               (selectedGame !== "STORY_RECALL" || storyPhase === "RECALL") && (

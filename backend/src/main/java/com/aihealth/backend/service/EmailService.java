@@ -4,6 +4,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import jakarta.annotation.PostConstruct;
 
 /*
  * EmailService
@@ -19,9 +20,15 @@ import org.springframework.beans.factory.annotation.Value;
 public class EmailService {
 
         @Value("${app.frontend.url}")
+
         private String frontendUrl;
 
         private final JavaMailSender mailSender;
+        @Value("${spring.mail.username:}")
+        private String mailUsername;
+
+        @Value("${spring.mail.password:}")
+        private String mailPassword;
 
         public EmailService(JavaMailSender mailSender) {
                 this.mailSender = mailSender;
@@ -142,4 +149,17 @@ public class EmailService {
 
                 mailSender.send(message);
         }
+
+        // Logs mail config without exposing the actual password.
+        @PostConstruct
+        public void verifyMailConfig() {
+                System.out.println("MAIL USERNAME = " + mailUsername);
+
+                if (mailPassword == null || mailPassword.isBlank()) {
+                        System.out.println("MAIL PASSWORD IS MISSING");
+                } else {
+                        System.out.println("MAIL PASSWORD LENGTH = " + mailPassword.length());
+                }
+        }
+
 }

@@ -44,7 +44,7 @@ public class EmailService {
 
                 SimpleMailMessage message = new SimpleMailMessage();
 
-                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setFrom("dmmcmillan2018@gmail.com");
                 message.setTo(toEmail);
                 message.setSubject("CogniHaven Medication Reminder");
 
@@ -73,7 +73,7 @@ public class EmailService {
 
                 SimpleMailMessage message = new SimpleMailMessage();
 
-                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setFrom("dmmcmillan2018@gmail.com");
                 message.setTo(toEmail);
                 message.setSubject("Verify Your CogniHaven Email");
 
@@ -100,7 +100,7 @@ public class EmailService {
 
                 SimpleMailMessage message = new SimpleMailMessage();
 
-                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setFrom("dmmcmillan2018@gmail.com");
                 message.setTo(toEmail);
                 message.setSubject("CogniHaven Goal Reminder");
 
@@ -131,7 +131,7 @@ public class EmailService {
 
                 SimpleMailMessage message = new SimpleMailMessage();
 
-                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setFrom("dmmcmillan2018@gmail.com");
 
                 message.setTo(toEmail);
 

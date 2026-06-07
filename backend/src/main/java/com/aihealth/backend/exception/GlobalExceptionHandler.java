@@ -15,10 +15,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleRuntimeException(RuntimeException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        if (
-                ex.getMessage() != null &&
-                ex.getMessage().toLowerCase().contains("invalid email or password")
-        ) {
+        if (ex.getMessage() != null &&
+                ex.getMessage().toLowerCase().contains("invalid email or password")) {
             status = HttpStatus.UNAUTHORIZED;
         }
 
@@ -31,6 +29,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MailException.class)
     public ResponseEntity<ApiErrorResponse> handleMailException(MailException ex) {
+        ex.printStackTrace();
+
         ApiErrorResponse error = new ApiErrorResponse(
                 "Email could not be sent. Please check mail configuration.",
                 HttpStatus.BAD_GATEWAY.value());

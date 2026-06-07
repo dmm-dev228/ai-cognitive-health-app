@@ -2,24 +2,42 @@ package com.aihealth.backend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+// Handles backend errors and returns cleaner API responses.
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handles general RuntimeExceptions like "User not found"
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiErrorResponse> handleRuntimeException(RuntimeException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        if (
+                ex.getMessage() != null &&
+                ex.getMessage().toLowerCase().contains("invalid email or password")
+        ) {
+            status = HttpStatus.UNAUTHORIZED;
+        }
+
         ApiErrorResponse error = new ApiErrorResponse(
                 ex.getMessage(),
-                HttpStatus.NOT_FOUND.value());
+                status.value());
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return ResponseEntity.status(status).body(error);
     }
 
-    // Handles validation errors from @Valid
+    @ExceptionHandler(MailException.class)
+    public ResponseEntity<ApiErrorResponse> handleMailException(MailException ex) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                "Email could not be sent. Please check mail configuration.",
+                HttpStatus.BAD_GATEWAY.value());
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult()

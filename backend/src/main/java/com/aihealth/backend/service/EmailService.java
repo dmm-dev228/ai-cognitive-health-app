@@ -1,17 +1,20 @@
 package com.aihealth.backend.service;
 
-import com.resend.Resend;
-import com.resend.services.emails.model.SendEmailRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 /*
  * EmailService
  * ------------
- * Sends email notifications for CogniHaven.
+ * Sends simple email notifications for CogniHaven.
  *
- * Production note:
- * Uses Resend API instead of SMTP because Render Free blocks outbound SMTP ports.
+ * Current email types:
+ * - medication reminders
+ * - email verification
+ * - goal reminders
+ * - password reset
  */
 @Service
 public class EmailService {
@@ -19,20 +22,24 @@ public class EmailService {
         @Value("${app.frontend.url}")
         private String frontendUrl;
 
-        @Value("${resend.api.key}")
-        private String resendApiKey;
+        private final JavaMailSender mailSender;
 
-        @Value("${resend.from.email:onboarding@resend.dev}")
-        private String fromEmail;
+        public EmailService(JavaMailSender mailSender) {
+                this.mailSender = mailSender;
+        }
 
         // Sends a medication reminder email.
         public void sendMedicationReminderEmail(
                         String toEmail,
                         String medicationName) {
 
-                sendEmail(
-                                toEmail,
-                                "CogniHaven Medication Reminder",
+                SimpleMailMessage message = new SimpleMailMessage();
+
+                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setTo(toEmail);
+                message.setSubject("CogniHaven Medication Reminder");
+
+                message.setText(
                                 "Hello,\n\n"
                                                 + "This is a supportive reminder from CogniHaven.\n\n"
                                                 + "It may be time for your medication reminder: "
@@ -42,6 +49,8 @@ public class EmailService {
                                                 + frontendUrl
                                                 + "/medication\n\n"
                                                 + "— CogniHaven");
+
+                mailSender.send(message);
         }
 
         // Sends email verification link to newly registered users.
@@ -51,15 +60,21 @@ public class EmailService {
 
                 String verificationLink = frontendUrl + "/verify-email?token=" + verificationToken;
 
-                sendEmail(
-                                toEmail,
-                                "Verify Your CogniHaven Email",
+                SimpleMailMessage message = new SimpleMailMessage();
+
+                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setTo(toEmail);
+                message.setSubject("Verify Your CogniHaven Email");
+
+                message.setText(
                                 "Welcome to CogniHaven.\n\n"
                                                 + "Please verify your email by clicking the link below:\n\n"
                                                 + verificationLink
                                                 + "\n\n"
                                                 + "If you did not create this account, you can ignore this email.\n\n"
                                                 + "— CogniHaven");
+
+                mailSender.send(message);
         }
 
         // Sends a gentle goal reminder email.
@@ -67,9 +82,13 @@ public class EmailService {
                         String toEmail,
                         String goalTitle) {
 
-                sendEmail(
-                                toEmail,
-                                "CogniHaven Goal Reminder",
+                SimpleMailMessage message = new SimpleMailMessage();
+
+                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setTo(toEmail);
+                message.setSubject("CogniHaven Goal Reminder");
+
+                message.setText(
                                 "Hello,\n\n"
                                                 + "This is a gentle reminder from CogniHaven.\n\n"
                                                 + "You set a goal: "
@@ -80,6 +99,8 @@ public class EmailService {
                                                 + frontendUrl
                                                 + "/goals\n\n"
                                                 + "— CogniHaven");
+
+                mailSender.send(message);
         }
 
         // Sends password reset email.
@@ -89,9 +110,13 @@ public class EmailService {
 
                 String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
 
-                sendEmail(
-                                toEmail,
-                                "Reset Your CogniHaven Password",
+                SimpleMailMessage message = new SimpleMailMessage();
+
+                message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+                message.setTo(toEmail);
+                message.setSubject("Reset Your CogniHaven Password");
+
+                message.setText(
                                 "Hello,\n\n"
                                                 + "We received a request to reset your CogniHaven password.\n\n"
                                                 + "Use the link below to create a new password:\n\n"
@@ -100,19 +125,7 @@ public class EmailService {
                                                 + "This link will expire for security reasons.\n\n"
                                                 + "If you did not request a password reset, you can safely ignore this email.\n\n"
                                                 + "— CogniHaven");
-        }
 
-        // Sends email through Resend HTTPS API.
-        private void sendEmail(String toEmail, String subject, String text) {
-                Resend resend = new Resend(resendApiKey);
-
-                SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
-                                .from(fromEmail)
-                                .to(toEmail)
-                                .subject(subject)
-                                .text(text)
-                                .build();
-
-                resend.emails().send(sendEmailRequest);
+                mailSender.send(message);
         }
 }

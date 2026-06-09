@@ -19,6 +19,7 @@ import IdleSessionManager from "./components/IdleSessionManager";
 import Navbar from "./components/Navbar";
 import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
 import FeedbackCard from "./components/FeedbackCard";
+import UserMenu from "./components/user/UserMenu";
 
 import {
   logoutUser,

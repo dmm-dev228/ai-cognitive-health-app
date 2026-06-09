@@ -9,13 +9,11 @@ import java.util.Optional;
 
 public interface DailyPromptRepository extends JpaRepository<DailyPrompt, Long> {
 
-    /*
-     * Finds today's prompt for a specific user.
-     */
+    List<DailyPrompt> findByUserId(Long userId);
+
+    // Finds today's prompt for a specific user
     Optional<DailyPrompt> findByUserIdAndPromptDate(Long userId, LocalDate promptDate);
 
-    /*
-     * Gets recent prompts so OpenAI can avoid repeating previous ones.
-     */
+    // Gets recent prompts so OpenAI can avoid repeating previous ones.
     List<DailyPrompt> findTop30ByUserIdOrderByPromptDateDesc(Long userId);
 }

@@ -6,12 +6,15 @@ import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.AchievementRepository;
+import com.aihealth.backend.repository.CommunityCommentRepository;
 import com.aihealth.backend.repository.MedicationReminderRepository;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
 import com.aihealth.backend.repository.GoalLogRepository;
 import com.aihealth.backend.repository.GoalRepository;
 import com.aihealth.backend.repository.CommunityReactionRepository;
+import com.aihealth.backend.repository.CommunityCommentRepository;
+import com.aihealth.backend.repository.DailyPromptRepository;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,6 +35,8 @@ public class UserService {
     private final GoalLogRepository goalLogRepository;
     private final GoalRepository goalRepository;
     private final CommunityReactionRepository communityReactionRepository;
+    private final CommunityCommentRepository communityCommentRepository;
+    private final DailyPromptRepository dailyPromptRepository;
 
     public UserService(
             UserRepository userRepository,
@@ -40,7 +45,8 @@ public class UserService {
             AchievementRepository achievementRepository,
             GoalLogRepository goalLogRepository,
             GoalRepository goalRepository,
-            CommunityReactionRepository communityReactionRepository) {
+            CommunityReactionRepository communityReactionRepository,
+            CommunityCommentRepository communityCommentRepository, DailyPromptRepository dailyPromptRepository) {
 
         this.userRepository = userRepository;
         this.emailService = emailService;
@@ -49,6 +55,8 @@ public class UserService {
         this.goalLogRepository = goalLogRepository;
         this.goalRepository = goalRepository;
         this.communityReactionRepository = communityReactionRepository;
+        this.communityCommentRepository = communityCommentRepository;
+        this.dailyPromptRepository = dailyPromptRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -156,6 +164,21 @@ public class UserService {
             communityReactionRepository.flush();
         }
 
+        // Delete community comments before deleting the user.
+        var communityComments = communityCommentRepository.findByUserId(user.getId());
+
+        if (!communityComments.isEmpty()) {
+            communityCommentRepository.deleteAll(communityComments);
+            communityCommentRepository.flush();
+        }
+
+        // Delete daily prompts before deleting the user.
+        var dailyPrompts = dailyPromptRepository.findByUserId(user.getId());
+
+        if (!dailyPrompts.isEmpty()) {
+            dailyPromptRepository.deleteAll(dailyPrompts);
+            dailyPromptRepository.flush();
+        }
         // Finally delete the user.
         userRepository.delete(user);
     }

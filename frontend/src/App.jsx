@@ -18,6 +18,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import IdleSessionManager from "./components/IdleSessionManager";
 import Navbar from "./components/Navbar";
 import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
+import FeedbackCard from "./components/FeedbackCard";
 
 import {
   logoutUser,
@@ -297,7 +298,7 @@ function App() {
                       ))}
                     </div>
 
-
+<FeedbackCard isDarkMode={isDarkMode} />
                   </div>
 
                     <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">

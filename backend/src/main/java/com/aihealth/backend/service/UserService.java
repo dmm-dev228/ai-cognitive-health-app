@@ -5,13 +5,17 @@ import com.aihealth.backend.dto.ResetPasswordRequest;
 import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.model.User;
+import com.aihealth.backend.repository.AchievementRepository;
+import com.aihealth.backend.repository.MedicationReminderRepository;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
-import com.aihealth.backend.repository.MedicationReminderRepository;
+import com.aihealth.backend.repository.GoalLogRepository;
+import com.aihealth.backend.repository.GoalRepository;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,13 +27,24 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final MedicationReminderRepository medicationReminderRepository;
+    private final AchievementRepository achievementRepository;
+    private final GoalLogRepository goalLogRepository;
+    private final GoalRepository goalRepository;
 
-    public UserService(UserRepository userRepository,
+    public UserService(
+            UserRepository userRepository,
             EmailService emailService,
-            MedicationReminderRepository medicationReminderRepository) {
+            MedicationReminderRepository medicationReminderRepository,
+            AchievementRepository achievementRepository,
+            GoalLogRepository goalLogRepository,
+            GoalRepository goalRepository) {
+
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.medicationReminderRepository = medicationReminderRepository;
+        this.achievementRepository = achievementRepository;
+        this.goalLogRepository = goalLogRepository;
+        this.goalRepository = goalRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -93,15 +108,43 @@ public class UserService {
     }
 
     // Deletes the currently authenticated user's account.
+    @Transactional
     public void deleteCurrentUser() {
+
         User user = getCurrentAuthenticatedUser();
 
+        // Delete medication reminders first because they reference the user.
         var medicationReminders = medicationReminderRepository.findByUserId(user.getId());
 
         if (!medicationReminders.isEmpty()) {
             medicationReminderRepository.deleteAll(medicationReminders);
         }
 
+        // Delete achievements before deleting the user to avoid foreign key errors.
+        var achievements = achievementRepository.findByUserId(user.getId());
+
+        if (!achievements.isEmpty()) {
+            achievementRepository.deleteAll(achievements);
+        }
+
+        // Delete goal progress logs before goals because logs reference both user and
+        // goal.
+        var goalLogs = goalLogRepository.findByUserId(user.getId());
+
+        if (!goalLogs.isEmpty()) {
+            goalLogRepository.deleteAll(goalLogs);
+            goalLogRepository.flush();
+        }
+
+        // Delete goals after goal logs are removed.
+        var goals = goalRepository.findByUserId(user.getId());
+
+        if (!goals.isEmpty()) {
+            goalRepository.deleteAll(goals);
+            goalRepository.flush();
+        }
+
+        // Finally delete the user.
         userRepository.delete(user);
     }
 
@@ -136,58 +179,54 @@ public class UserService {
                 user.getEmail(),
                 verificationToken);
     }
+
     /*
- * Starts password reset flow.
- *
- * Security note:
- * We do not reveal whether the email exists.
- * This prevents account enumeration.
- */
-public void forgotPassword(ForgotPasswordRequest request) {
+     * Starts password reset flow.
+     *
+     * Security note:
+     * We do not reveal whether the email exists.
+     * This prevents account enumeration.
+     */
+    public void forgotPassword(ForgotPasswordRequest request) {
 
-    userRepository.findByEmail(request.getEmail())
-            .ifPresent(user -> {
-                String resetToken = UUID.randomUUID().toString();
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(user -> {
+                    String resetToken = UUID.randomUUID().toString();
 
-                user.setPasswordResetToken(resetToken);
-                user.setPasswordResetTokenExpiresAt(
-                        LocalDateTime.now().plusMinutes(30)
-                );
+                    user.setPasswordResetToken(resetToken);
+                    user.setPasswordResetTokenExpiresAt(
+                            LocalDateTime.now().plusMinutes(30));
 
-                userRepository.save(user);
+                    userRepository.save(user);
 
-                emailService.sendPasswordResetEmail(
-                        user.getEmail(),
-                        resetToken
-                );
-            });
-}
-
-/*
- * Completes password reset using a valid reset token.
- */
-public void resetPassword(ResetPasswordRequest request) {
-
-    User user = userRepository
-            .findByPasswordResetToken(request.getToken())
-            .orElseThrow(() ->
-                    new RuntimeException("Invalid or expired reset token")
-            );
-
-    if (user.getPasswordResetTokenExpiresAt() == null
-            || user.getPasswordResetTokenExpiresAt()
-                    .isBefore(LocalDateTime.now())) {
-
-        throw new RuntimeException("Invalid or expired reset token");
+                    emailService.sendPasswordResetEmail(
+                            user.getEmail(),
+                            resetToken);
+                });
     }
 
-    user.setPassword(
-            passwordEncoder.encode(request.getNewPassword())
-    );
+    /*
+     * Completes password reset using a valid reset token.
+     */
+    public void resetPassword(ResetPasswordRequest request) {
 
-    user.setPasswordResetToken(null);
-    user.setPasswordResetTokenExpiresAt(null);
+        User user = userRepository
+                .findByPasswordResetToken(request.getToken())
+                .orElseThrow(() -> new RuntimeException("Invalid or expired reset token"));
 
-    userRepository.save(user);
-}
+        if (user.getPasswordResetTokenExpiresAt() == null
+                || user.getPasswordResetTokenExpiresAt()
+                        .isBefore(LocalDateTime.now())) {
+
+            throw new RuntimeException("Invalid or expired reset token");
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(request.getNewPassword()));
+
+        user.setPasswordResetToken(null);
+        user.setPasswordResetTokenExpiresAt(null);
+
+        userRepository.save(user);
+    }
 }

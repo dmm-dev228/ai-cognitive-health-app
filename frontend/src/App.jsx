@@ -84,16 +84,21 @@ function App() {
 
     if (!confirmed) return;
 
-    await deleteAccount();
+    try {
+      await deleteAccount();
 
-    logoutUser();
-    window.location.href = "/signup";
+      logoutUser();
+      window.location.href = "/signup";
+    } catch (err) {
+      console.error("Delete account failed:", err);
+      alert("Could not delete your account. Please check the console/backend logs.");
+    }
   };
 
   return (
     <main
       className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "dark bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
-          : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
+        : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
         }`}
     >
       {/* Soft background decoration */}
@@ -298,7 +303,7 @@ function App() {
                       ))}
                     </div>
 
-<FeedbackCard isDarkMode={isDarkMode} />
+                    <FeedbackCard isDarkMode={isDarkMode} />
                   </div>
 
                     <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">

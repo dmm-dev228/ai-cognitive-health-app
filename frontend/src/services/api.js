@@ -91,12 +91,16 @@ export const createUser = async (data) => {
 
 // Delete User Account
 export const deleteAccount = async () => {
-    const response = await fetch(`${BASE_URL}/users/me`, {
-        method: "DELETE",
-        headers: getAuthHeaders()
-    });
+  const response = await fetch(`${BASE_URL}/users/me`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
 
-    return response;
+  if (!response.ok) {
+    throw new Error("Delete account failed.");
+  }
+
+  return response;
 };
 
 // ===== JOURNAL =====

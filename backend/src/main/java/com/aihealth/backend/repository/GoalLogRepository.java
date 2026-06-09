@@ -19,4 +19,6 @@ public interface GoalLogRepository extends JpaRepository<GoalLog, Long> {
      * Used for smart reminder timing.
      */
     Optional<GoalLog> findTopByGoalIdOrderByLoggedAtDesc(Long goalId);
+
+    List<GoalLog> findByUserId(Long userId);
 }

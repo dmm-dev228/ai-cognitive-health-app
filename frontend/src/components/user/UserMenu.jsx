@@ -6,7 +6,7 @@
  * Shows a circular user avatar in the navbar so users can quickly
  * recognize who is logged in.
  */
-function UserMenu() {
+function UserMenu({ onClick }) {
   const username = localStorage.getItem("username") || "User";
   const email = localStorage.getItem("email") || "Signed in";
 
@@ -14,6 +14,7 @@ function UserMenu() {
 
   return (
     <button
+    onClick={onClick}
       className="group flex items-center gap-3 rounded-full border border-white/60 bg-white/80 px-3 py-2 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md"
       title={`${username} - ${email}`}
     >

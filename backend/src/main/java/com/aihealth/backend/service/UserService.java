@@ -17,6 +17,7 @@ import com.aihealth.backend.repository.CommunityCommentRepository;
 import com.aihealth.backend.repository.DailyPromptRepository;
 
 import org.springframework.lang.NonNull;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -700,3 +700,16 @@ export const generateStoryRecallGame = async (difficulty) => {
 
   return response.json();
 };
+
+// ===== FEEDBACK =====
+export const submitFeedback = async (message) => {
+    const response = await fetch(`${BASE_URL}/feedback`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message })
+    });
+
+    return response.text();
+};

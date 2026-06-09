@@ -11,6 +11,7 @@ import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
 import com.aihealth.backend.repository.GoalLogRepository;
 import com.aihealth.backend.repository.GoalRepository;
+import com.aihealth.backend.repository.CommunityReactionRepository;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,6 +31,7 @@ public class UserService {
     private final AchievementRepository achievementRepository;
     private final GoalLogRepository goalLogRepository;
     private final GoalRepository goalRepository;
+    private final CommunityReactionRepository communityReactionRepository;
 
     public UserService(
             UserRepository userRepository,
@@ -37,7 +39,8 @@ public class UserService {
             MedicationReminderRepository medicationReminderRepository,
             AchievementRepository achievementRepository,
             GoalLogRepository goalLogRepository,
-            GoalRepository goalRepository) {
+            GoalRepository goalRepository,
+            CommunityReactionRepository communityReactionRepository) {
 
         this.userRepository = userRepository;
         this.emailService = emailService;
@@ -45,6 +48,7 @@ public class UserService {
         this.achievementRepository = achievementRepository;
         this.goalLogRepository = goalLogRepository;
         this.goalRepository = goalRepository;
+        this.communityReactionRepository = communityReactionRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -142,6 +146,14 @@ public class UserService {
         if (!goals.isEmpty()) {
             goalRepository.deleteAll(goals);
             goalRepository.flush();
+        }
+
+        // Delete community reactions before deleting the user.
+        var communityReactions = communityReactionRepository.findByUserId(user.getId());
+
+        if (!communityReactions.isEmpty()) {
+            communityReactionRepository.deleteAll(communityReactions);
+            communityReactionRepository.flush();
         }
 
         // Finally delete the user.

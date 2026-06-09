@@ -30,7 +30,9 @@ import "./index.css";
 
 function App() {
   const [visibleNotifications, setVisibleNotifications] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("cognihavenDarkMode") === "true";
+  });
 
   /*
    * Fetch in-app notifications for the logged-in user.
@@ -64,6 +66,11 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // Saves dark mode so refresh/login does not reset it.
+  useEffect(() => {
+    localStorage.setItem("cognihavenDarkMode", isDarkMode);
+  }, [isDarkMode]);
+
   const handleLogout = () => {
     logoutUser();
     window.location.href = "/login";
@@ -84,9 +91,8 @@ function App() {
 
   return (
     <main
-      className={`min-h-screen transition-colors duration-300 ${isDarkMode
-        ? "bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
-        : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "dark bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
+          : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
         }`}
     >
       {/* Soft background decoration */}

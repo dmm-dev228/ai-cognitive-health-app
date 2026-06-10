@@ -10,7 +10,7 @@ import java.util.Map;
 /*
  * ProfileImageService
  * -------------------
- * Handles uploading user profile images to Cloudinary.
+ * Handles uploading profile images to Cloudinary.
  */
 @Service
 public class ProfileImageService {
@@ -21,7 +21,7 @@ public class ProfileImageService {
         this.cloudinary = cloudinary;
     }
 
-    // Uploads an image file and returns the secure Cloudinary URL.
+    // Uploads a selected image file to Cloudinary and returns the secure image URL.
     public String uploadProfileImage(MultipartFile file) {
         try {
             Map uploadResult = cloudinary.uploader().upload(

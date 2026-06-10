@@ -137,6 +137,22 @@ export const uploadProfileImage = async (file) => {
 
   return response.json();
 };
+
+// Remove current user's profile image
+export const removeProfileImage = async () => {
+  const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ profileImageUrl: null }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to remove profile image.");
+  }
+
+  return response.json();
+};
+
 // ===== JOURNAL =====
 export const createJournalEntry = async (data) => {
     const response = await fetch(`${BASE_URL}/journal`, {

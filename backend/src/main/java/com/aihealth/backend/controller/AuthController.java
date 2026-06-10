@@ -2,12 +2,12 @@ package com.aihealth.backend.controller;
 
 import com.aihealth.backend.dto.AuthRequest;
 import com.aihealth.backend.dto.AuthResponse;
+import com.aihealth.backend.dto.ForgotPasswordRequest;
+import com.aihealth.backend.dto.ResetPasswordRequest;
 import com.aihealth.backend.model.User;
 import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.JwtUtil;
 import com.aihealth.backend.service.UserService;
-import com.aihealth.backend.dto.ForgotPasswordRequest;
-import com.aihealth.backend.dto.ResetPasswordRequest;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,9 +22,11 @@ public class AuthController {
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserService userService;
 
-    public AuthController(UserRepository userRepository,
+    public AuthController(
+            UserRepository userRepository,
             JwtUtil jwtUtil,
             UserService userService) {
+
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
@@ -44,13 +46,19 @@ public class AuthController {
         if (!passwordMatches) {
             throw new RuntimeException("Invalid email or password");
         }
+
         if (!Boolean.TRUE.equals(user.getEmailVerified())) {
             throw new RuntimeException("Please verify your email before logging in.");
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
 
-        return ResponseEntity.ok(new AuthResponse(token, user.getId()));
+        return ResponseEntity.ok(
+                new AuthResponse(
+                        token,
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail()));
     }
 
     // Verifies a user's email and returns a JWT so they can be logged in
@@ -61,7 +69,12 @@ public class AuthController {
 
         String jwt = jwtUtil.generateToken(user.getEmail());
 
-        return ResponseEntity.ok(new AuthResponse(jwt, user.getId()));
+        return ResponseEntity.ok(
+                new AuthResponse(
+                        jwt,
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail()));
     }
 
     // Resends email verification link.

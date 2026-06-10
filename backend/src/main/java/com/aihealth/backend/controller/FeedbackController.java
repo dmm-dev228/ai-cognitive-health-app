@@ -1,6 +1,7 @@
 package com.aihealth.backend.controller;
 
 import com.aihealth.backend.dto.FeedbackRequest;
+import com.aihealth.backend.security.SecurityUtils;
 import com.aihealth.backend.service.EmailService;
 
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 /*
  * FeedbackController
  * ------------------
- * Handles public feedback submissions from the home page.
+ * Handles feedback submissions from authenticated users.
  */
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -24,15 +25,26 @@ public class FeedbackController {
 
     /*
      * Sends submitted feedback to the app owner.
+     * User identity comes from the JWT security context.
      */
     @PostMapping
-    public ResponseEntity<String> submitFeedback(@RequestBody FeedbackRequest request) {
-        if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
-            throw new RuntimeException("Feedback message cannot be empty.");
+    public ResponseEntity<String> submitFeedback(
+            @RequestBody FeedbackRequest request) {
+
+        if (request.getMessage() == null
+                || request.getMessage().trim().isEmpty()) {
+
+            throw new RuntimeException(
+                    "Feedback message cannot be empty.");
         }
 
-        emailService.sendFeedbackEmail(request.getMessage());
+        String userEmail = SecurityUtils.getCurrentUserEmail();
 
-        return ResponseEntity.ok("Thank you for helping improve CogniHaven.");
+        emailService.sendFeedbackEmail(
+                userEmail,
+                request.getMessage());
+
+        return ResponseEntity.ok(
+                "Thank you for helping improve CogniHaven.");
     }
 }

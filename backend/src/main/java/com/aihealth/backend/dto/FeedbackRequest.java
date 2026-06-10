@@ -3,7 +3,7 @@ package com.aihealth.backend.dto;
 /*
  * FeedbackRequest
  * ---------------
- * Represents feedback submitted from the frontend.
+ * Represents feedback submitted by an authenticated user.
  */
 public class FeedbackRequest {
 

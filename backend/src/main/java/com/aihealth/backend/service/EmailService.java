@@ -129,10 +129,10 @@ public class EmailService {
                 mailSender.send(message);
         }
 
-        /*
-         * Sends feedback submitted from the CogniHaven home page.
-         */
-        public void sendFeedbackEmail(String feedbackText) {
+        // Sends feedback submitted from an authenticated CogniHaven user.
+        public void sendFeedbackEmail(
+                        String userEmail,
+                        String feedbackText) {
 
                 SimpleMailMessage message = new SimpleMailMessage();
 
@@ -142,9 +142,11 @@ public class EmailService {
 
                 message.setText(
                                 "New feedback submitted from CogniHaven:\n\n"
+                                                + "User: "
+                                                + userEmail
+                                                + "\n\nFeedback:\n"
                                                 + feedbackText
-                                                + "\n\n"
-                                                + "Submitted via Home Page Feedback Form");
+                                                + "\n\nSubmitted via Home Page Feedback Form");
 
                 mailSender.send(message);
         }

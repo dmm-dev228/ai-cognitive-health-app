@@ -7,8 +7,8 @@
  * recognize who is logged in.
  */
 function UserMenu({ onClick }) {
-  const username = localStorage.getItem("username") || "User";
-  const email = localStorage.getItem("email") || "Signed in";
+  const username = sessionStorage.getItem("username") || "User";
+  const email = sessionStorage.getItem("email") || "Signed in";
 
   const initial = username.charAt(0).toUpperCase();
 

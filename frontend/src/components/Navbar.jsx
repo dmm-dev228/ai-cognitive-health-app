@@ -106,15 +106,6 @@ function Navbar({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setIsDarkMode((prev) => !prev)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${isDarkMode
-                  ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
-                  : "bg-white text-slate-700 hover:text-indigo-700"
-                  }`}
-              >
-                {isDarkMode ? "☀️ Light" : "🌙 Dark"}
-              </button>
 
               {!isLoggedIn() && (
                 <>
@@ -145,6 +136,7 @@ function Navbar({
                     isOpen={isSettingsOpen}
                     onClose={() => setIsSettingsOpen(false)}
                     isDarkMode={isDarkMode}
+                    setIsDarkMode={setIsDarkMode}
                     onLogout={handleLogout}
                   />
 

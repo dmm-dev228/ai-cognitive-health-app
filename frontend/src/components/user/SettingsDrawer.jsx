@@ -37,9 +37,8 @@ function SettingsDrawer({
       />
 
       <aside
-        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${
-          isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
-        }`}
+        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+          }`}
       >
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -51,11 +50,10 @@ function SettingsDrawer({
 
           <button
             onClick={onClose}
-            className={`rounded-full px-4 py-2 text-sm font-bold transition ${
-              isDarkMode
+            className={`rounded-full px-4 py-2 text-sm font-bold transition ${isDarkMode
                 ? "bg-white/10 text-slate-200 hover:bg-white/15"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
+              }`}
           >
             ✕
           </button>
@@ -83,12 +81,18 @@ function SettingsDrawer({
         </div>
 
         <div className="mt-6 space-y-4">
-          <SettingsRow
+          <ExpandableSection
             isDarkMode={isDarkMode}
             icon="👤"
             title="Account"
             text="Profile details and personal information."
-          />
+            isOpen={openSection === "account"}
+            onClick={() => toggleSection("account")}
+          >
+            <div className="rounded-2xl bg-white/10 p-4 text-sm">
+              Profile image and username settings will go here.
+            </div>
+          </ExpandableSection>
 
           <ExpandableSection
             isDarkMode={isDarkMode}
@@ -104,12 +108,18 @@ function SettingsDrawer({
             />
           </ExpandableSection>
 
-          <SettingsRow
+          <ExpandableSection
             isDarkMode={isDarkMode}
             icon="🔒"
             title="Security"
             text="Update email and account security options."
-          />
+            isOpen={openSection === "security"}
+            onClick={() => toggleSection("security")}
+          >
+            <div className="rounded-2xl bg-white/10 p-4 text-sm">
+              Email update settings will go here.
+            </div>
+          </ExpandableSection>
 
           <ExpandableSection
             isDarkMode={isDarkMode}
@@ -122,18 +132,23 @@ function SettingsDrawer({
             <SessionTimeoutOptions isDarkMode={isDarkMode} />
           </ExpandableSection>
 
-          <SettingsRow
+          <ExpandableSection
             isDarkMode={isDarkMode}
             icon="🔔"
             title="Notifications"
             text="Manage reminder and notification preferences."
-          />
+            isOpen={openSection === "notifications"}
+            onClick={() => toggleSection("notifications")}
+          >
+            <div className="rounded-2xl bg-white/10 p-4 text-sm">
+              Notification preferences will go here.
+            </div>
+          </ExpandableSection>
         </div>
 
         <div
-          className={`mt-8 border-t pt-5 ${
-            isDarkMode ? "border-white/10" : "border-slate-200"
-          }`}
+          className={`mt-8 border-t pt-5 ${isDarkMode ? "border-white/10" : "border-slate-200"
+            }`}
         >
           <button
             onClick={onLogout}
@@ -159,20 +174,18 @@ function ExpandableSection({
 }) {
   return (
     <div
-      className={`rounded-3xl border transition ${
-        isDarkMode
+      className={`rounded-3xl border transition ${isDarkMode
           ? "border-white/10 bg-white/10"
           : "border-slate-100 bg-slate-50"
-      }`}
+        }`}
     >
       <button
         onClick={onClick}
         className="flex w-full items-center gap-4 p-5 text-left"
       >
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${
-            isDarkMode ? "bg-white/10" : "bg-white"
-          }`}
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
+            }`}
         >
           {icon}
         </div>
@@ -182,20 +195,18 @@ function ExpandableSection({
             {title}
           </p>
           <p
-            className={`mt-1 text-sm leading-6 ${
-              isDarkMode ? "text-slate-300" : "text-slate-500"
-            }`}
+            className={`mt-1 text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-slate-500"
+              }`}
           >
             {text}
           </p>
         </div>
 
         <span
-          className={`text-xl transition-transform ${
-            isOpen ? "rotate-180" : "rotate-0"
-          }`}
+          className={`text-xl transition-transform ${isOpen ? "rotate-180" : "rotate-0"
+            }`}
         >
-         ⌄
+          ⌄
         </span>
       </button>
 
@@ -217,15 +228,13 @@ function AppearanceToggle({ isDarkMode, setIsDarkMode }) {
 
         <button
           onClick={() => setIsDarkMode((prev) => !prev)}
-          className={`relative h-8 w-16 rounded-full p-1 transition ${
-            isDarkMode ? "bg-indigo-500" : "bg-slate-300"
-          }`}
+          className={`relative h-8 w-16 rounded-full p-1 transition ${isDarkMode ? "bg-indigo-500" : "bg-slate-300"
+            }`}
           aria-label="Toggle dark mode"
         >
           <span
-            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${
-              isDarkMode ? "translate-x-8" : "translate-x-0"
-            }`}
+            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${isDarkMode ? "translate-x-8" : "translate-x-0"
+              }`}
           >
             {isDarkMode ? "🌙" : "☀️"}
           </span>
@@ -259,9 +268,8 @@ function SessionTimeoutOptions({ isDarkMode }) {
       {timeoutOptions.map((option) => (
         <label
           key={option.value}
-          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${
-            isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
-          }`}
+          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
+            }`}
         >
           <span>{option.label}</span>
 
@@ -280,17 +288,15 @@ function SessionTimeoutOptions({ isDarkMode }) {
 function SettingsRow({ icon, title, text, isDarkMode }) {
   return (
     <div
-      className={`rounded-3xl border p-5 transition hover:-translate-y-0.5 ${
-        isDarkMode
+      className={`rounded-3xl border p-5 transition hover:-translate-y-0.5 ${isDarkMode
           ? "border-white/10 bg-white/10 hover:bg-white/15"
           : "border-slate-100 bg-slate-50 hover:bg-white"
-      }`}
+        }`}
     >
       <div className="flex gap-4">
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${
-            isDarkMode ? "bg-white/10" : "bg-white"
-          }`}
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
+            }`}
         >
           {icon}
         </div>
@@ -300,9 +306,8 @@ function SettingsRow({ icon, title, text, isDarkMode }) {
             {title}
           </p>
           <p
-            className={`mt-1 text-sm leading-6 ${
-              isDarkMode ? "text-slate-300" : "text-slate-500"
-            }`}
+            className={`mt-1 text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-slate-500"
+              }`}
           >
             {text}
           </p>

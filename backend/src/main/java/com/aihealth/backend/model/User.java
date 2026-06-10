@@ -53,6 +53,10 @@ public class User {
     @Column(name = "password_reset_token_expires_at")
     private LocalDateTime passwordResetTokenExpiresAt;
 
+    // Optional profile image URL shown in the navbar/settings drawer.
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
     public User() {
     }
 
@@ -130,5 +134,13 @@ public class User {
 
     public void setPasswordResetTokenExpiresAt(LocalDateTime passwordResetTokenExpiresAt) {
         this.passwordResetTokenExpiresAt = passwordResetTokenExpiresAt;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

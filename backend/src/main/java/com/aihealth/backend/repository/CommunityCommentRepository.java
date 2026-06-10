@@ -14,19 +14,16 @@ import java.util.List;
  */
 public interface CommunityCommentRepository extends JpaRepository<CommunityComment, Long> {
 
-    /*
-     * Gets visible comments for a post, oldest first.
-     */
-    List<CommunityComment> findByPostAndStatusOrderByCreatedAtAsc(
-            CommunityPost post,
-            CommunityCommentStatus status
-    );
+        List<CommunityComment> findByUserId(Long userId);
 
-    /*
-     * Counts visible comments for a post.
-     */
-    long countByPostAndStatus(
-            CommunityPost post,
-            CommunityCommentStatus status
-    );
+        // Gets visible comments for a post, oldest first.
+        List<CommunityComment> findByPostAndStatusOrderByCreatedAtAsc(
+                        CommunityPost post,
+                        CommunityCommentStatus status);
+
+        // Counts visible comments for a post.
+        long countByPostAndStatus(
+                        CommunityPost post,
+                        CommunityCommentStatus status);
+
 }

@@ -42,6 +42,14 @@ function LoginPage() {
           sessionStorage.setItem("userId", data.userId);
         }
 
+        if (data.username) {
+          sessionStorage.setItem("username", data.username);
+        }
+
+        if (data.email) {
+          sessionStorage.setItem("email", data.email);
+        }
+
         setMessage("Login successful.");
         setShowResend(false);
         window.location.href = "/journal";
@@ -182,9 +190,9 @@ function LoginPage() {
           {message && (
             <p
               className={`mt-5 rounded-2xl border px-4 py-3 text-sm font-medium ${message.toLowerCase().includes("successful") ||
-                  message.toLowerCase().includes("sent")
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                  : "border-amber-100 bg-amber-50 text-amber-700"
+                message.toLowerCase().includes("sent")
+                ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                : "border-amber-100 bg-amber-50 text-amber-700"
                 }`}
             >
               {message}

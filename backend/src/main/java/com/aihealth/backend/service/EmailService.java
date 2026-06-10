@@ -128,4 +128,26 @@ public class EmailService {
 
                 mailSender.send(message);
         }
+
+        // Sends feedback submitted from an authenticated CogniHaven user.
+        public void sendFeedbackEmail(
+                        String userEmail,
+                        String feedbackText) {
+
+                SimpleMailMessage message = new SimpleMailMessage();
+
+                message.setTo("dmmcmillan2018@gmail.com");
+
+                message.setSubject("CogniHaven User Feedback");
+
+                message.setText(
+                                "New feedback submitted from CogniHaven:\n\n"
+                                                + "User: "
+                                                + userEmail
+                                                + "\n\nFeedback:\n"
+                                                + feedbackText
+                                                + "\n\nSubmitted via Home Page Feedback Form");
+
+                mailSender.send(message);
+        }
 }

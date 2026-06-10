@@ -18,6 +18,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import IdleSessionManager from "./components/IdleSessionManager";
 import Navbar from "./components/Navbar";
 import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
+import FeedbackCard from "./components/FeedbackCard";
+import UserMenu from "./components/user/UserMenu";
 
 import {
   logoutUser,
@@ -30,7 +32,9 @@ import "./index.css";
 
 function App() {
   const [visibleNotifications, setVisibleNotifications] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("cognihavenDarkMode") === "true";
+  });
 
   /*
    * Fetch in-app notifications for the logged-in user.
@@ -64,6 +68,11 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // Saves dark mode so refresh/login does not reset it.
+  useEffect(() => {
+    localStorage.setItem("cognihavenDarkMode", isDarkMode);
+  }, [isDarkMode]);
+
   const handleLogout = () => {
     logoutUser();
     window.location.href = "/login";
@@ -76,16 +85,20 @@ function App() {
 
     if (!confirmed) return;
 
-    await deleteAccount();
+    try {
+      await deleteAccount();
 
-    logoutUser();
-    window.location.href = "/signup";
+      logoutUser();
+      window.location.href = "/signup";
+    } catch (err) {
+      console.error("Delete account failed:", err);
+      alert("Could not delete your account. Please check the console/backend logs.");
+    }
   };
 
   return (
     <main
-      className={`min-h-screen transition-colors duration-300 ${isDarkMode
-        ? "bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "dark bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
         : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
         }`}
     >
@@ -111,7 +124,7 @@ function App() {
           />
         )}
 
-        {isLoggedIn() && <IdleSessionManager />}
+        { <IdleSessionManager />}
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <Routes>
@@ -291,7 +304,7 @@ function App() {
                       ))}
                     </div>
 
-
+                    <FeedbackCard isDarkMode={isDarkMode} />
                   </div>
 
                     <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 p-8 text-white shadow-xl">

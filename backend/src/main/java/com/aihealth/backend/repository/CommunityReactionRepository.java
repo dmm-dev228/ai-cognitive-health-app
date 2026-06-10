@@ -16,23 +16,17 @@ import java.util.Optional;
  */
 public interface CommunityReactionRepository extends JpaRepository<CommunityReaction, Long> {
 
-    /*
-     * Finds whether the current user already reacted to this post.
-     */
+    // Finds whether the current user already reacted to this post.
     Optional<CommunityReaction> findByUserAndPost(User user, CommunityPost post);
 
-    /*
-     * Gets all reactions for one post.
-     */
+    // Gets all reactions for one post.
     List<CommunityReaction> findByPost(CommunityPost post);
 
-    /*
-     * Counts a specific reaction type on a post.
-     */
+    // Counts a specific reaction type on a post.
     long countByPostAndReactionType(CommunityPost post, CommunityReactionType reactionType);
 
-    /*
-     * Deletes a user's reaction from a post when they click the same reaction again.
-     */
+    // Deletes a user's reaction from a post when they click the same reaction again.
     void deleteByUserAndPost(User user, CommunityPost post);
+
+    List<CommunityReaction> findByUserId(Long userId);
 }

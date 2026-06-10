@@ -91,12 +91,66 @@ export const createUser = async (data) => {
 
 // Delete User Account
 export const deleteAccount = async () => {
-    const response = await fetch(`${BASE_URL}/users/me`, {
-        method: "DELETE",
-        headers: getAuthHeaders()
-    });
+  const response = await fetch(`${BASE_URL}/users/me`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
 
-    return response;
+  if (!response.ok) {
+    throw new Error("Delete account failed.");
+  }
+
+  return response;
+};
+
+// Update current user's profile image URL
+export const updateProfileImage = async (profileImageUrl) => {
+  const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ profileImageUrl }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update profile image.");
+  }
+
+  return response.json();
+};
+
+// Upload current user's profile image
+export const uploadProfileImage = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${BASE_URL}/users/me/profile-image/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to upload profile image.");
+  }
+
+  return response.json();
+};
+
+// Remove current user's profile image
+export const removeProfileImage = async () => {
+  const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ profileImageUrl: null }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to remove profile image.");
+  }
+
+  return response.json();
 };
 
 // ===== JOURNAL =====
@@ -695,4 +749,20 @@ export const generateStoryRecallGame = async (difficulty) => {
   }
 
   return response.json();
+};
+
+// ===== FEEDBACK =====
+export const submitFeedback = async (feedbackData) => {
+    const token = sessionStorage.getItem("token");
+
+    const response = await fetch(`${BASE_URL}/feedback`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(feedbackData)
+    });
+
+    return response.text();
 };

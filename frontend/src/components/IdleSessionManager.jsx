@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isLoggedIn, logoutUser } from "../services/api";
 
 /*
@@ -6,68 +6,87 @@ import { isLoggedIn, logoutUser } from "../services/api";
  * ------------------
  * Logs users out after inactivity for privacy/security.
  *
- * Flow:
- * - 15 minutes inactive → warning popup
- * - 60 second countdown
- * - user can stay signed in
- * - no response → logout and return to home page
+ * Important behavior:
+ * - Normal activity resets the timer only BEFORE the warning appears.
+ * - Once the warning appears, mouse movement does NOT dismiss it.
+ * - User must click Stay Signed In or Log Out.
  */
 function IdleSessionManager() {
-  const IDLE_LIMIT_MS = 15 * 60 * 1000;
+  const DEFAULT_IDLE_LIMIT_MS = 15 * 60 * 1000;
   const WARNING_SECONDS = 60;
 
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(WARNING_SECONDS);
 
-  useEffect(() => {
+  const idleTimerRef = useRef(null);
+  const countdownTimerRef = useRef(null);
+  const showWarningRef = useRef(false);
+
+  const getIdleLimit = () => {
+    const savedTimeout = sessionStorage.getItem("sessionTimeoutMinutes");
+
+    if (!savedTimeout) {
+      return DEFAULT_IDLE_LIMIT_MS;
+    }
+
+    if (savedTimeout === "never") {
+      return null;
+    }
+
+    return Number(savedTimeout) * 60 * 1000;
+  };
+
+  const clearTimers = () => {
+    clearTimeout(idleTimerRef.current);
+    clearInterval(countdownTimerRef.current);
+  };
+
+  const returnToHomeAfterLogout = () => {
+    clearTimers();
+    logoutUser();
+    window.location.href = "/";
+  };
+
+  const startCountdown = () => {
+    showWarningRef.current = true;
+    setShowWarning(true);
+    setSecondsLeft(WARNING_SECONDS);
+
+    countdownTimerRef.current = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          returnToHomeAfterLogout();
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const resetIdleTimer = () => {
     if (!isLoggedIn()) return;
 
-    let idleTimer;
-    let countdownTimer;
+    /*
+     * Once the warning is visible, activity should NOT dismiss it.
+     * The user must intentionally click Stay Signed In.
+     */
+    if (showWarningRef.current) return;
 
-    const clearTimers = () => {
-      clearTimeout(idleTimer);
-      clearInterval(countdownTimer);
-    };
+    clearTimers();
 
-    const returnToHomeAfterLogout = () => {
-      clearTimers();
-      logoutUser();
+    const idleLimit = getIdleLimit();
 
-      /*
-       * Force a full reload so App/Navbar re-check auth state.
-       * This prevents protected pages from showing stale UI after logout.
-       */
-      window.location.href = "/";
-    };
+    // If user chooses "Never", do not start an inactivity timer.
+    if (idleLimit === null) return;
 
-    const startCountdown = () => {
-      setShowWarning(true);
-      setSecondsLeft(WARNING_SECONDS);
+    idleTimerRef.current = setTimeout(() => {
+      startCountdown();
+    }, idleLimit);
+  };
 
-      countdownTimer = setInterval(() => {
-        setSecondsLeft((prev) => {
-          if (prev <= 1) {
-            returnToHomeAfterLogout();
-            return 0;
-          }
-
-          return prev - 1;
-        });
-      }, 1000);
-    };
-
-    const resetIdleTimer = () => {
-      if (!isLoggedIn()) return;
-
-      clearTimers();
-      setShowWarning(false);
-      setSecondsLeft(WARNING_SECONDS);
-
-      idleTimer = setTimeout(() => {
-        startCountdown();
-      }, IDLE_LIMIT_MS);
-    };
+  useEffect(() => {
+    if (!isLoggedIn()) return;
 
     const activityEvents = [
       "mousemove",
@@ -93,21 +112,19 @@ function IdleSessionManager() {
   }, []);
 
   const staySignedIn = () => {
+    clearTimers();
+
+    showWarningRef.current = false;
     setShowWarning(false);
     setSecondsLeft(WARNING_SECONDS);
 
-    /*
-     * Reuse normal activity tracking so the idle timer fully resets.
-     */
-    window.dispatchEvent(new Event("mousemove"));
+    // Restart the idle timer only after the user clicks the button.
+    resetIdleTimer();
   };
 
   const logoutNow = () => {
+    clearTimers();
     logoutUser();
-
-    /*
-     * Full reload ensures navbar switches from Logout to Login/Sign Up.
-     */
     window.location.href = "/";
   };
 

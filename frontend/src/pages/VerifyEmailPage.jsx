@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { verifyEmail } from "../services/api";
 
@@ -6,13 +6,20 @@ import { verifyEmail } from "../services/api";
  * VerifyEmailPage
  * ---------------
  * Handles email verification after a user clicks the email link.
- * If verification succeeds, the user is automatically logged in
- * and redirected to the journal page.
+ *
+ * Fixes:
+ * - Uses sessionStorage instead of localStorage.
+ * - Saves username/email for the profile avatar menu.
+ * - Prevents duplicate verification calls caused by React Strict Mode.
+ * - Avoids showing an error if the user was already successfully logged in.
  */
 function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState("Verifying your email...");
   const [status, setStatus] = useState("loading");
+
+  // Prevents React Strict Mode from verifying the same token twice in development.
+  const hasVerifiedRef = useRef(false);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -22,6 +29,12 @@ function VerifyEmailPage() {
       setStatus("error");
       return;
     }
+
+    // React Strict Mode can run effects twice in development.
+    // This prevents a second request from falsely showing an error after success.
+    if (hasVerifiedRef.current) return;
+
+    hasVerifiedRef.current = true;
 
     const confirmEmail = async () => {
       try {
@@ -33,29 +46,33 @@ function VerifyEmailPage() {
           sessionStorage.setItem("token", data.token);
           sessionStorage.setItem("userId", data.userId);
 
+          // Store user profile info for navbar avatar/settings drawer.
+          if (data.username) {
+            sessionStorage.setItem("username", data.username);
+          }
+
+          if (data.email) {
+            sessionStorage.setItem("email", data.email);
+          }
+
           setMessage("Email verified successfully. Redirecting you to your journal...");
           setStatus("success");
 
           setTimeout(() => {
             window.location.href = "/journal";
           }, 2000);
-        } else {
-          if (localStorage.getItem("token")) {
-            setMessage("Email verified successfully. Redirecting you to your journal...");
-            setStatus("success");
 
-            setTimeout(() => {
-              window.location.href = "/journal";
-            }, 1500);
-
-            return;
-          }
-
-          setMessage(data.message || "Email verification failed.");
-          setStatus("error");
+          return;
         }
+
+        setMessage(data.message || "Email verification failed.");
+        setStatus("error");
       } catch (err) {
-        if (localStorage.getItem("token")) {
+        /*
+         * If the token was already verified but the user has a session token,
+         * treat it as success instead of showing a false error.
+         */
+        if (sessionStorage.getItem("token")) {
           setMessage("Email verified successfully. Redirecting you to your journal...");
           setStatus("success");
 
@@ -126,7 +143,9 @@ function VerifyEmailPage() {
           </p>
 
           {status === "loading" && (
-            <div className={`mx-auto mt-6 max-w-sm rounded-2xl border px-5 py-4 ${currentStatus.ring}`}>
+            <div
+              className={`mx-auto mt-6 max-w-sm rounded-2xl border px-5 py-4 ${currentStatus.ring}`}
+            >
               <div className="flex items-center justify-center gap-3">
                 <span className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" />
                 <p className="text-sm font-semibold text-indigo-700">
@@ -137,7 +156,9 @@ function VerifyEmailPage() {
           )}
 
           {status === "success" && (
-            <div className={`mx-auto mt-6 max-w-sm rounded-2xl border px-5 py-4 ${currentStatus.ring}`}>
+            <div
+              className={`mx-auto mt-6 max-w-sm rounded-2xl border px-5 py-4 ${currentStatus.ring}`}
+            >
               <p className="text-sm font-semibold text-emerald-700">
                 You are being signed in automatically.
               </p>

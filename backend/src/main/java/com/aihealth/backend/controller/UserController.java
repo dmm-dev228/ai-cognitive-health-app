@@ -1,22 +1,31 @@
 package com.aihealth.backend.controller;
 
+import com.aihealth.backend.dto.UpdateProfileImageRequest;
 import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
+import com.aihealth.backend.service.ProfileImageService;
 import com.aihealth.backend.service.UserService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
+    private final ProfileImageService profileImageService;
 
-    public UserController(UserService userService) {
+    public UserController(
+            UserService userService,
+            ProfileImageService profileImageService) {
+
         this.userService = userService;
+        this.profileImageService = profileImageService;
     }
 
     // Create user (register)
@@ -44,5 +53,32 @@ public class UserController {
         userService.deleteCurrentUser();
 
         return ResponseEntity.noContent().build();
+    }
+
+    // Updates the currently authenticated user's profile image from a URL.
+    @PutMapping("/me/profile-image")
+    public ResponseEntity<UserResponse> updateCurrentUserProfileImage(
+            @RequestBody UpdateProfileImageRequest request) {
+
+        UserResponse response = userService.updateCurrentUserProfileImage(
+                request.getProfileImageUrl());
+
+        return ResponseEntity.ok(response);
+    }
+
+    /*
+     * Uploads a selected image file to Cloudinary.
+     * Cloudinary returns a permanent secure URL.
+     * That URL is then saved on the authenticated user.
+     */
+    @PostMapping(value = "/me/profile-image/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserResponse> uploadCurrentUserProfileImage(
+            @RequestParam("file") MultipartFile file) {
+
+        String profileImageUrl = profileImageService.uploadProfileImage(file);
+
+        UserResponse response = userService.updateCurrentUserProfileImage(profileImageUrl);
+
+        return ResponseEntity.ok(response);
     }
 }

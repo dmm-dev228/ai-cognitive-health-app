@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { isLoggedIn } from "../services/api";
 import CogniHavenLogo from "./CogniHavenLogo";
+import UserMenu from "./user/UserMenu";
+import SettingsDrawer from "./user/SettingsDrawer";
 
 /*
  * Navbar
@@ -18,6 +21,7 @@ function Navbar({
   handleLogout,
   handleDeleteAccount
 }) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const navLinkClass = ({ isActive }) =>
     `rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${isActive
       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
@@ -25,6 +29,7 @@ function Navbar({
         ? "text-slate-300 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
         : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-indigo-700 hover:shadow-sm"
     }`;
+
 
   return (
     <header
@@ -101,15 +106,6 @@ function Navbar({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setIsDarkMode((prev) => !prev)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 ${isDarkMode
-                  ? "bg-slate-800 text-yellow-200 hover:bg-slate-700"
-                  : "bg-white text-slate-700 hover:text-indigo-700"
-                  }`}
-              >
-                {isDarkMode ? "☀️ Light" : "🌙 Dark"}
-              </button>
 
               {!isLoggedIn() && (
                 <>
@@ -134,15 +130,15 @@ function Navbar({
 
               {isLoggedIn() && (
                 <>
-                  <button
-                    onClick={handleLogout}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isDarkMode
-                      ? "border-white/10 bg-white/10 text-slate-200 hover:bg-white/15"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700"
-                      }`}
-                  >
-                    Logout
-                  </button>
+                  <UserMenu onClick={() => setIsSettingsOpen(true)} />
+
+                  <SettingsDrawer
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    isDarkMode={isDarkMode}
+                    setIsDarkMode={setIsDarkMode}
+                    onLogout={handleLogout}
+                  />
 
                   <button
                     onClick={handleDeleteAccount}

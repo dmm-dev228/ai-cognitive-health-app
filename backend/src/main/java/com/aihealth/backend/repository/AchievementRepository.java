@@ -8,15 +8,15 @@ import java.util.Optional;
 
 public interface AchievementRepository extends JpaRepository<Achievement, Long> {
 
-    List<Achievement> findByUserIdOrderByUnlockedAtDesc(Long userId);
+        List<Achievement> findByUserId(Long userId);
 
-    Optional<Achievement> findByUserIdAndAchievementKey(
-            Long userId,
-            String achievementKey
-    );
+        List<Achievement> findByUserIdOrderByUnlockedAtDesc(Long userId);
 
-    boolean existsByUserIdAndAchievementKey(
-            Long userId,
-            String achievementKey
-    );
+        Optional<Achievement> findByUserIdAndAchievementKey(
+                        Long userId,
+                        String achievementKey);
+
+        boolean existsByUserIdAndAchievementKey(
+                        Long userId,
+                        String achievementKey);
 }

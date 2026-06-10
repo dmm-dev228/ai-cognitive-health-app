@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-
+import { uploadProfileImage } from "../../services/api";
 /*
  * SettingsDrawer
  * --------------
@@ -51,8 +51,8 @@ function SettingsDrawer({
           <button
             onClick={onClose}
             className={`rounded-full px-4 py-2 text-sm font-bold transition ${isDarkMode
-                ? "bg-white/10 text-slate-200 hover:bg-white/15"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-white/10 text-slate-200 hover:bg-white/15"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
           >
             ✕
@@ -89,9 +89,7 @@ function SettingsDrawer({
             isOpen={openSection === "account"}
             onClick={() => toggleSection("account")}
           >
-            <div className="rounded-2xl bg-white/10 p-4 text-sm">
-              Profile image and username settings will go here.
-            </div>
+            <AccountProfileSection isDarkMode={isDarkMode} />
           </ExpandableSection>
 
           <ExpandableSection
@@ -175,8 +173,8 @@ function ExpandableSection({
   return (
     <div
       className={`rounded-3xl border transition ${isDarkMode
-          ? "border-white/10 bg-white/10"
-          : "border-slate-100 bg-slate-50"
+        ? "border-white/10 bg-white/10"
+        : "border-slate-100 bg-slate-50"
         }`}
     >
       <button
@@ -289,8 +287,8 @@ function SettingsRow({ icon, title, text, isDarkMode }) {
   return (
     <div
       className={`rounded-3xl border p-5 transition hover:-translate-y-0.5 ${isDarkMode
-          ? "border-white/10 bg-white/10 hover:bg-white/15"
-          : "border-slate-100 bg-slate-50 hover:bg-white"
+        ? "border-white/10 bg-white/10 hover:bg-white/15"
+        : "border-slate-100 bg-slate-50 hover:bg-white"
         }`}
     >
       <div className="flex gap-4">
@@ -313,6 +311,95 @@ function SettingsRow({ icon, title, text, isDarkMode }) {
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AccountProfileSection({ isDarkMode }) {
+  const username = sessionStorage.getItem("username") || "User";
+  const email = sessionStorage.getItem("email") || "Signed in";
+
+  const [profileImageUrl, setProfileImageUrl] = useState(
+    sessionStorage.getItem("profileImageUrl") || ""
+  );
+  const [isUploading, setIsUploading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setMessage("Please choose an image file.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setMessage("");
+
+      const updatedUser = await uploadProfileImage(file);
+
+      if (updatedUser.profileImageUrl) {
+        sessionStorage.setItem("profileImageUrl", updatedUser.profileImageUrl);
+        setProfileImageUrl(updatedUser.profileImageUrl);
+
+        // Refreshes the navbar avatar immediately.
+        window.dispatchEvent(new Event("profileImageUpdated"));
+      }
+
+      setMessage("Profile image updated.");
+    } catch (err) {
+      console.error("Profile image upload failed:", err);
+      setMessage("Could not upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl bg-white/10 p-4 text-sm">
+      <div className="flex items-center gap-4">
+        {profileImageUrl ? (
+          <img
+            src={profileImageUrl}
+            alt={`${username} profile`}
+            className="h-16 w-16 rounded-full object-cover shadow-lg"
+          />
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-2xl font-black text-white">
+            {username.charAt(0).toUpperCase()}
+          </div>
+        )}
+
+        <div className="min-w-0">
+          <p className="font-bold">{username}</p>
+          <p className="truncate text-xs opacity-70">{email}</p>
+        </div>
+      </div>
+
+      <label
+        className={`mt-4 block cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-bold transition ${isDarkMode
+            ? "bg-white/10 text-white hover:bg-white/15"
+            : "bg-white text-indigo-700 hover:bg-indigo-50"
+          }`}
+      >
+        {isUploading ? "Uploading..." : "📷 Choose Profile Image"}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          disabled={isUploading}
+          className="hidden"
+        />
+      </label>
+
+      {message && (
+        <p className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold">
+          {message}
+        </p>
+      )}
     </div>
   );
 }

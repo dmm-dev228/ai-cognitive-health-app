@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/users")
@@ -70,14 +71,13 @@ public class UserController {
      * Cloudinary returns a permanent secure URL.
      * That URL is then saved on the authenticated user.
      */
-    @PostMapping("/me/profile-image/upload")
+    @PostMapping(value = "/me/profile-image/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> uploadCurrentUserProfileImage(
             @RequestParam("file") MultipartFile file) {
 
         String profileImageUrl = profileImageService.uploadProfileImage(file);
 
-        UserResponse response =
-                userService.updateCurrentUserProfileImage(profileImageUrl);
+        UserResponse response = userService.updateCurrentUserProfileImage(profileImageUrl);
 
         return ResponseEntity.ok(response);
     }

@@ -118,6 +118,25 @@ export const updateProfileImage = async (profileImageUrl) => {
   return response.json();
 };
 
+// Upload current user's profile image
+export const uploadProfileImage = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${BASE_URL}/users/me/profile-image/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to upload profile image.");
+  }
+
+  return response.json();
+};
 // ===== JOURNAL =====
 export const createJournalEntry = async (data) => {
     const response = await fetch(`${BASE_URL}/journal`, {

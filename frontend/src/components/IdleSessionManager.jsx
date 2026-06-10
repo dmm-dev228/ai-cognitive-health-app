@@ -87,7 +87,6 @@ function IdleSessionManager() {
 
   useEffect(() => {
     if (!isLoggedIn()) return;
-      console.log("IdleSessionManager mounted. Logged in:", isLoggedIn());
 
     const activityEvents = [
       "mousemove",

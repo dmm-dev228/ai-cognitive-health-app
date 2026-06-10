@@ -28,13 +28,12 @@ public class ProfileImageService {
                     file.getBytes(),
                     ObjectUtils.asMap(
                             "folder", "cognihaven/profile-images",
-                            "resource_type", "image"
-                    )
-            );
+                            "resource_type", "image"));
 
             return uploadResult.get("secure_url").toString();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to upload profile image.", e);
+            e.printStackTrace();
+            throw new RuntimeException("Failed to upload profile image: " + e.getMessage(), e);
         }
     }
 }

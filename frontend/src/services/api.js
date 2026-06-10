@@ -103,6 +103,21 @@ export const deleteAccount = async () => {
   return response;
 };
 
+// Update current user's profile image URL
+export const updateProfileImage = async (profileImageUrl) => {
+  const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ profileImageUrl }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update profile image.");
+  }
+
+  return response.json();
+};
+
 // ===== JOURNAL =====
 export const createJournalEntry = async (data) => {
     const response = await fetch(`${BASE_URL}/journal`, {

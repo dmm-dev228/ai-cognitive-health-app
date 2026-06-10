@@ -3,6 +3,7 @@ package com.aihealth.backend.controller;
 import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.service.UserService;
+import com.aihealth.backend.dto.UpdateProfileImageRequest;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -44,5 +45,16 @@ public class UserController {
         userService.deleteCurrentUser();
 
         return ResponseEntity.noContent().build();
+    }
+
+    // Updates the currently authenticated user's profile image.
+    @PutMapping("/me/profile-image")
+    public ResponseEntity<UserResponse> updateCurrentUserProfileImage(
+            @RequestBody UpdateProfileImageRequest request) {
+
+        UserResponse response = userService.updateCurrentUserProfileImage(
+                request.getProfileImageUrl());
+
+        return ResponseEntity.ok(response);
     }
 }

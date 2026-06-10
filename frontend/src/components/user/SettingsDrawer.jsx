@@ -1,11 +1,11 @@
+import { useState } from "react";
 import { createPortal } from "react-dom";
 
 /*
  * SettingsDrawer
  * --------------
  * Slide-out user settings panel.
- * Uses a portal so the drawer covers the full screen instead of being trapped
- * inside the navbar layout.
+ * Uses expandable rows so settings stay clean until the user opens them.
  */
 function SettingsDrawer({
   isOpen,
@@ -16,51 +16,51 @@ function SettingsDrawer({
 }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
-
-  // For now this stays null. Later Phase 6 will load a real profile image.
   const profileImageUrl = sessionStorage.getItem("profileImageUrl");
 
+  const [openSection, setOpenSection] = useState("");
+
   const initial = username.charAt(0).toUpperCase();
+
+  const toggleSection = (sectionName) => {
+    setOpenSection((prev) => (prev === sectionName ? "" : sectionName));
+  };
 
   if (!isOpen) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[9999]">
-      {/* Backdrop closes the drawer when the user clicks outside it. */}
       <button
         onClick={onClose}
         className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
         aria-label="Close settings"
       />
 
-      {/* Settings drawer panel */}
       <aside
-        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl transition ${isDarkMode
-            ? "bg-slate-950 text-white"
-            : "bg-white text-slate-900"
-          }`}
+        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${
+          isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+        }`}
       >
         <div className="mb-8 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-500">
               Settings
             </p>
-
             <h2 className="mt-2 text-3xl font-black">Account Center</h2>
           </div>
 
           <button
             onClick={onClose}
-            className={`rounded-full px-4 py-2 text-sm font-bold transition ${isDarkMode
+            className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+              isDarkMode
                 ? "bg-white/10 text-slate-200 hover:bg-white/15"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+            }`}
           >
             ✕
           </button>
         </div>
 
-        {/* User profile header */}
         <div className="rounded-[2rem] bg-gradient-to-br from-indigo-600 to-emerald-500 p-5 text-white shadow-lg">
           <div className="flex items-center gap-4">
             {profileImageUrl ? (
@@ -80,11 +80,6 @@ function SettingsDrawer({
               <p className="truncate text-sm text-white/75">{email}</p>
             </div>
           </div>
-
-          <p className="mt-4 text-xs leading-5 text-white/75">
-            Profile image upload will be added later. Until then, CogniHaven
-            uses your first initial as the default avatar.
-          </p>
         </div>
 
         <div className="mt-6 space-y-4">
@@ -95,10 +90,19 @@ function SettingsDrawer({
             text="Profile details and personal information."
           />
 
-          <AppearanceToggle
+          <ExpandableSection
             isDarkMode={isDarkMode}
-            setIsDarkMode={setIsDarkMode}
-          />
+            icon="🎨"
+            title="Appearance"
+            text="Dark mode and visual preferences."
+            isOpen={openSection === "appearance"}
+            onClick={() => toggleSection("appearance")}
+          >
+            <AppearanceToggle
+              isDarkMode={isDarkMode}
+              setIsDarkMode={setIsDarkMode}
+            />
+          </ExpandableSection>
 
           <SettingsRow
             isDarkMode={isDarkMode}
@@ -107,12 +111,16 @@ function SettingsDrawer({
             text="Update email and account security options."
           />
 
-          <SettingsRow
+          <ExpandableSection
             isDarkMode={isDarkMode}
             icon="⏱"
             title="Session Timeout"
             text="Choose how long before inactivity logs you out."
-          />
+            isOpen={openSection === "session"}
+            onClick={() => toggleSection("session")}
+          >
+            <SessionTimeoutOptions isDarkMode={isDarkMode} />
+          </ExpandableSection>
 
           <SettingsRow
             isDarkMode={isDarkMode}
@@ -122,10 +130,10 @@ function SettingsDrawer({
           />
         </div>
 
-        {/* Drawer footer */}
         <div
-          className={`mt-8 border-t pt-5 ${isDarkMode ? "border-white/10" : "border-slate-200"
-            }`}
+          className={`mt-8 border-t pt-5 ${
+            isDarkMode ? "border-white/10" : "border-slate-200"
+          }`}
         >
           <button
             onClick={onLogout}
@@ -140,68 +148,131 @@ function SettingsDrawer({
   );
 }
 
-/*
- * AppearanceToggle
- * ----------------
- * Lets users switch between light and dark mode from the settings drawer.
- */
-function AppearanceToggle({ isDarkMode, setIsDarkMode }) {
+function ExpandableSection({
+  icon,
+  title,
+  text,
+  isDarkMode,
+  isOpen,
+  onClick,
+  children,
+}) {
   return (
     <div
-      className={`rounded-3xl border p-5 transition ${isDarkMode
+      className={`rounded-3xl border transition ${
+        isDarkMode
           ? "border-white/10 bg-white/10"
           : "border-slate-100 bg-slate-50"
-        }`}
+      }`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex gap-4">
-          <div
-            className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
-              }`}
+      <button
+        onClick={onClick}
+        className="flex w-full items-center gap-4 p-5 text-left"
+      >
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${
+            isDarkMode ? "bg-white/10" : "bg-white"
+          }`}
+        >
+          {icon}
+        </div>
+
+        <div className="flex-1">
+          <p className={`font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
+            {title}
+          </p>
+          <p
+            className={`mt-1 text-sm leading-6 ${
+              isDarkMode ? "text-slate-300" : "text-slate-500"
+            }`}
           >
-            🎨
-          </div>
+            {text}
+          </p>
+        </div>
 
-          <div>
-            <p
-              className={`font-bold ${isDarkMode ? "text-white" : "text-slate-900"
-                }`}
-            >
-              Appearance
-            </p>
+        <span
+          className={`text-xl transition-transform ${
+            isOpen ? "rotate-180" : "rotate-0"
+          }`}
+        >
+         ⌄
+        </span>
+      </button>
 
-            <p
-              className={`mt-1 text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-slate-500"
-                }`}
-            >
-              Switch between light and dark mode.
-            </p>
-          </div>
+      {isOpen && <div className="px-5 pb-5">{children}</div>}
+    </div>
+  );
+}
+
+function AppearanceToggle({ isDarkMode, setIsDarkMode }) {
+  return (
+    <div className="rounded-2xl bg-white/10 p-4">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-bold">Theme</p>
+          <p className="mt-1 text-xs opacity-70">
+            Current: {isDarkMode ? "Dark Mode" : "Light Mode"}
+          </p>
         </div>
 
         <button
           onClick={() => setIsDarkMode((prev) => !prev)}
-          className={`relative h-8 w-16 rounded-full p-1 transition ${isDarkMode ? "bg-indigo-500" : "bg-slate-300"
-            }`}
+          className={`relative h-8 w-16 rounded-full p-1 transition ${
+            isDarkMode ? "bg-indigo-500" : "bg-slate-300"
+          }`}
           aria-label="Toggle dark mode"
         >
           <span
-            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${isDarkMode ? "translate-x-8" : "translate-x-0"
-              }`}
+            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${
+              isDarkMode ? "translate-x-8" : "translate-x-0"
+            }`}
           >
             {isDarkMode ? "🌙" : "☀️"}
           </span>
         </button>
       </div>
+    </div>
+  );
+}
 
-      <div
-        className={`mt-4 rounded-2xl px-4 py-3 text-sm font-semibold ${isDarkMode
-            ? "bg-white/10 text-slate-200"
-            : "bg-white text-slate-600"
+function SessionTimeoutOptions({ isDarkMode }) {
+  const [selectedTimeout, setSelectedTimeout] = useState(
+    sessionStorage.getItem("sessionTimeoutMinutes") || "15"
+  );
+
+  const timeoutOptions = [
+    { label: "1 Minute", value: "1" },
+    { label: "5 Minutes", value: "5" },
+    { label: "15 Minutes", value: "15" },
+    { label: "30 Minutes", value: "30" },
+    { label: "1 Hour", value: "60" },
+    { label: "Never", value: "never" },
+  ];
+
+  const handleChange = (value) => {
+    setSelectedTimeout(value);
+    sessionStorage.setItem("sessionTimeoutMinutes", value);
+  };
+
+  return (
+    <div className="space-y-2 rounded-2xl bg-white/10 p-4">
+      {timeoutOptions.map((option) => (
+        <label
+          key={option.value}
+          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${
+            isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
           }`}
-      >
-        Current theme: {isDarkMode ? "Dark Mode" : "Light Mode"}
-      </div>
+        >
+          <span>{option.label}</span>
+
+          <input
+            type="radio"
+            name="session-timeout"
+            checked={selectedTimeout === option.value}
+            onChange={() => handleChange(option.value)}
+          />
+        </label>
+      ))}
     </div>
   );
 }
@@ -209,30 +280,29 @@ function AppearanceToggle({ isDarkMode, setIsDarkMode }) {
 function SettingsRow({ icon, title, text, isDarkMode }) {
   return (
     <div
-      className={`rounded-3xl border p-5 transition hover:-translate-y-0.5 ${isDarkMode
+      className={`rounded-3xl border p-5 transition hover:-translate-y-0.5 ${
+        isDarkMode
           ? "border-white/10 bg-white/10 hover:bg-white/15"
           : "border-slate-100 bg-slate-50 hover:bg-white"
-        }`}
+      }`}
     >
       <div className="flex gap-4">
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
-            }`}
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${
+            isDarkMode ? "bg-white/10" : "bg-white"
+          }`}
         >
           {icon}
         </div>
 
         <div>
-          <p
-            className={`font-bold ${isDarkMode ? "text-white" : "text-slate-900"
-              }`}
-          >
+          <p className={`font-bold ${isDarkMode ? "text-white" : "text-slate-900"}`}>
             {title}
           </p>
-
           <p
-            className={`mt-1 text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-slate-500"
-              }`}
+            className={`mt-1 text-sm leading-6 ${
+              isDarkMode ? "text-slate-300" : "text-slate-500"
+            }`}
           >
             {text}
           </p>

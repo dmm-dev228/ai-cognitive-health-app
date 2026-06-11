@@ -72,9 +72,9 @@ function SettingsDrawer({
               </div>
             )}
 
-            <div className="min-w-0">
-              <p className="truncate text-xl font-black">{username}</p>
-              <p className="truncate text-sm text-white/75">{email}</p>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <p className="truncate font-bold">{username}</p>
+              <p className="truncate text-xs opacity-70">{email}</p>
             </div>
           </div>
         </div>
@@ -320,7 +320,12 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
       setMessage("Username updated successfully.");
     } catch (err) {
       console.error(err);
-      setMessage("Could not update username.");
+
+      if (err.message) {
+        setMessage(err.message);
+      } else {
+        setMessage("Could not update username.");
+      }
     }
   };
 

@@ -108,13 +108,18 @@ public class UserService {
         return mapToResponse(user);
     }
 
+    /*
+     * Converts User entity into API response DTO.
+     */
     private UserResponse mapToResponse(User user) {
+
         return new UserResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getRole(),
                 user.getProfileImageUrl(),
+                user.getJournalReminderEnabled(),
                 user.getCreatedAt());
     }
 
@@ -441,4 +446,17 @@ public class UserService {
 
         return mapToResponse(savedUser);
     }
+
+    /*
+ * Updates whether the current user receives daily journal reminders.
+ */
+public UserResponse updateJournalReminderPreference(Boolean enabled) {
+    User user = getCurrentAuthenticatedUser();
+
+    user.setJournalReminderEnabled(Boolean.TRUE.equals(enabled));
+
+    User savedUser = userRepository.save(user);
+
+    return mapToResponse(savedUser);
+}
 }

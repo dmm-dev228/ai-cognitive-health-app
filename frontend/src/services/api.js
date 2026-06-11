@@ -451,6 +451,22 @@ export const getNotifications = async () => {
     return response.json();
 };
 
+// Updates current user's daily journal reminder preference.
+export const updateJournalReminderPreference = async (journalReminderEnabled) => {
+  const response = await fetch(`${BASE_URL}/users/me/journal-reminder`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ journalReminderEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update journal reminder.");
+  }
+
+  return response.json();
+};
+
 // ===== Game Results =====
 
 /*

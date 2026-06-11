@@ -72,6 +72,10 @@ public class NotificationService {
     private void addJournalReminder(
             User user,
             List<NotificationResponse> notifications) {
+        // Respect the user's journal reminder preference.
+        if (!Boolean.TRUE.equals(user.getJournalReminderEnabled())) {
+            return;
+        }
 
         LocalDate today = LocalDate.now();
 

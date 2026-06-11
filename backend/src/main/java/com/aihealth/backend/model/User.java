@@ -69,6 +69,10 @@ public class User {
     @Column(name = "email_change_token_expires_at")
     private LocalDateTime emailChangeTokenExpiresAt;
 
+    // Controls whether the user receives daily journal reminder notifications.
+    @Column(name = "journal_reminder_enabled")
+    private Boolean journalReminderEnabled = true;
+
     public User() {
     }
 
@@ -178,5 +182,13 @@ public class User {
 
     public void setEmailChangeTokenExpiresAt(LocalDateTime emailChangeTokenExpiresAt) {
         this.emailChangeTokenExpiresAt = emailChangeTokenExpiresAt;
+    }
+
+    public Boolean getJournalReminderEnabled() {
+        return journalReminderEnabled;
+    }
+
+    public void setJournalReminderEnabled(Boolean journalReminderEnabled) {
+        this.journalReminderEnabled = journalReminderEnabled;
     }
 }

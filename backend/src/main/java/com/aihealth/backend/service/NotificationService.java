@@ -178,7 +178,9 @@ public class NotificationService {
      * This reuses the existing in-app notification system.
      */
     private void addGoalReminders(User user, List<NotificationResponse> notifications) {
-
+        if (!Boolean.TRUE.equals(user.getGoalReminderEnabled())) {
+            return;
+        }
         List<Goal> goals = goalRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
 
         for (Goal goal : goals) {

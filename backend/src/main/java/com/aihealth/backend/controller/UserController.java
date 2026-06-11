@@ -8,6 +8,7 @@ import com.aihealth.backend.service.UserService;
 import com.aihealth.backend.dto.UpdateUsernameRequest;
 import com.aihealth.backend.dto.ChangePasswordRequest;
 import com.aihealth.backend.dto.EmailChangeRequest;
+import com.aihealth.backend.dto.UpdateGoalReminderRequest;
 import com.aihealth.backend.dto.UpdateJournalReminderRequest;
 
 import jakarta.validation.Valid;
@@ -136,14 +137,22 @@ public class UserController {
     }
 
     @PutMapping("/me/journal-reminder")
-public ResponseEntity<UserResponse> updateJournalReminderPreference(
-        @RequestBody UpdateJournalReminderRequest request) {
+    public ResponseEntity<UserResponse> updateJournalReminderPreference(
+            @RequestBody UpdateJournalReminderRequest request) {
 
-    UserResponse response =
-            userService.updateJournalReminderPreference(
-                    request.getJournalReminderEnabled());
+        UserResponse response = userService.updateJournalReminderPreference(
+                request.getJournalReminderEnabled());
 
-    return ResponseEntity.ok(response);
-}
+        return ResponseEntity.ok(response);
+    }
 
+    @PutMapping("/me/goal-reminder")
+    public ResponseEntity<UserResponse> updateGoalReminderPreference(
+            @RequestBody UpdateGoalReminderRequest request) {
+
+        UserResponse response = userService.updateGoalReminderPreference(
+                request.getGoalReminderEnabled());
+
+        return ResponseEntity.ok(response);
+    }
 }

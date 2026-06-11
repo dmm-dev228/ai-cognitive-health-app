@@ -448,13 +448,22 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
-    /*
-     * Updates whether the current user receives daily journal reminders.
-     */
+    // Updates whether the current user receives daily journal reminders.
     public UserResponse updateJournalReminderPreference(Boolean enabled) {
         User user = getCurrentAuthenticatedUser();
 
         user.setJournalReminderEnabled(Boolean.TRUE.equals(enabled));
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    // Updates whether the current user receives goal reminder notifications.
+    public UserResponse updateGoalReminderPreference(Boolean enabled) {
+        User user = getCurrentAuthenticatedUser();
+
+        user.setGoalReminderEnabled(Boolean.TRUE.equals(enabled));
 
         User savedUser = userRepository.save(user);
 

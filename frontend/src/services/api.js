@@ -467,6 +467,21 @@ export const updateJournalReminderPreference = async (journalReminderEnabled) =>
   return response.json();
 };
 
+// Updates current user's goal reminder preference.
+export const updateGoalReminderPreference = async (goalReminderEnabled) => {
+  const response = await fetch(`${BASE_URL}/users/me/goal-reminder`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ goalReminderEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update goal reminder.");
+  }
+
+  return response.json();
+};
 // ===== Game Results =====
 
 /*

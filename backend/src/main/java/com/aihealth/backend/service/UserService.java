@@ -120,6 +120,7 @@ public class UserService {
                 user.getRole(),
                 user.getProfileImageUrl(),
                 user.getJournalReminderEnabled(),
+                user.getGoalReminderEnabled(),
                 user.getCreatedAt());
     }
 
@@ -448,15 +449,15 @@ public class UserService {
     }
 
     /*
- * Updates whether the current user receives daily journal reminders.
- */
-public UserResponse updateJournalReminderPreference(Boolean enabled) {
-    User user = getCurrentAuthenticatedUser();
+     * Updates whether the current user receives daily journal reminders.
+     */
+    public UserResponse updateJournalReminderPreference(Boolean enabled) {
+        User user = getCurrentAuthenticatedUser();
 
-    user.setJournalReminderEnabled(Boolean.TRUE.equals(enabled));
+        user.setJournalReminderEnabled(Boolean.TRUE.equals(enabled));
 
-    User savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-    return mapToResponse(savedUser);
-}
+        return mapToResponse(savedUser);
+    }
 }

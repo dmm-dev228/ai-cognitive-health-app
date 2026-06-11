@@ -73,6 +73,10 @@ public class User {
     @Column(name = "journal_reminder_enabled")
     private Boolean journalReminderEnabled = true;
 
+    // Controls whether the user receives goal reminder notifications.
+    @Column(name = "goal_reminder_enabled")
+    private Boolean goalReminderEnabled = true;
+
     public User() {
     }
 
@@ -190,5 +194,13 @@ public class User {
 
     public void setJournalReminderEnabled(Boolean journalReminderEnabled) {
         this.journalReminderEnabled = journalReminderEnabled;
+    }
+
+    public Boolean getGoalReminderEnabled() {
+        return goalReminderEnabled;
+    }
+
+    public void setGoalReminderEnabled(Boolean goalReminderEnabled) {
+        this.goalReminderEnabled = goalReminderEnabled;
     }
 }

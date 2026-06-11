@@ -9,7 +9,10 @@ public class UserResponse {
     private String email;
     private String role;
     private String profileImageUrl;
+
     private Boolean journalReminderEnabled;
+    private Boolean goalReminderEnabled;
+
     private LocalDateTime createdAt;
 
     public UserResponse(
@@ -19,6 +22,7 @@ public class UserResponse {
             String role,
             String profileImageUrl,
             Boolean journalReminderEnabled,
+            Boolean goalReminderEnabled,
             LocalDateTime createdAt) {
 
         this.id = id;
@@ -27,6 +31,7 @@ public class UserResponse {
         this.role = role;
         this.profileImageUrl = profileImageUrl;
         this.journalReminderEnabled = journalReminderEnabled;
+        this.goalReminderEnabled = goalReminderEnabled;
         this.createdAt = createdAt;
     }
 
@@ -52,6 +57,10 @@ public class UserResponse {
 
     public Boolean getJournalReminderEnabled() {
         return journalReminderEnabled;
+    }
+
+    public Boolean getGoalReminderEnabled() {
+        return goalReminderEnabled;
     }
 
     public LocalDateTime getCreatedAt() {

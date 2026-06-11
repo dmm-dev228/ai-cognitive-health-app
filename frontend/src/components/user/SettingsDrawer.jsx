@@ -549,6 +549,191 @@ function SessionTimeoutOptions({ isDarkMode }) {
     </div>
   );
 }
+
+
+function NotificationsSection({ isDarkMode }) {
+  const [openNotificationPanel, setOpenNotificationPanel] = useState("");
+
+  const [journalReminderEnabled, setJournalReminderEnabled] = useState(
+    sessionStorage.getItem("journalReminderEnabled") !== "false"
+  );
+
+  const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleJournalReminderToggle = async () => {
+    try {
+      setIsSaving(true);
+      setMessage("");
+
+      const nextValue = !journalReminderEnabled;
+
+      const updatedUser = await updateJournalReminderPreference(nextValue);
+
+      const savedValue = Boolean(updatedUser.journalReminderEnabled);
+
+      setJournalReminderEnabled(savedValue);
+
+      sessionStorage.setItem(
+        "journalReminderEnabled",
+        String(savedValue)
+      );
+
+      setMessage(
+        savedValue
+          ? "Journal reminders turned on."
+          : "Journal reminders turned off."
+      );
+    } catch (err) {
+      console.error("Journal reminder update failed:", err);
+      setMessage(err.message || "Could not update journal reminders.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <NotificationPanel
+        title="Journal Reminders"
+        description="Get one gentle reminder per day if you have not journaled."
+        isOpen={openNotificationPanel === "journal"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "journal" ? "" : "journal"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-bold">
+              {journalReminderEnabled ? "Enabled" : "Disabled"}
+            </p>
+
+            <p className="mt-1 text-xs opacity-70">
+              {journalReminderEnabled
+                ? "CogniHaven may remind you once per day."
+                : "CogniHaven will not show daily journal reminders."}
+            </p>
+          </div>
+
+          <button
+            onClick={handleJournalReminderToggle}
+            disabled={isSaving}
+            className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${
+              journalReminderEnabled
+                ? "bg-indigo-500"
+                : "bg-slate-300"
+            } disabled:opacity-60`}
+          >
+            <span
+              className={`block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
+                journalReminderEnabled
+                  ? "translate-x-8"
+                  : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+      </NotificationPanel>
+
+      <NotificationPanel
+        title="Medication Reminders"
+        description="Manage reminder channels for medication routines."
+        isOpen={openNotificationPanel === "medication"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "medication" ? "" : "medication"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <p className="rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold opacity-80">
+          Medication notification controls coming soon.
+        </p>
+      </NotificationPanel>
+
+      <NotificationPanel
+        title="Goal Reminders"
+        description="Stay encouraged with progress reminders."
+        isOpen={openNotificationPanel === "goal"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "goal" ? "" : "goal"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <p className="rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold opacity-80">
+          Goal notification controls coming soon.
+        </p>
+      </NotificationPanel>
+
+      <NotificationPanel
+        title="Community Updates"
+        description="Control future community activity notifications."
+        isOpen={openNotificationPanel === "community"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "community" ? "" : "community"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <p className="rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold opacity-80">
+          Community notification controls coming soon.
+        </p>
+      </NotificationPanel>
+
+      {message && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+          {message}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NotificationPanel({
+  title,
+  description,
+  isOpen,
+  onClick,
+  isDarkMode,
+  children,
+}) {
+  return (
+    <div
+      className={`rounded-3xl border ${
+        isDarkMode
+          ? "border-white/10 bg-white/10"
+          : "border-slate-100 bg-white"
+      }`}
+    >
+      <button
+        onClick={onClick}
+        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+      >
+        <div>
+          <p className="text-sm font-bold">{title}</p>
+          <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
+        </div>
+
+        <span
+          className={`text-xl transition-transform ${
+            isOpen ? "rotate-180" : "rotate-0"
+          }`}
+        >
+          ⌄
+        </span>
+      </button>
+
+      {isOpen && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+}
+
 function SecurityPanel({ title, description, isOpen, onClick, isDarkMode, children }) {
   return (
     <div
@@ -578,105 +763,6 @@ function SecurityPanel({ title, description, isOpen, onClick, isDarkMode, childr
     </div>
   );
 }
-
-function NotificationsSection({ isDarkMode }) {
-  const [journalReminderEnabled, setJournalReminderEnabled] = useState(
-    sessionStorage.getItem("journalReminderEnabled") !== "false"
-  );
-  const [message, setMessage] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleJournalReminderToggle = async () => {
-    try {
-      setIsSaving(true);
-      setMessage("");
-
-      const nextValue = !journalReminderEnabled;
-
-      const updatedUser = await updateJournalReminderPreference(nextValue);
-
-      const savedValue = Boolean(updatedUser.journalReminderEnabled);
-      const [openNotificationPanel, setOpenNotificationPanel] = useState("");
-
-      setJournalReminderEnabled(savedValue);
-      sessionStorage.setItem("journalReminderEnabled", String(savedValue));
-
-      setMessage(
-        savedValue
-          ? "Journal reminders turned on."
-          : "Journal reminders turned off."
-      );
-    } catch (err) {
-      console.error("Journal reminder update failed:", err);
-      setMessage(err.message || "Could not update journal reminders.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <NotificationPanel
-        title="Journal Reminders"
-        description="Get one gentle reminder per day if you have not journaled."
-        isDarkMode={isDarkMode}
-      >
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
-          <div>
-            <p className="text-sm font-bold">
-              {journalReminderEnabled ? "Enabled" : "Disabled"}
-            </p>
-            <p className="mt-1 text-xs opacity-70">
-              {journalReminderEnabled
-                ? "CogniHaven may remind you once per day."
-                : "CogniHaven will not show daily journal reminders."}
-            </p>
-          </div>
-
-          <button
-            onClick={handleJournalReminderToggle}
-            disabled={isSaving}
-            className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${
-              journalReminderEnabled ? "bg-indigo-500" : "bg-slate-300"
-            } disabled:opacity-60`}
-          >
-            <span
-              className={`block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${
-                journalReminderEnabled ? "translate-x-8" : "translate-x-0"
-              }`}
-            />
-          </button>
-        </div>
-      </NotificationPanel>
-
-      <NotificationPanel
-        title="Medication Reminders"
-        description="Manage reminder channels for medication routines."
-        isDarkMode={isDarkMode}
-      />
-
-      <NotificationPanel
-        title="Goal Reminders"
-        description="Stay encouraged with progress reminders."
-        isDarkMode={isDarkMode}
-      />
-
-      <NotificationPanel
-        title="Community Updates"
-        description="Control future community activity notifications."
-        isDarkMode={isDarkMode}
-      />
-
-      {message && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
-          {message}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const [openNotificationPanel, setOpenNotificationPanel] = useState("");
 
 function SecuritySection({ isDarkMode }) {
   const [currentPassword, setCurrentPassword] = useState("");

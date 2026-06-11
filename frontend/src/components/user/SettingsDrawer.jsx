@@ -226,12 +226,17 @@ function AccountProfileSection({ isDarkMode }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
   const [newUsername, setNewUsername] = useState(username);
+  
 
   const [profileImageUrl, setProfileImageUrl] = useState(
     sessionStorage.getItem("profileImageUrl") || ""
   );
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const isSuccessMessage =
+  message.toLowerCase().includes("success") ||
+  message.toLowerCase().includes("updated") ||
+  message.toLowerCase().includes("removed");
 
   const handleImageChange = async (event) => {
     const file = event.target.files?.[0];
@@ -397,12 +402,18 @@ function AccountProfileSection({ isDarkMode }) {
           Save Username
         </button>
       </div>
-
       {message && (
-        <p className="rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold">
-          {message}
-        </p>
-      )}
+  <div
+    className={`rounded-2xl px-4 py-3 text-xs font-semibold ${
+      isSuccessMessage
+        ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+        : "border border-red-200 bg-red-50 text-red-600"
+    }`}
+  >
+    {message}
+  </div>
+)}
+
     </div>
   );
 }

@@ -12,6 +12,7 @@ function SettingsDrawer({
   isDarkMode,
   setIsDarkMode,
   onLogout,
+  onDeleteAccount,
 }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
@@ -35,9 +36,8 @@ function SettingsDrawer({
       />
 
       <aside
-        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${
-          isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
-        }`}
+        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+          }`}
       >
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -49,11 +49,10 @@ function SettingsDrawer({
 
           <button
             onClick={onClose}
-            className={`rounded-full px-4 py-2 text-sm font-bold transition ${
-              isDarkMode
-                ? "bg-white/10 text-slate-200 hover:bg-white/15"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
+            className={`rounded-full px-4 py-2 text-sm font-bold transition ${isDarkMode
+              ? "bg-white/10 text-slate-200 hover:bg-white/15"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
           >
             ✕
           </button>
@@ -89,7 +88,31 @@ function SettingsDrawer({
             isOpen={openSection === "account"}
             onClick={() => toggleSection("account")}
           >
-            <AccountProfileSection isDarkMode={isDarkMode} />
+            <AccountProfileSection
+              isDarkMode={isDarkMode}
+              onDeleteAccount={onDeleteAccount}
+            />
+            <div
+              className={`rounded-3xl border p-4 ${isDarkMode
+                  ? "border-red-400/20 bg-red-500/10"
+                  : "border-red-100 bg-red-50"
+                }`}
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">
+                Delete Account
+              </p>
+
+              <p className="mt-2 text-xs leading-5 text-red-500/80">
+                Permanently delete your CogniHaven account and all connected data.
+              </p>
+
+              <button
+                onClick={onDeleteAccount}
+                className="mt-4 w-full rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-700"
+              >
+                Delete Account
+              </button>
+            </div>
           </ExpandableSection>
 
           <ExpandableSection
@@ -104,6 +127,7 @@ function SettingsDrawer({
               isDarkMode={isDarkMode}
               setIsDarkMode={setIsDarkMode}
             />
+
           </ExpandableSection>
 
           <ExpandableSection
@@ -145,9 +169,8 @@ function SettingsDrawer({
         </div>
 
         <div
-          className={`mt-8 border-t pt-5 ${
-            isDarkMode ? "border-white/10" : "border-slate-200"
-          }`}
+          className={`mt-8 border-t pt-5 ${isDarkMode ? "border-white/10" : "border-slate-200"
+            }`}
         >
           <button
             onClick={onLogout}
@@ -173,45 +196,40 @@ function ExpandableSection({
 }) {
   return (
     <div
-      className={`rounded-3xl border transition ${
-        isDarkMode
-          ? "border-white/10 bg-white/10"
-          : "border-slate-100 bg-slate-50"
-      }`}
+      className={`rounded-3xl border transition ${isDarkMode
+        ? "border-white/10 bg-white/10"
+        : "border-slate-100 bg-slate-50"
+        }`}
     >
       <button
         onClick={onClick}
         className="flex w-full items-center gap-4 p-5 text-left"
       >
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${
-            isDarkMode ? "bg-white/10" : "bg-white"
-          }`}
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
+            }`}
         >
           {icon}
         </div>
 
         <div className="flex-1">
           <p
-            className={`font-bold ${
-              isDarkMode ? "text-white" : "text-slate-900"
-            }`}
+            className={`font-bold ${isDarkMode ? "text-white" : "text-slate-900"
+              }`}
           >
             {title}
           </p>
           <p
-            className={`mt-1 text-sm leading-6 ${
-              isDarkMode ? "text-slate-300" : "text-slate-500"
-            }`}
+            className={`mt-1 text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-slate-500"
+              }`}
           >
             {text}
           </p>
         </div>
 
         <span
-          className={`text-xl transition-transform ${
-            isOpen ? "rotate-180" : "rotate-0"
-          }`}
+          className={`text-xl transition-transform ${isOpen ? "rotate-180" : "rotate-0"
+            }`}
         >
           ⌄
         </span>
@@ -222,11 +240,11 @@ function ExpandableSection({
   );
 }
 
-function AccountProfileSection({ isDarkMode }) {
+function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
   const [newUsername, setNewUsername] = useState(username);
-  
+
 
   const [profileImageUrl, setProfileImageUrl] = useState(
     sessionStorage.getItem("profileImageUrl") || ""
@@ -234,9 +252,9 @@ function AccountProfileSection({ isDarkMode }) {
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
   const isSuccessMessage =
-  message.toLowerCase().includes("success") ||
-  message.toLowerCase().includes("updated") ||
-  message.toLowerCase().includes("removed");
+    message.toLowerCase().includes("success") ||
+    message.toLowerCase().includes("updated") ||
+    message.toLowerCase().includes("removed");
 
   const handleImageChange = async (event) => {
     const file = event.target.files?.[0];
@@ -310,11 +328,10 @@ function AccountProfileSection({ isDarkMode }) {
     <div className="space-y-4">
       {/* Profile image settings */}
       <div
-        className={`rounded-3xl border p-4 ${
-          isDarkMode
-            ? "border-white/10 bg-white/10"
-            : "border-slate-100 bg-white"
-        }`}
+        className={`rounded-3xl border p-4 ${isDarkMode
+          ? "border-white/10 bg-white/10"
+          : "border-slate-100 bg-white"
+          }`}
       >
         <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-60">
           Profile Image
@@ -340,11 +357,10 @@ function AccountProfileSection({ isDarkMode }) {
         </div>
 
         <label
-          className={`mt-4 block cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-bold transition ${
-            isDarkMode
-              ? "bg-white/10 text-white hover:bg-white/15"
-              : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
-          }`}
+          className={`mt-4 block cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-bold transition ${isDarkMode
+            ? "bg-white/10 text-white hover:bg-white/15"
+            : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+            }`}
         >
           {isUploading ? "Uploading..." : "📷 Choose Profile Image"}
           <input
@@ -369,11 +385,10 @@ function AccountProfileSection({ isDarkMode }) {
 
       {/* Username settings */}
       <div
-        className={`rounded-3xl border p-4 ${
-          isDarkMode
-            ? "border-white/10 bg-white/10"
-            : "border-slate-100 bg-white"
-        }`}
+        className={`rounded-3xl border p-4 ${isDarkMode
+          ? "border-white/10 bg-white/10"
+          : "border-slate-100 bg-white"
+          }`}
       >
         <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-60">
           Username
@@ -387,11 +402,10 @@ function AccountProfileSection({ isDarkMode }) {
           type="text"
           value={newUsername}
           onChange={(e) => setNewUsername(e.target.value)}
-          className={`mt-4 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
-            isDarkMode
-              ? "border-white/10 bg-white/10 text-white"
-              : "border-slate-200 bg-slate-50 text-slate-900"
-          }`}
+          className={`mt-4 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+            ? "border-white/10 bg-white/10 text-white"
+            : "border-slate-200 bg-slate-50 text-slate-900"
+            }`}
           placeholder="Enter username"
         />
 
@@ -403,16 +417,15 @@ function AccountProfileSection({ isDarkMode }) {
         </button>
       </div>
       {message && (
-  <div
-    className={`rounded-2xl px-4 py-3 text-xs font-semibold ${
-      isSuccessMessage
-        ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-        : "border border-red-200 bg-red-50 text-red-600"
-    }`}
-  >
-    {message}
-  </div>
-)}
+        <div
+          className={`rounded-2xl px-4 py-3 text-xs font-semibold ${isSuccessMessage
+            ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+            : "border border-red-200 bg-red-50 text-red-600"
+            }`}
+        >
+          {message}
+        </div>
+      )}
 
     </div>
   );
@@ -431,15 +444,13 @@ function AppearanceToggle({ isDarkMode, setIsDarkMode }) {
 
         <button
           onClick={() => setIsDarkMode((prev) => !prev)}
-          className={`relative h-8 w-16 rounded-full p-1 transition ${
-            isDarkMode ? "bg-indigo-500" : "bg-slate-300"
-          }`}
+          className={`relative h-8 w-16 rounded-full p-1 transition ${isDarkMode ? "bg-indigo-500" : "bg-slate-300"
+            }`}
           aria-label="Toggle dark mode"
         >
           <span
-            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${
-              isDarkMode ? "translate-x-8" : "translate-x-0"
-            }`}
+            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${isDarkMode ? "translate-x-8" : "translate-x-0"
+              }`}
           >
             {isDarkMode ? "🌙" : "☀️"}
           </span>
@@ -473,9 +484,8 @@ function SessionTimeoutOptions({ isDarkMode }) {
       {timeoutOptions.map((option) => (
         <label
           key={option.value}
-          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${
-            isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
-          }`}
+          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
+            }`}
         >
           <span>{option.label}</span>
 

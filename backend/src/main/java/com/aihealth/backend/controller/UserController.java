@@ -6,6 +6,7 @@ import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.service.ProfileImageService;
 import com.aihealth.backend.service.UserService;
 import com.aihealth.backend.dto.UpdateUsernameRequest;
+import com.aihealth.backend.dto.ChangePasswordRequest;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -91,5 +92,18 @@ public class UserController {
         UserResponse response = userService.updateCurrentUsername(request.getUsername());
 
         return ResponseEntity.ok(response);
+    }
+
+    // Changes the currently authenticated user's password.
+    @PutMapping("/me/password")
+    public ResponseEntity<String> changeCurrentUserPassword(
+            @RequestBody ChangePasswordRequest request) {
+
+        userService.changeCurrentUserPassword(
+                request.getCurrentPassword(),
+                request.getNewPassword(),
+                request.getConfirmPassword());
+
+        return ResponseEntity.ok("Password updated successfully.");
     }
 }

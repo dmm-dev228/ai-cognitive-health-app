@@ -342,4 +342,34 @@ public class UserService {
                     "Username can only contain letters, numbers, and underscores.");
         }
     }
+
+    /*
+     * Changes the currently authenticated user's password.
+     *
+     * Requires current password so someone cannot change the password
+     * just because they found an unlocked session.
+     */
+    public void changeCurrentUserPassword(
+            String currentPassword,
+            String newPassword,
+            String confirmPassword) {
+
+        User user = getCurrentAuthenticatedUser();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect.");
+        }
+
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new RuntimeException("New password must be at least 8 characters.");
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("New passwords do not match.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+    }
 }

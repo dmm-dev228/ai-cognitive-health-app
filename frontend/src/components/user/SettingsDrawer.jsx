@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 import {
   uploadProfileImage,
   removeProfileImage,
-  updateUsername
+  updateUsername,
+  changePassword,
 } from "../../services/api";
 
 function SettingsDrawer({
@@ -138,9 +139,7 @@ function SettingsDrawer({
             isOpen={openSection === "security"}
             onClick={() => toggleSection("security")}
           >
-            <div className="rounded-2xl bg-white/10 p-4 text-sm">
-              Email update settings will go here.
-            </div>
+            <SecuritySection isDarkMode={isDarkMode} />
           </ExpandableSection>
 
           <ExpandableSection
@@ -502,6 +501,121 @@ function SessionTimeoutOptions({ isDarkMode }) {
           />
         </label>
       ))}
+    </div>
+  );
+}
+function SecuritySection({ isDarkMode }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const isSuccessMessage =
+    !message.toLowerCase().includes("incorrect") &&
+    !message.toLowerCase().includes("failed") &&
+    !message.toLowerCase().includes("must") &&
+    !message.toLowerCase().includes("match");
+
+  const handlePasswordChange = async () => {
+    try {
+      setIsUpdating(true);
+      setMessage("");
+
+      const responseMessage = await changePassword({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+
+      setMessage(responseMessage || "Password updated successfully.");
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      console.error("Password update failed:", err);
+      setMessage(err.message || "Failed to update password.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div
+        className={`rounded-3xl border p-4 ${
+          isDarkMode
+            ? "border-white/10 bg-white/10"
+            : "border-slate-100 bg-white"
+        }`}
+      >
+        <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-60">
+          Change Password
+        </p>
+
+        <p className="mt-2 text-xs leading-5 opacity-70">
+          Enter your current password before choosing a new one.
+        </p>
+
+        <div className="mt-4 space-y-3">
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+              isDarkMode
+                ? "border-white/10 bg-white/10 text-white"
+                : "border-slate-200 bg-slate-50 text-slate-900"
+            }`}
+            placeholder="Current password"
+          />
+
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+              isDarkMode
+                ? "border-white/10 bg-white/10 text-white"
+                : "border-slate-200 bg-slate-50 text-slate-900"
+            }`}
+            placeholder="New password"
+          />
+
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+              isDarkMode
+                ? "border-white/10 bg-white/10 text-white"
+                : "border-slate-200 bg-slate-50 text-slate-900"
+            }`}
+            placeholder="Confirm new password"
+          />
+        </div>
+
+        <button
+          onClick={handlePasswordChange}
+          disabled={isUpdating}
+          className="mt-4 w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+        >
+          {isUpdating ? "Updating..." : "Update Password"}
+        </button>
+      </div>
+
+      {message && (
+        <div
+          className={`rounded-2xl px-4 py-3 text-xs font-semibold ${
+            isSuccessMessage
+              ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border border-red-200 bg-red-50 text-red-600"
+          }`}
+        >
+          {message}
+        </div>
+      )}
     </div>
   );
 }

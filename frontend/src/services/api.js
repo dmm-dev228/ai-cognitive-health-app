@@ -76,6 +76,31 @@ export const resendVerificationEmail = async (email) => {
 
     return response.text();
 };
+
+// Changes the current user's password.
+export const changePassword = async ({
+  currentPassword,
+  newPassword,
+  confirmPassword,
+}) => {
+  const response = await fetch(`${BASE_URL}/users/me/password`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update password.");
+  }
+
+  return response.text();
+};
+
 // ===== USER =====
 export const createUser = async (data) => {
     const response = await fetch(`${BASE_URL}/users`, {

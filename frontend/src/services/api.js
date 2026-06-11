@@ -482,6 +482,25 @@ export const updateGoalReminderPreference = async (goalReminderEnabled) => {
 
   return response.json();
 };
+
+// Updates current user's medication reminder preference.
+export const updateMedicationReminderPreference = async (
+  medicationReminderEnabled
+) => {
+  const response = await fetch(`${BASE_URL}/users/me/medication-reminder`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ medicationReminderEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update medication reminder.");
+  }
+
+  return response.json();
+};
+
 // ===== Game Results =====
 
 /*

@@ -10,6 +10,7 @@ import com.aihealth.backend.dto.ChangePasswordRequest;
 import com.aihealth.backend.dto.EmailChangeRequest;
 import com.aihealth.backend.dto.UpdateGoalReminderRequest;
 import com.aihealth.backend.dto.UpdateJournalReminderRequest;
+import com.aihealth.backend.dto.UpdateMedicationReminderRequest;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -152,6 +153,16 @@ public class UserController {
 
         UserResponse response = userService.updateGoalReminderPreference(
                 request.getGoalReminderEnabled());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/me/medication-reminder")
+    public ResponseEntity<UserResponse> updateMedicationReminderPreference(
+            @RequestBody UpdateMedicationReminderRequest request) {
+
+        UserResponse response = userService.updateMedicationReminderPreference(
+                request.getMedicationReminderEnabled());
 
         return ResponseEntity.ok(response);
     }

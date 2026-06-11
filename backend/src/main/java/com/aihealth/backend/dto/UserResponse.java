@@ -12,6 +12,7 @@ public class UserResponse {
 
     private Boolean journalReminderEnabled;
     private Boolean goalReminderEnabled;
+    private Boolean medicationReminderEnabled;
 
     private LocalDateTime createdAt;
 
@@ -23,6 +24,7 @@ public class UserResponse {
             String profileImageUrl,
             Boolean journalReminderEnabled,
             Boolean goalReminderEnabled,
+            Boolean medicationReminderEnabled,
             LocalDateTime createdAt) {
 
         this.id = id;
@@ -32,6 +34,7 @@ public class UserResponse {
         this.profileImageUrl = profileImageUrl;
         this.journalReminderEnabled = journalReminderEnabled;
         this.goalReminderEnabled = goalReminderEnabled;
+        this.medicationReminderEnabled = medicationReminderEnabled;
         this.createdAt = createdAt;
     }
 
@@ -62,7 +65,9 @@ public class UserResponse {
     public Boolean getGoalReminderEnabled() {
         return goalReminderEnabled;
     }
-
+public Boolean getMedicationReminderEnabled() {
+    return medicationReminderEnabled;
+}
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

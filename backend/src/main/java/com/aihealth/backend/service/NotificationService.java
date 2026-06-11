@@ -107,6 +107,10 @@ public class NotificationService {
     private void addMedicationReminders(
             User user,
             List<NotificationResponse> notifications) {
+        // Respect user's global medication reminder preference.
+        if (!Boolean.TRUE.equals(user.getMedicationReminderEnabled())) {
+            return;
+        }
 
         // Compare only hour/minute so seconds/nanoseconds do not block matches.
         LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);

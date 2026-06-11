@@ -77,6 +77,10 @@ public class User {
     @Column(name = "goal_reminder_enabled")
     private Boolean goalReminderEnabled = true;
 
+    // Controls whether the user receives medication reminder notifications.
+    @Column(name = "medication_reminder_enabled")
+    private Boolean medicationReminderEnabled = true;
+
     public User() {
     }
 
@@ -202,5 +206,13 @@ public class User {
 
     public void setGoalReminderEnabled(Boolean goalReminderEnabled) {
         this.goalReminderEnabled = goalReminderEnabled;
+    }
+
+    public Boolean getMedicationReminderEnabled() {
+        return medicationReminderEnabled;
+    }
+
+    public void setMedicationReminderEnabled(Boolean medicationReminderEnabled) {
+        this.medicationReminderEnabled = medicationReminderEnabled;
     }
 }

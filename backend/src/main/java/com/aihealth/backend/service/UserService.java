@@ -121,6 +121,7 @@ public class UserService {
                 user.getProfileImageUrl(),
                 user.getJournalReminderEnabled(),
                 user.getGoalReminderEnabled(),
+                user.getMedicationReminderEnabled(),
                 user.getCreatedAt());
     }
 
@@ -464,6 +465,17 @@ public class UserService {
         User user = getCurrentAuthenticatedUser();
 
         user.setGoalReminderEnabled(Boolean.TRUE.equals(enabled));
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    // Updates whether the current user receives medication reminder notifications.
+    public UserResponse updateMedicationReminderPreference(Boolean enabled) {
+        User user = getCurrentAuthenticatedUser();
+
+        user.setMedicationReminderEnabled(Boolean.TRUE.equals(enabled));
 
         User savedUser = userRepository.save(user);
 

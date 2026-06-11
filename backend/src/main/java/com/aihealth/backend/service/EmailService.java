@@ -150,4 +150,31 @@ public class EmailService {
 
                 mailSender.send(message);
         }
+
+        // Sends a verification link to confirm an email address change.
+public void sendEmailChangeVerificationEmail(
+        String toEmail,
+        String emailChangeToken) {
+
+    String verificationLink =
+            frontendUrl + "/verify-email-change?token=" + emailChangeToken;
+
+    SimpleMailMessage message = new SimpleMailMessage();
+
+    message.setFrom("CogniHaven <dmmcmillan2018@gmail.com>");
+    message.setTo(toEmail);
+    message.setSubject("Confirm Your CogniHaven Email Change");
+
+    message.setText(
+            "Hello,\n\n"
+                    + "We received a request to change your CogniHaven email address.\n\n"
+                    + "Please confirm this new email by clicking the link below:\n\n"
+                    + verificationLink
+                    + "\n\n"
+                    + "This link will expire for security reasons.\n\n"
+                    + "If you did not request this change, you can ignore this email.\n\n"
+                    + "— CogniHaven");
+
+    mailSender.send(message);
+}
 }

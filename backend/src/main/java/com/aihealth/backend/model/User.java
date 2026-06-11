@@ -57,6 +57,18 @@ public class User {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
+    // New email waiting for user verification before it replaces current email.
+    @Column(name = "pending_email", length = 100)
+    private String pendingEmail;
+
+    // Token sent to the new email address for confirming an email change.
+    @Column(name = "email_change_token", length = 255)
+    private String emailChangeToken;
+
+    // Expiration time for the email change token.
+    @Column(name = "email_change_token_expires_at")
+    private LocalDateTime emailChangeTokenExpiresAt;
+
     public User() {
     }
 
@@ -142,5 +154,29 @@ public class User {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getPendingEmail() {
+        return pendingEmail;
+    }
+
+    public void setPendingEmail(String pendingEmail) {
+        this.pendingEmail = pendingEmail;
+    }
+
+    public String getEmailChangeToken() {
+        return emailChangeToken;
+    }
+
+    public void setEmailChangeToken(String emailChangeToken) {
+        this.emailChangeToken = emailChangeToken;
+    }
+
+    public LocalDateTime getEmailChangeTokenExpiresAt() {
+        return emailChangeTokenExpiresAt;
+    }
+
+    public void setEmailChangeTokenExpiresAt(LocalDateTime emailChangeTokenExpiresAt) {
+        this.emailChangeTokenExpiresAt = emailChangeTokenExpiresAt;
     }
 }

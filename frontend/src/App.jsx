@@ -20,6 +20,7 @@ import Navbar from "./components/Navbar";
 import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
 import FeedbackCard from "./components/FeedbackCard";
 import UserMenu from "./components/user/UserMenu";
+import VerifyEmailChangePage from "./pages/VerifyEmailChangePage";
 
 import {
   logoutUser,
@@ -402,6 +403,7 @@ function App() {
             <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/verify-email-change" element={<VerifyEmailChangePage />} />
           </Routes>
         </section>
       </div>

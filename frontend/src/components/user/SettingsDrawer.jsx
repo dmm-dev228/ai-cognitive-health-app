@@ -5,6 +5,7 @@ import {
   removeProfileImage,
   updateUsername,
   changePassword,
+  requestEmailChange,
 } from "../../services/api";
 
 function SettingsDrawer({
@@ -504,12 +505,45 @@ function SessionTimeoutOptions({ isDarkMode }) {
     </div>
   );
 }
+function SecurityPanel({ title, description, isOpen, onClick, isDarkMode, children }) {
+  return (
+    <div
+      className={`rounded-3xl border ${isDarkMode
+          ? "border-white/10 bg-white/10"
+          : "border-slate-100 bg-white"
+        }`}
+    >
+      <button
+        onClick={onClick}
+        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+      >
+        <div>
+          <p className="text-sm font-bold">{title}</p>
+          <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
+        </div>
+
+        <span
+          className={`text-xl transition-transform ${isOpen ? "rotate-180" : "rotate-0"
+            }`}
+        >
+          ⌄
+        </span>
+      </button>
+
+      {isOpen && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+}
 function SecuritySection({ isDarkMode }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const email = sessionStorage.getItem("email") || "";
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [openSecurityPanel, setOpenSecurityPanel] = useState("");
 
   const isSuccessMessage =
     !message.toLowerCase().includes("incorrect") &&
@@ -541,83 +575,148 @@ function SecuritySection({ isDarkMode }) {
     }
   };
 
-  return (
-    <div className="space-y-4">
-      <div
-        className={`rounded-3xl border p-4 ${
-          isDarkMode
-            ? "border-white/10 bg-white/10"
-            : "border-slate-100 bg-white"
-        }`}
-      >
-        <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-60">
-          Change Password
-        </p>
+  const handleEmailChangeRequest = async () => {
+    try {
+      setIsUpdating(true);
+      setMessage("");
 
-        <p className="mt-2 text-xs leading-5 opacity-70">
-          Enter your current password before choosing a new one.
-        </p>
+      const responseMessage = await requestEmailChange({
+        newEmail,
+        currentPassword: emailPassword,
+      });
 
-        <div className="mt-4 space-y-3">
-          <input
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
-              isDarkMode
-                ? "border-white/10 bg-white/10 text-white"
-                : "border-slate-200 bg-slate-50 text-slate-900"
-            }`}
-            placeholder="Current password"
-          />
+      setMessage(responseMessage || "Verification email sent.");
 
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
-              isDarkMode
-                ? "border-white/10 bg-white/10 text-white"
-                : "border-slate-200 bg-slate-50 text-slate-900"
-            }`}
-            placeholder="New password"
-          />
+      setNewEmail("");
+      setEmailPassword("");
+    } catch (err) {
+      console.error("Email change request failed:", err);
+      setMessage(err.message || "Could not start email change.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
-              isDarkMode
-                ? "border-white/10 bg-white/10 text-white"
-                : "border-slate-200 bg-slate-50 text-slate-900"
-            }`}
-            placeholder="Confirm new password"
-          />
-        </div>
+ return (
+  <div className="space-y-4">
+    <SecurityPanel
+      title="Change Password"
+      description="Update your password using your current password."
+      isOpen={openSecurityPanel === "password"}
+      onClick={() =>
+        setOpenSecurityPanel((prev) =>
+          prev === "password" ? "" : "password"
+        )
+      }
+      isDarkMode={isDarkMode}
+    >
+      <div className="space-y-3">
+        <input
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+            isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+          }`}
+          placeholder="Current password"
+        />
+
+        <input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+            isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+          }`}
+          placeholder="New password"
+        />
+
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+            isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+          }`}
+          placeholder="Confirm new password"
+        />
 
         <button
           onClick={handlePasswordChange}
           disabled={isUpdating}
-          className="mt-4 w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+          className="w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
         >
           {isUpdating ? "Updating..." : "Update Password"}
         </button>
       </div>
+    </SecurityPanel>
 
-      {message && (
-        <div
-          className={`rounded-2xl px-4 py-3 text-xs font-semibold ${
-            isSuccessMessage
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border border-red-200 bg-red-50 text-red-600"
+    <SecurityPanel
+      title="Change Email"
+      description="Send a verification link before changing your login email."
+      isOpen={openSecurityPanel === "email"}
+      onClick={() =>
+        setOpenSecurityPanel((prev) => (prev === "email" ? "" : "email"))
+      }
+      isDarkMode={isDarkMode}
+    >
+      <div className="space-y-3">
+        <p className="text-xs leading-5 opacity-70">
+          Current email: <span className="font-bold">{email}</span>
+        </p>
+
+        <input
+          type="email"
+          value={newEmail}
+          onChange={(e) => setNewEmail(e.target.value)}
+          className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+            isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
           }`}
-        >
-          {message}
-        </div>
-      )}
-    </div>
-  );
-}
+          placeholder="New email address"
+        />
 
+        <input
+          type="password"
+          value={emailPassword}
+          onChange={(e) => setEmailPassword(e.target.value)}
+          className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+            isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+          }`}
+          placeholder="Current password"
+        />
+
+        <button
+          onClick={handleEmailChangeRequest}
+          disabled={isUpdating}
+          className="w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+        >
+          {isUpdating ? "Sending..." : "Send Verification Email"}
+        </button>
+      </div>
+    </SecurityPanel>
+
+    {message && (
+      <div
+        className={`rounded-2xl px-4 py-3 text-xs font-semibold ${
+          isSuccessMessage
+            ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+            : "border border-red-200 bg-red-50 text-red-600"
+        }`}
+      >
+        {message}
+      </div>
+    )}
+  </div>
+);
+}
 export default SettingsDrawer;

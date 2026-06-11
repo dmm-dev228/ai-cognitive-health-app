@@ -372,4 +372,66 @@ public class UserService {
 
         userRepository.save(user);
     }
+
+    /*
+     * Starts secure email change flow.
+     * The current email is not changed until the new email is verified.
+     */
+    public void requestEmailChange(String newEmail, String currentPassword) {
+        User user = getCurrentAuthenticatedUser();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect.");
+        }
+
+        if (newEmail == null || newEmail.trim().isEmpty()) {
+            throw new RuntimeException("New email is required.");
+        }
+
+        String cleanedEmail = newEmail.trim().toLowerCase();
+
+        if (userRepository.existsByEmail(cleanedEmail)) {
+            throw new RuntimeException("Email is already in use.");
+        }
+
+        String token = UUID.randomUUID().toString();
+
+        user.setPendingEmail(cleanedEmail);
+        user.setEmailChangeToken(token);
+        user.setEmailChangeTokenExpiresAt(LocalDateTime.now().plusMinutes(30));
+
+        userRepository.save(user);
+
+        emailService.sendEmailChangeVerificationEmail(cleanedEmail, token);
+    }
+
+    /*
+     * Confirms email change after user clicks verification link.
+     */
+    public UserResponse confirmEmailChange(String token) {
+        User user = userRepository.findByEmailChangeToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid email change token."));
+
+        if (user.getEmailChangeTokenExpiresAt() == null
+                || user.getEmailChangeTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Email change link has expired.");
+        }
+
+        if (user.getPendingEmail() == null || user.getPendingEmail().isBlank()) {
+            throw new RuntimeException("No pending email change found.");
+        }
+
+        if (userRepository.existsByEmail(user.getPendingEmail())) {
+            throw new RuntimeException("Email is already in use.");
+        }
+
+        user.setEmail(user.getPendingEmail());
+        user.setPendingEmail(null);
+        user.setEmailChangeToken(null);
+        user.setEmailChangeTokenExpiresAt(null);
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
 }

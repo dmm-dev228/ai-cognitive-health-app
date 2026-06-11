@@ -101,6 +101,36 @@ export const changePassword = async ({
   return response.text();
 };
 
+// Starts email change verification flow.
+export const requestEmailChange = async ({ newEmail, currentPassword }) => {
+  const response = await fetch(`${BASE_URL}/users/me/email-change-request`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ newEmail, currentPassword }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to start email change.");
+  }
+
+  return response.text();
+};
+
+// Confirms email change using the verification token.
+export const confirmEmailChange = async (token) => {
+  const response = await fetch(
+    `${BASE_URL}/users/confirm-email-change?token=${token}`
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to confirm email change.");
+  }
+
+  return response.json();
+};
+
 // ===== USER =====
 export const createUser = async (data) => {
     const response = await fetch(`${BASE_URL}/users`, {

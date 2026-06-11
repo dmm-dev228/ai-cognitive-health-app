@@ -7,6 +7,7 @@ import com.aihealth.backend.service.ProfileImageService;
 import com.aihealth.backend.service.UserService;
 import com.aihealth.backend.dto.UpdateUsernameRequest;
 import com.aihealth.backend.dto.ChangePasswordRequest;
+import com.aihealth.backend.dto.EmailChangeRequest;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -105,5 +106,29 @@ public class UserController {
                 request.getConfirmPassword());
 
         return ResponseEntity.ok("Password updated successfully.");
+    }
+
+    // Starts a secure email change flow.
+    // The email is not changed until the new address is verified.
+    @PostMapping("/me/email-change-request")
+    public ResponseEntity<String> requestEmailChange(
+            @RequestBody EmailChangeRequest request) {
+
+        userService.requestEmailChange(
+                request.getNewEmail(),
+                request.getCurrentPassword());
+
+        return ResponseEntity.ok(
+                "Verification email sent to your new email address.");
+    }
+
+    // Confirms email change after the user clicks the verification link.
+    @GetMapping("/confirm-email-change")
+    public ResponseEntity<UserResponse> confirmEmailChange(
+            @RequestParam String token) {
+
+        UserResponse response = userService.confirmEmailChange(token);
+
+        return ResponseEntity.ok(response);
     }
 }

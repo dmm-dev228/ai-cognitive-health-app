@@ -6,107 +6,129 @@ import { isLoggedIn, logoutUser } from "../services/api";
  * ------------------
  * Logs users out after inactivity for privacy/security.
  *
- * Important behavior:
- * - Tracks the actual time of last activity.
- * - Checks inactivity every second.
- * - Timer continues even if the user walks away and does nothing.
- * - Once the warning appears, mouse movement does NOT dismiss it.
- * - User must click Stay Signed In or Log Out.
+ * Flow:
+ * - User-selected idle time passes
+ * - Warning countdown appears
+ * - Logout deadline is stored with an absolute timestamp
+ * - If browser throttles timers while tab is hidden, user is logged out
+ *   immediately when they return after the deadline
  */
 function IdleSessionManager() {
   const DEFAULT_IDLE_LIMIT_MS = 15 * 60 * 1000;
   const WARNING_SECONDS = 60;
+  const LOGOUT_AT_KEY = "idleSessionLogoutAt";
 
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(WARNING_SECONDS);
 
   const lastActivityRef = useRef(Date.now());
+  const showWarningRef = useRef(false);
   const inactivityCheckerRef = useRef(null);
   const countdownTimerRef = useRef(null);
-  const showWarningRef = useRef(false);
-
-  const getIdleLimit = () => {
-    const savedTimeout = sessionStorage.getItem("sessionTimeoutMinutes");
-
-    if (!savedTimeout) {
-      return DEFAULT_IDLE_LIMIT_MS;
-    }
-
-    if (savedTimeout === "never") {
-      return null;
-    }
-
-    return Number(savedTimeout) * 60 * 1000;
-  };
-
-  const clearTimers = () => {
-    clearInterval(inactivityCheckerRef.current);
-    clearInterval(countdownTimerRef.current);
-  };
-
-  const returnToHomeAfterLogout = () => {
-    clearTimers();
-    logoutUser();
-    window.location.href = "/";
-  };
-
-  const startCountdown = () => {
-    if (showWarningRef.current) return;
-
-    showWarningRef.current = true;
-    setShowWarning(true);
-    setSecondsLeft(WARNING_SECONDS);
-
-    countdownTimerRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          returnToHomeAfterLogout();
-          return 0;
-        }
-
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const recordActivity = () => {
-    if (!isLoggedIn()) return;
-
-    /*
-     * Once the warning is visible, activity should NOT dismiss it.
-     * The user must intentionally click Stay Signed In.
-     */
-    if (showWarningRef.current) return;
-
-    lastActivityRef.current = Date.now();
-  };
-
-  const startInactivityChecker = () => {
-    clearInterval(inactivityCheckerRef.current);
-
-    const idleLimit = getIdleLimit();
-
-    // If user chooses "Never", do not start an inactivity checker.
-    if (idleLimit === null) return;
-
-    inactivityCheckerRef.current = setInterval(() => {
-      if (!isLoggedIn()) {
-        clearTimers();
-        return;
-      }
-
-      if (showWarningRef.current) return;
-
-      const inactiveFor = Date.now() - lastActivityRef.current;
-
-      if (inactiveFor >= idleLimit) {
-        startCountdown();
-      }
-    }, 1000);
-  };
 
   useEffect(() => {
     if (!isLoggedIn()) return;
+
+    const getIdleLimit = () => {
+      const savedTimeout = sessionStorage.getItem("sessionTimeoutMinutes");
+
+      if (!savedTimeout) return DEFAULT_IDLE_LIMIT_MS;
+      if (savedTimeout === "never") return null;
+
+      return Number(savedTimeout) * 60 * 1000;
+    };
+
+    const clearTimers = () => {
+      clearInterval(inactivityCheckerRef.current);
+      clearInterval(countdownTimerRef.current);
+    };
+
+    const logoutAndRedirect = () => {
+      clearTimers();
+      sessionStorage.removeItem(LOGOUT_AT_KEY);
+      logoutUser();
+      window.location.href = "/login";
+    };
+
+    const syncCountdownWithLogoutDeadline = () => {
+      const logoutAt = Number(sessionStorage.getItem(LOGOUT_AT_KEY));
+
+      if (!logoutAt) return;
+
+      const remainingMs = logoutAt - Date.now();
+
+      if (remainingMs <= 0) {
+        logoutAndRedirect();
+        return;
+      }
+
+      setSecondsLeft(Math.ceil(remainingMs / 1000));
+    };
+
+    const startCountdown = () => {
+      if (showWarningRef.current) return;
+
+      const logoutAt = Date.now() + WARNING_SECONDS * 1000;
+
+      sessionStorage.setItem(LOGOUT_AT_KEY, String(logoutAt));
+
+      showWarningRef.current = true;
+      setShowWarning(true);
+      setSecondsLeft(WARNING_SECONDS);
+
+      countdownTimerRef.current = setInterval(() => {
+        syncCountdownWithLogoutDeadline();
+      }, 1000);
+    };
+
+    const recordActivity = () => {
+      if (!isLoggedIn()) return;
+
+      if (showWarningRef.current) return;
+
+      lastActivityRef.current = Date.now();
+    };
+
+    const startInactivityChecker = () => {
+      clearInterval(inactivityCheckerRef.current);
+
+      const idleLimit = getIdleLimit();
+
+      if (idleLimit === null) return;
+
+      inactivityCheckerRef.current = setInterval(() => {
+        if (!isLoggedIn()) {
+          clearTimers();
+          return;
+        }
+
+        if (showWarningRef.current) {
+          syncCountdownWithLogoutDeadline();
+          return;
+        }
+
+        const inactiveFor = Date.now() - lastActivityRef.current;
+
+        if (inactiveFor >= idleLimit) {
+          startCountdown();
+        }
+      }, 1000);
+    };
+
+    const handleVisibilityOrFocusReturn = () => {
+      if (!isLoggedIn()) return;
+
+      const logoutAt = Number(sessionStorage.getItem(LOGOUT_AT_KEY));
+
+      if (logoutAt && Date.now() >= logoutAt) {
+        logoutAndRedirect();
+        return;
+      }
+
+      if (logoutAt && showWarningRef.current) {
+        syncCountdownWithLogoutDeadline();
+      }
+    };
 
     const activityEvents = [
       "mousemove",
@@ -120,6 +142,21 @@ function IdleSessionManager() {
       window.addEventListener(event, recordActivity);
     });
 
+    document.addEventListener("visibilitychange", handleVisibilityOrFocusReturn);
+    window.addEventListener("focus", handleVisibilityOrFocusReturn);
+
+    window.resetIdleSessionTimer = () => {
+      clearTimers();
+      sessionStorage.removeItem(LOGOUT_AT_KEY);
+
+      showWarningRef.current = false;
+      setShowWarning(false);
+      setSecondsLeft(WARNING_SECONDS);
+
+      lastActivityRef.current = Date.now();
+      startInactivityChecker();
+    };
+
     lastActivityRef.current = Date.now();
     startInactivityChecker();
 
@@ -129,24 +166,28 @@ function IdleSessionManager() {
       activityEvents.forEach((event) => {
         window.removeEventListener(event, recordActivity);
       });
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityOrFocusReturn
+      );
+
+      window.removeEventListener("focus", handleVisibilityOrFocusReturn);
+
+      delete window.resetIdleSessionTimer;
     };
   }, []);
 
   const staySignedIn = () => {
-    clearTimers();
-
-    showWarningRef.current = false;
-    setShowWarning(false);
-    setSecondsLeft(WARNING_SECONDS);
-
-    lastActivityRef.current = Date.now();
-    startInactivityChecker();
+    if (window.resetIdleSessionTimer) {
+      window.resetIdleSessionTimer();
+    }
   };
 
   const logoutNow = () => {
-    clearTimers();
+    sessionStorage.removeItem("idleSessionLogoutAt");
     logoutUser();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   if (!showWarning) return null;
@@ -168,7 +209,7 @@ function IdleSessionManager() {
 
         <p className="mt-3 text-sm leading-6 text-slate-600">
           For your privacy, CogniHaven will sign you out and return you to the
-          home page in{" "}
+          login page in{" "}
           <span className="font-bold text-amber-600">{secondsLeft}</span>{" "}
           seconds.
         </p>

@@ -7,7 +7,9 @@ import { isLoggedIn, logoutUser } from "../services/api";
  * Logs users out after inactivity for privacy/security.
  *
  * Important behavior:
- * - Normal activity resets the timer only BEFORE the warning appears.
+ * - Tracks the actual time of last activity.
+ * - Checks inactivity every second.
+ * - Timer continues even if the user walks away and does nothing.
  * - Once the warning appears, mouse movement does NOT dismiss it.
  * - User must click Stay Signed In or Log Out.
  */
@@ -18,7 +20,8 @@ function IdleSessionManager() {
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(WARNING_SECONDS);
 
-  const idleTimerRef = useRef(null);
+  const lastActivityRef = useRef(Date.now());
+  const inactivityCheckerRef = useRef(null);
   const countdownTimerRef = useRef(null);
   const showWarningRef = useRef(false);
 
@@ -37,7 +40,7 @@ function IdleSessionManager() {
   };
 
   const clearTimers = () => {
-    clearTimeout(idleTimerRef.current);
+    clearInterval(inactivityCheckerRef.current);
     clearInterval(countdownTimerRef.current);
   };
 
@@ -48,6 +51,8 @@ function IdleSessionManager() {
   };
 
   const startCountdown = () => {
+    if (showWarningRef.current) return;
+
     showWarningRef.current = true;
     setShowWarning(true);
     setSecondsLeft(WARNING_SECONDS);
@@ -64,7 +69,7 @@ function IdleSessionManager() {
     }, 1000);
   };
 
-  const resetIdleTimer = () => {
+  const recordActivity = () => {
     if (!isLoggedIn()) return;
 
     /*
@@ -73,16 +78,31 @@ function IdleSessionManager() {
      */
     if (showWarningRef.current) return;
 
-    clearTimers();
+    lastActivityRef.current = Date.now();
+  };
+
+  const startInactivityChecker = () => {
+    clearInterval(inactivityCheckerRef.current);
 
     const idleLimit = getIdleLimit();
 
-    // If user chooses "Never", do not start an inactivity timer.
+    // If user chooses "Never", do not start an inactivity checker.
     if (idleLimit === null) return;
 
-    idleTimerRef.current = setTimeout(() => {
-      startCountdown();
-    }, idleLimit);
+    inactivityCheckerRef.current = setInterval(() => {
+      if (!isLoggedIn()) {
+        clearTimers();
+        return;
+      }
+
+      if (showWarningRef.current) return;
+
+      const inactiveFor = Date.now() - lastActivityRef.current;
+
+      if (inactiveFor >= idleLimit) {
+        startCountdown();
+      }
+    }, 1000);
   };
 
   useEffect(() => {
@@ -93,20 +113,21 @@ function IdleSessionManager() {
       "mousedown",
       "keydown",
       "scroll",
-      "touchstart"
+      "touchstart",
     ];
 
     activityEvents.forEach((event) => {
-      window.addEventListener(event, resetIdleTimer);
+      window.addEventListener(event, recordActivity);
     });
 
-    resetIdleTimer();
+    lastActivityRef.current = Date.now();
+    startInactivityChecker();
 
     return () => {
       clearTimers();
 
       activityEvents.forEach((event) => {
-        window.removeEventListener(event, resetIdleTimer);
+        window.removeEventListener(event, recordActivity);
       });
     };
   }, []);
@@ -118,8 +139,8 @@ function IdleSessionManager() {
     setShowWarning(false);
     setSecondsLeft(WARNING_SECONDS);
 
-    // Restart the idle timer only after the user clicks the button.
-    resetIdleTimer();
+    lastActivityRef.current = Date.now();
+    startInactivityChecker();
   };
 
   const logoutNow = () => {

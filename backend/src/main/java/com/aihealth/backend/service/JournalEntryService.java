@@ -69,9 +69,7 @@ public class JournalEntryService {
          */
         JournalEntry saved = journalEntryRepository.save(entry);
 
-        /*
-         * Save the user's journal content as the first conversation message.
-         */
+        // Save the user's journal content as the first conversation message.
         conversationMessageService.saveMessage(
                 saved,
                 "USER",
@@ -110,9 +108,7 @@ public class JournalEntryService {
                 + "\nContinue conversation: " + analysis.isContinueConversation()
                 + "\nUrgent safety concern: " + analysis.isUrgentSafetyConcern();
 
-        /*
-         * Generate the first companion-style AI response.
-         */
+        // Generate the first companion-style AI response.
         String aiResponse = openAIService.generateSupportiveJournalResponse(
                 saved.getTitle(),
                 saved.getContent(),

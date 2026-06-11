@@ -138,14 +138,10 @@ function Navbar({
                     isDarkMode={isDarkMode}
                     setIsDarkMode={setIsDarkMode}
                     onLogout={handleLogout}
+                    onDeleteAccount={handleDeleteAccount}
                   />
 
-                  <button
-                    onClick={handleDeleteAccount}
-                    className="rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-md"
-                  >
-                    Delete Account
-                  </button>
+
                 </>
               )}
             </div>

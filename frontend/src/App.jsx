@@ -20,6 +20,7 @@ import Navbar from "./components/Navbar";
 import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
 import FeedbackCard from "./components/FeedbackCard";
 import UserMenu from "./components/user/UserMenu";
+import VerifyEmailChangePage from "./pages/VerifyEmailChangePage";
 
 import {
   logoutUser,
@@ -29,6 +30,21 @@ import {
 } from "./services/api";
 
 import "./index.css";
+
+// Prevents the journal reminder popup from showing more than once per day.
+const shouldShowJournalReminderToday = () => {
+  const today = new Date().toISOString().split("T")[0];
+  const lastShownDate = localStorage.getItem("journalReminderShownDate");
+
+  return lastShownDate !== today;
+};
+
+// Marks today's journal reminder as shown.
+const markJournalReminderShownToday = () => {
+  const today = new Date().toISOString().split("T")[0];
+  localStorage.setItem("journalReminderShownDate", today);
+};
+
 
 function App() {
   const [visibleNotifications, setVisibleNotifications] = useState([]);
@@ -51,7 +67,19 @@ function App() {
         const data = await getNotifications();
         const notifications = Array.isArray(data) ? data : [];
 
-        setVisibleNotifications(notifications);
+        const filteredNotifications = notifications.filter((notification) => {
+          if (notification.type !== "JOURNAL") {
+            return true;
+          }
+
+          return shouldShowJournalReminderToday();
+        });
+
+        if (filteredNotifications.some((notification) => notification.type === "JOURNAL")) {
+          markJournalReminderShownToday();
+        }
+
+        setVisibleNotifications(filteredNotifications);
 
         setTimeout(() => {
           setVisibleNotifications([]);
@@ -124,7 +152,7 @@ function App() {
           />
         )}
 
-        { <IdleSessionManager />}
+        {<IdleSessionManager />}
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <Routes>
@@ -402,6 +430,7 @@ function App() {
             <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/verify-email-change" element={<VerifyEmailChangePage />} />
           </Routes>
         </section>
       </div>

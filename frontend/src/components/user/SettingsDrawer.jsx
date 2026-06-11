@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { uploadProfileImage, removeProfileImage } from "../../services/api";
+import {
+  uploadProfileImage,
+  removeProfileImage,
+  updateUsername,
+  changePassword,
+  requestEmailChange,
+  updateJournalReminderPreference,
+  updateGoalReminderPreference,
+  updateMedicationReminderPreference,
+  updateCommunityNotificationPreference,
+} from "../../services/api";
 
 function SettingsDrawer({
   isOpen,
@@ -8,6 +18,7 @@ function SettingsDrawer({
   isDarkMode,
   setIsDarkMode,
   onLogout,
+  onDeleteAccount,
 }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
@@ -31,9 +42,8 @@ function SettingsDrawer({
       />
 
       <aside
-        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${
-          isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
-        }`}
+        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+          }`}
       >
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -45,11 +55,10 @@ function SettingsDrawer({
 
           <button
             onClick={onClose}
-            className={`rounded-full px-4 py-2 text-sm font-bold transition ${
-              isDarkMode
-                ? "bg-white/10 text-slate-200 hover:bg-white/15"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
+            className={`rounded-full px-4 py-2 text-sm font-bold transition ${isDarkMode
+              ? "bg-white/10 text-slate-200 hover:bg-white/15"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
           >
             ✕
           </button>
@@ -69,9 +78,9 @@ function SettingsDrawer({
               </div>
             )}
 
-            <div className="min-w-0">
-              <p className="truncate text-xl font-black">{username}</p>
-              <p className="truncate text-sm text-white/75">{email}</p>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <p className="truncate font-bold">{username}</p>
+              <p className="truncate text-xs opacity-70">{email}</p>
             </div>
           </div>
         </div>
@@ -85,7 +94,31 @@ function SettingsDrawer({
             isOpen={openSection === "account"}
             onClick={() => toggleSection("account")}
           >
-            <AccountProfileSection isDarkMode={isDarkMode} />
+            <AccountProfileSection
+              isDarkMode={isDarkMode}
+              onDeleteAccount={onDeleteAccount}
+            />
+            <div
+              className={`rounded-3xl border p-4 ${isDarkMode
+                ? "border-red-400/20 bg-red-500/10"
+                : "border-red-100 bg-red-50"
+                }`}
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">
+                Delete Account
+              </p>
+
+              <p className="mt-2 text-xs leading-5 text-red-500/80">
+                Permanently delete your CogniHaven account and all connected data.
+              </p>
+
+              <button
+                onClick={onDeleteAccount}
+                className="mt-4 w-full rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-red-700"
+              >
+                Delete Account
+              </button>
+            </div>
           </ExpandableSection>
 
           <ExpandableSection
@@ -100,6 +133,7 @@ function SettingsDrawer({
               isDarkMode={isDarkMode}
               setIsDarkMode={setIsDarkMode}
             />
+
           </ExpandableSection>
 
           <ExpandableSection
@@ -110,9 +144,7 @@ function SettingsDrawer({
             isOpen={openSection === "security"}
             onClick={() => toggleSection("security")}
           >
-            <div className="rounded-2xl bg-white/10 p-4 text-sm">
-              Email update settings will go here.
-            </div>
+            <SecuritySection isDarkMode={isDarkMode} />
           </ExpandableSection>
 
           <ExpandableSection
@@ -133,17 +165,15 @@ function SettingsDrawer({
             text="Manage reminder and notification preferences."
             isOpen={openSection === "notifications"}
             onClick={() => toggleSection("notifications")}
+
           >
-            <div className="rounded-2xl bg-white/10 p-4 text-sm">
-              Notification preferences will go here.
-            </div>
+            <NotificationsSection isDarkMode={isDarkMode} />
           </ExpandableSection>
         </div>
 
         <div
-          className={`mt-8 border-t pt-5 ${
-            isDarkMode ? "border-white/10" : "border-slate-200"
-          }`}
+          className={`mt-8 border-t pt-5 ${isDarkMode ? "border-white/10" : "border-slate-200"
+            }`}
         >
           <button
             onClick={onLogout}
@@ -169,45 +199,40 @@ function ExpandableSection({
 }) {
   return (
     <div
-      className={`rounded-3xl border transition ${
-        isDarkMode
-          ? "border-white/10 bg-white/10"
-          : "border-slate-100 bg-slate-50"
-      }`}
+      className={`rounded-3xl border transition ${isDarkMode
+        ? "border-white/10 bg-white/10"
+        : "border-slate-100 bg-slate-50"
+        }`}
     >
       <button
         onClick={onClick}
         className="flex w-full items-center gap-4 p-5 text-left"
       >
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${
-            isDarkMode ? "bg-white/10" : "bg-white"
-          }`}
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
+            }`}
         >
           {icon}
         </div>
 
         <div className="flex-1">
           <p
-            className={`font-bold ${
-              isDarkMode ? "text-white" : "text-slate-900"
-            }`}
+            className={`font-bold ${isDarkMode ? "text-white" : "text-slate-900"
+              }`}
           >
             {title}
           </p>
           <p
-            className={`mt-1 text-sm leading-6 ${
-              isDarkMode ? "text-slate-300" : "text-slate-500"
-            }`}
+            className={`mt-1 text-sm leading-6 ${isDarkMode ? "text-slate-300" : "text-slate-500"
+              }`}
           >
             {text}
           </p>
         </div>
 
         <span
-          className={`text-xl transition-transform ${
-            isOpen ? "rotate-180" : "rotate-0"
-          }`}
+          className={`text-xl transition-transform ${isOpen ? "rotate-180" : "rotate-0"
+            }`}
         >
           ⌄
         </span>
@@ -218,16 +243,22 @@ function ExpandableSection({
   );
 }
 
-function AccountProfileSection({ isDarkMode }) {
+function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
-
+  const [newUsername, setNewUsername] = useState(username);
   const [profileImageUrl, setProfileImageUrl] = useState(
     sessionStorage.getItem("profileImageUrl") || ""
   );
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const isSuccessMessage =
+    message.toLowerCase().includes("success") ||
+    message.toLowerCase().includes("updated") ||
+    message.toLowerCase().includes("removed");
 
+  const [usernamePassword, setUsernamePassword] = useState("");
+  const [openAccountPanel, setOpenAccountPanel] = useState("");
   const handleImageChange = async (event) => {
     const file = event.target.files?.[0];
 
@@ -280,59 +311,171 @@ function AccountProfileSection({ isDarkMode }) {
     }
   };
 
-  return (
-    <div className="rounded-2xl bg-white/10 p-4 text-sm">
-      <div className="flex items-center gap-4">
-        {profileImageUrl ? (
-          <img
-            src={profileImageUrl}
-            alt={`${username} profile`}
-            className="h-16 w-16 rounded-full object-cover shadow-lg"
-          />
-        ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-2xl font-black text-white">
-            {username.charAt(0).toUpperCase()}
-          </div>
-        )}
+  const handleUsernameUpdate = async () => {
+    try {
+      setMessage("");
 
-        <div className="min-w-0">
-          <p className="font-bold">{username}</p>
-          <p className="truncate text-xs opacity-70">{email}</p>
+      const updatedUser = await updateUsername({
+        username: newUsername,
+        currentPassword: usernamePassword,
+      });
+
+      sessionStorage.setItem("username", updatedUser.username);
+      setUsernamePassword("");
+
+      window.dispatchEvent(new Event("userProfileUpdated"));
+
+      setMessage("Username updated successfully.");
+    } catch (err) {
+      console.error(err);
+      setMessage(err.message || "Could not update username.");
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Profile image settings */}
+      <div
+        className={`rounded-3xl border p-4 ${isDarkMode
+          ? "border-white/10 bg-white/10"
+          : "border-slate-100 bg-white"
+          }`}
+      >
+        <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-60">
+          Profile Image
+        </p>
+
+        <div className="mt-4 flex items-center gap-4">
+          {profileImageUrl ? (
+            <img
+              src={profileImageUrl}
+              alt={`${username} profile`}
+              className="h-16 w-16 rounded-full object-cover shadow-lg"
+            />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-2xl font-black text-white">
+              {username.charAt(0).toUpperCase()}
+            </div>
+          )}
+
+          <div className="min-w-0">
+            <p className="font-bold">{username}</p>
+            <p className="truncate text-xs opacity-70">{email}</p>
+          </div>
         </div>
+
+        <label
+          className={`mt-4 block cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-bold transition ${isDarkMode
+            ? "bg-white/10 text-white hover:bg-white/15"
+            : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+            }`}
+        >
+          {isUploading ? "Uploading..." : "📷 Choose Profile Image"}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            disabled={isUploading}
+            className="hidden"
+          />
+        </label>
+
+        {profileImageUrl && (
+          <button
+            onClick={handleRemoveImage}
+            disabled={isUploading}
+            className="mt-3 w-full rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
+          >
+            Remove Profile Image
+          </button>
+        )}
       </div>
 
-      <label
-        className={`mt-4 block cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-bold transition ${
-          isDarkMode
-            ? "bg-white/10 text-white hover:bg-white/15"
-            : "bg-white text-indigo-700 hover:bg-indigo-50"
-        }`}
+      {/* Username settings */}
+      <AccountPanel
+        title="Change Username"
+        description="Update your username after confirming your password."
+        isOpen={openAccountPanel === "username"}
+        onClick={() =>
+          setOpenAccountPanel((prev) =>
+            prev === "username" ? "" : "username"
+          )
+        }
+        isDarkMode={isDarkMode}
       >
-        {isUploading ? "Uploading..." : "📷 Choose Profile Image"}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          disabled={isUploading}
-          className="hidden"
-        />
-      </label>
-
-      {profileImageUrl && (
-        <button
-          onClick={handleRemoveImage}
-          disabled={isUploading}
-          className="mt-3 w-full rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
-        >
-          Remove Profile Image
-        </button>
-      )}
-
-      {message && (
-        <p className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold">
-          {message}
+        <p className="text-xs leading-5 opacity-70">
+          Current username: <span className="font-bold">{username}</span>
         </p>
-      )}
+
+        <input
+          type="text"
+          value={newUsername}
+          onChange={(e) => setNewUsername(e.target.value)}
+          className={`mt-3 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+            ? "border-white/10 bg-white/10 text-white"
+            : "border-slate-200 bg-slate-50 text-slate-900"
+            }`}
+          placeholder="New username"
+        />
+
+        <input
+          type="password"
+          value={usernamePassword}
+          onChange={(e) => setUsernamePassword(e.target.value)}
+          className={`mt-3 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+            ? "border-white/10 bg-white/10 text-white"
+            : "border-slate-200 bg-slate-50 text-slate-900"
+            }`}
+          placeholder="Current password"
+        />
+
+        <button
+          onClick={handleUsernameUpdate}
+          className="mt-3 w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
+        >
+          Save Username
+        </button>
+      </AccountPanel>
+
+    </div>
+
+
+  );
+}
+
+function AccountPanel({
+  title,
+  description,
+  isOpen,
+  onClick,
+  isDarkMode,
+  children,
+}) {
+  return (
+    <div
+      className={`rounded-3xl border ${isDarkMode
+        ? "border-white/10 bg-white/10"
+        : "border-slate-100 bg-white"
+        }`}
+    >
+      <button
+        onClick={onClick}
+        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+      >
+        <div>
+          <p className="text-sm font-bold">{title}</p>
+          <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
+        </div>
+
+        <span
+          className={`text-xl transition-transform ${isOpen ? "rotate-180" : "rotate-0"
+            }`}
+        >
+          ⌄
+        </span>
+      </button>
+
+      {isOpen && <div className="px-4 pb-4">{children}</div>}
     </div>
   );
 }
@@ -350,15 +493,13 @@ function AppearanceToggle({ isDarkMode, setIsDarkMode }) {
 
         <button
           onClick={() => setIsDarkMode((prev) => !prev)}
-          className={`relative h-8 w-16 rounded-full p-1 transition ${
-            isDarkMode ? "bg-indigo-500" : "bg-slate-300"
-          }`}
+          className={`relative h-8 w-16 rounded-full p-1 transition ${isDarkMode ? "bg-indigo-500" : "bg-slate-300"
+            }`}
           aria-label="Toggle dark mode"
         >
           <span
-            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${
-              isDarkMode ? "translate-x-8" : "translate-x-0"
-            }`}
+            className={`flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform ${isDarkMode ? "translate-x-8" : "translate-x-0"
+              }`}
           >
             {isDarkMode ? "🌙" : "☀️"}
           </span>
@@ -392,9 +533,8 @@ function SessionTimeoutOptions({ isDarkMode }) {
       {timeoutOptions.map((option) => (
         <label
           key={option.value}
-          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${
-            isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
-          }`}
+          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
+            }`}
         >
           <span>{option.label}</span>
 
@@ -410,4 +550,551 @@ function SessionTimeoutOptions({ isDarkMode }) {
   );
 }
 
+
+function NotificationsSection({ isDarkMode }) {
+  const [openNotificationPanel, setOpenNotificationPanel] = useState("");
+
+  const [journalReminderEnabled, setJournalReminderEnabled] = useState(
+    sessionStorage.getItem("journalReminderEnabled") !== "false"
+  );
+
+  const [goalReminderEnabled, setGoalReminderEnabled] = useState(
+    sessionStorage.getItem("goalReminderEnabled") !== "false"
+  );
+
+  const [medicationReminderEnabled, setMedicationReminderEnabled] = useState(
+    sessionStorage.getItem("medicationReminderEnabled") !== "false"
+  );
+
+  const [communityNotificationEnabled, setCommunityNotificationEnabled] = useState(
+    sessionStorage.getItem("communityNotificationEnabled") !== "false"
+  );
+
+  const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleJournalReminderToggle = async () => {
+    try {
+      setIsSaving(true);
+      setMessage("");
+
+      const nextValue = !journalReminderEnabled;
+
+      const updatedUser = await updateJournalReminderPreference(nextValue);
+
+      const savedValue = Boolean(updatedUser.journalReminderEnabled);
+
+      setJournalReminderEnabled(savedValue);
+
+      sessionStorage.setItem(
+        "journalReminderEnabled",
+        String(savedValue)
+      );
+
+      setMessage(
+        savedValue
+          ? "Journal reminders turned on."
+          : "Journal reminders turned off."
+      );
+    } catch (err) {
+      console.error("Journal reminder update failed:", err);
+      setMessage(err.message || "Could not update journal reminders.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleGoalReminderToggle = async () => {
+    try {
+      setIsSaving(true);
+      setMessage("");
+
+      const nextValue = !goalReminderEnabled;
+      const updatedUser = await updateGoalReminderPreference(nextValue);
+      const savedValue = Boolean(updatedUser.goalReminderEnabled);
+
+      setGoalReminderEnabled(savedValue);
+      sessionStorage.setItem("goalReminderEnabled", String(savedValue));
+
+      setMessage(
+        savedValue
+          ? "Goal reminders turned on."
+          : "Goal reminders turned off."
+      );
+    } catch (err) {
+      console.error("Goal reminder update failed:", err);
+      setMessage(err.message || "Could not update goal reminders.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleMedicationReminderToggle = async () => {
+    try {
+      setIsSaving(true);
+      setMessage("");
+
+      const nextValue = !medicationReminderEnabled;
+
+      const updatedUser =
+        await updateMedicationReminderPreference(nextValue);
+
+      const savedValue = Boolean(updatedUser.medicationReminderEnabled);
+
+      setMedicationReminderEnabled(savedValue);
+      sessionStorage.setItem("medicationReminderEnabled", String(savedValue));
+
+      setMessage(
+        savedValue
+          ? "Medication reminders turned on."
+          : "Medication reminders turned off."
+      );
+    } catch (err) {
+      console.error("Medication reminder update failed:", err);
+      setMessage(err.message || "Could not update medication reminders.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCommunityNotificationToggle = async () => {
+    try {
+      setIsSaving(true);
+      setMessage("");
+
+      const nextValue = !communityNotificationEnabled;
+
+      const updatedUser =
+        await updateCommunityNotificationPreference(nextValue);
+
+      const savedValue = Boolean(updatedUser.communityNotificationEnabled);
+
+      setCommunityNotificationEnabled(savedValue);
+      sessionStorage.setItem(
+        "communityNotificationEnabled",
+        String(savedValue)
+      );
+
+      setMessage(
+        savedValue
+          ? "Community notifications turned on."
+          : "Community notifications turned off."
+      );
+    } catch (err) {
+      console.error("Community notification update failed:", err);
+      setMessage(err.message || "Could not update community notifications.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <NotificationPanel
+        title="Journal Reminders"
+        description="Get one gentle reminder per day if you have not journaled."
+        isOpen={openNotificationPanel === "journal"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "journal" ? "" : "journal"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-bold">
+              {journalReminderEnabled ? "Enabled" : "Disabled"}
+            </p>
+
+            <p className="mt-1 text-xs opacity-70">
+              {journalReminderEnabled
+                ? "CogniHaven may remind you once per day."
+                : "CogniHaven will not show daily journal reminders."}
+            </p>
+          </div>
+
+          <button
+            onClick={handleJournalReminderToggle}
+            disabled={isSaving}
+            className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${journalReminderEnabled ? "bg-indigo-500" : "bg-slate-300"
+              } disabled:opacity-60`}
+          >
+            <span
+              className={`block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${journalReminderEnabled ? "translate-x-8" : "translate-x-0"
+                }`}
+            />
+          </button>
+        </div>
+      </NotificationPanel>
+
+      <NotificationPanel
+        title="Medication Reminders"
+        description="Manage reminder channels for medication routines."
+        isOpen={openNotificationPanel === "medication"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "medication" ? "" : "medication"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-bold">
+              {medicationReminderEnabled ? "Enabled" : "Disabled"}
+            </p>
+
+            <p className="mt-1 text-xs opacity-70">
+              {medicationReminderEnabled
+                ? "CogniHaven may show medication reminders at saved times."
+                : "Medication reminders are disabled."}
+            </p>
+          </div>
+
+          <button
+            onClick={handleMedicationReminderToggle}
+            disabled={isSaving}
+            className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${medicationReminderEnabled ? "bg-indigo-500" : "bg-slate-300"
+              } disabled:opacity-60`}
+          >
+            <span
+              className={`block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${medicationReminderEnabled ? "translate-x-8" : "translate-x-0"
+                }`}
+            />
+          </button>
+        </div>
+      </NotificationPanel>
+
+      <NotificationPanel
+        title="Goal Reminders"
+        description="Stay encouraged with progress reminders."
+        isOpen={openNotificationPanel === "goal"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "goal" ? "" : "goal"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-bold">
+              {goalReminderEnabled ? "Enabled" : "Disabled"}
+            </p>
+
+            <p className="mt-1 text-xs opacity-70">
+              {goalReminderEnabled
+                ? "CogniHaven may remind you about active goals."
+                : "Goal reminders are disabled."}
+            </p>
+          </div>
+
+          <button
+            onClick={handleGoalReminderToggle}
+            disabled={isSaving}
+            className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${goalReminderEnabled ? "bg-indigo-500" : "bg-slate-300"
+              } disabled:opacity-60`}
+          >
+            <span
+              className={`block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${goalReminderEnabled ? "translate-x-8" : "translate-x-0"
+                }`}
+            />
+          </button>
+        </div>
+      </NotificationPanel>
+
+      <NotificationPanel
+        title="Community Updates"
+        description="Control future community activity notifications."
+        isOpen={openNotificationPanel === "community"}
+        onClick={() =>
+          setOpenNotificationPanel((prev) =>
+            prev === "community" ? "" : "community"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-bold">
+              {communityNotificationEnabled ? "Enabled" : "Disabled"}
+            </p>
+
+            <p className="mt-1 text-xs opacity-70">
+              {communityNotificationEnabled
+                ? "CogniHaven may show future community activity updates."
+                : "Community notifications are disabled."}
+            </p>
+          </div>
+
+          <button
+            onClick={handleCommunityNotificationToggle}
+            disabled={isSaving}
+            className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${communityNotificationEnabled ? "bg-indigo-500" : "bg-slate-300"
+              } disabled:opacity-60`}
+          >
+            <span
+              className={`block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${communityNotificationEnabled ? "translate-x-8" : "translate-x-0"
+                }`}
+            />
+          </button>
+        </div>
+      </NotificationPanel>
+
+      {message && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+          {message}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NotificationPanel({
+  title,
+  description,
+  isOpen,
+  onClick,
+  isDarkMode,
+  children,
+}) {
+  return (
+    <div
+      className={`rounded-3xl border ${isDarkMode
+        ? "border-white/10 bg-white/10"
+        : "border-slate-100 bg-white"
+        }`}
+    >
+      <button
+        onClick={onClick}
+        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+      >
+        <div>
+          <p className="text-sm font-bold">{title}</p>
+          <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
+        </div>
+
+        <span
+          className={`text-xl transition-transform ${isOpen ? "rotate-180" : "rotate-0"
+            }`}
+        >
+          ⌄
+        </span>
+      </button>
+
+      {isOpen && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+}
+
+function SecurityPanel({ title, description, isOpen, onClick, isDarkMode, children }) {
+  return (
+    <div
+      className={`rounded-3xl border ${isDarkMode
+        ? "border-white/10 bg-white/10"
+        : "border-slate-100 bg-white"
+        }`}
+    >
+      <button
+        onClick={onClick}
+        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+      >
+        <div>
+          <p className="text-sm font-bold">{title}</p>
+          <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
+        </div>
+
+        <span
+          className={`text-xl transition-transform ${isOpen ? "rotate-180" : "rotate-0"
+            }`}
+        >
+          ⌄
+        </span>
+      </button>
+
+      {isOpen && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+}
+
+function SecuritySection({ isDarkMode }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const email = sessionStorage.getItem("email") || "";
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [openSecurityPanel, setOpenSecurityPanel] = useState("");
+
+  const isSuccessMessage =
+    !message.toLowerCase().includes("incorrect") &&
+    !message.toLowerCase().includes("failed") &&
+    !message.toLowerCase().includes("must") &&
+    !message.toLowerCase().includes("match");
+
+  const handlePasswordChange = async () => {
+    try {
+      setIsUpdating(true);
+      setMessage("");
+
+      const responseMessage = await changePassword({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+
+      setMessage(responseMessage || "Password updated successfully.");
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      console.error("Password update failed:", err);
+      setMessage(err.message || "Failed to update password.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleEmailChangeRequest = async () => {
+    try {
+      setIsUpdating(true);
+      setMessage("");
+
+      const responseMessage = await requestEmailChange({
+        newEmail,
+        currentPassword: emailPassword,
+      });
+
+      setMessage(responseMessage || "Verification email sent.");
+
+      setNewEmail("");
+      setEmailPassword("");
+    } catch (err) {
+      console.error("Email change request failed:", err);
+      setMessage(err.message || "Could not start email change.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <SecurityPanel
+        title="Change Password"
+        description="Update your password using your current password."
+        isOpen={openSecurityPanel === "password"}
+        onClick={() =>
+          setOpenSecurityPanel((prev) =>
+            prev === "password" ? "" : "password"
+          )
+        }
+        isDarkMode={isDarkMode}
+      >
+        <div className="space-y-3">
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+              }`}
+            placeholder="Current password"
+          />
+
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+              }`}
+            placeholder="New password"
+          />
+
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+              }`}
+            placeholder="Confirm new password"
+          />
+
+          <button
+            onClick={handlePasswordChange}
+            disabled={isUpdating}
+            className="w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+          >
+            {isUpdating ? "Updating..." : "Update Password"}
+          </button>
+        </div>
+      </SecurityPanel>
+
+      <SecurityPanel
+        title="Change Email"
+        description="Send a verification link before changing your login email."
+        isOpen={openSecurityPanel === "email"}
+        onClick={() =>
+          setOpenSecurityPanel((prev) => (prev === "email" ? "" : "email"))
+        }
+        isDarkMode={isDarkMode}
+      >
+        <div className="space-y-3">
+          <p className="text-xs leading-5 opacity-70">
+            Current email: <span className="font-bold">{email}</span>
+          </p>
+
+          <input
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+              }`}
+            placeholder="New email address"
+          />
+
+          <input
+            type="password"
+            value={emailPassword}
+            onChange={(e) => setEmailPassword(e.target.value)}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+              }`}
+            placeholder="Current password"
+          />
+
+          <button
+            onClick={handleEmailChangeRequest}
+            disabled={isUpdating}
+            className="w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+          >
+            {isUpdating ? "Sending..." : "Send Verification Email"}
+          </button>
+        </div>
+      </SecurityPanel>
+
+      {message && (
+        <div
+          className={`rounded-2xl px-4 py-3 text-xs font-semibold ${isSuccessMessage
+            ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+            : "border border-red-200 bg-red-50 text-red-600"
+            }`}
+        >
+          {message}
+        </div>
+      )}
+    </div>
+  );
+}
 export default SettingsDrawer;

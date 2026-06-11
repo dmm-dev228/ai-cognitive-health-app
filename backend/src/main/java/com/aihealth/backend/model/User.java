@@ -57,6 +57,34 @@ public class User {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
+    // New email waiting for user verification before it replaces current email.
+    @Column(name = "pending_email", length = 100)
+    private String pendingEmail;
+
+    // Token sent to the new email address for confirming an email change.
+    @Column(name = "email_change_token", length = 255)
+    private String emailChangeToken;
+
+    // Expiration time for the email change token.
+    @Column(name = "email_change_token_expires_at")
+    private LocalDateTime emailChangeTokenExpiresAt;
+
+    // Controls whether the user receives daily journal reminder notifications.
+    @Column(name = "journal_reminder_enabled")
+    private Boolean journalReminderEnabled = true;
+
+    // Controls whether the user receives goal reminder notifications.
+    @Column(name = "goal_reminder_enabled")
+    private Boolean goalReminderEnabled = true;
+
+    // Controls whether the user receives medication reminder notifications.
+    @Column(name = "medication_reminder_enabled")
+    private Boolean medicationReminderEnabled = true;
+
+    // Controls whether the user receives community update notifications.
+    @Column(name = "community_notification_enabled")
+    private Boolean communityNotificationEnabled = true;
+
     public User() {
     }
 
@@ -142,5 +170,61 @@ public class User {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getPendingEmail() {
+        return pendingEmail;
+    }
+
+    public void setPendingEmail(String pendingEmail) {
+        this.pendingEmail = pendingEmail;
+    }
+
+    public String getEmailChangeToken() {
+        return emailChangeToken;
+    }
+
+    public void setEmailChangeToken(String emailChangeToken) {
+        this.emailChangeToken = emailChangeToken;
+    }
+
+    public LocalDateTime getEmailChangeTokenExpiresAt() {
+        return emailChangeTokenExpiresAt;
+    }
+
+    public void setEmailChangeTokenExpiresAt(LocalDateTime emailChangeTokenExpiresAt) {
+        this.emailChangeTokenExpiresAt = emailChangeTokenExpiresAt;
+    }
+
+    public Boolean getJournalReminderEnabled() {
+        return journalReminderEnabled;
+    }
+
+    public void setJournalReminderEnabled(Boolean journalReminderEnabled) {
+        this.journalReminderEnabled = journalReminderEnabled;
+    }
+
+    public Boolean getGoalReminderEnabled() {
+        return goalReminderEnabled;
+    }
+
+    public void setGoalReminderEnabled(Boolean goalReminderEnabled) {
+        this.goalReminderEnabled = goalReminderEnabled;
+    }
+
+    public Boolean getMedicationReminderEnabled() {
+        return medicationReminderEnabled;
+    }
+
+    public void setMedicationReminderEnabled(Boolean medicationReminderEnabled) {
+        this.medicationReminderEnabled = medicationReminderEnabled;
+    }
+
+    public Boolean getCommunityNotificationEnabled() {
+        return communityNotificationEnabled;
+    }
+
+    public void setCommunityNotificationEnabled(Boolean communityNotificationEnabled) {
+        this.communityNotificationEnabled = communityNotificationEnabled;
     }
 }

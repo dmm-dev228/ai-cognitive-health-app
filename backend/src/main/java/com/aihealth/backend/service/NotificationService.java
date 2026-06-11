@@ -72,6 +72,10 @@ public class NotificationService {
     private void addJournalReminder(
             User user,
             List<NotificationResponse> notifications) {
+        // Respect the user's journal reminder preference.
+        if (!Boolean.TRUE.equals(user.getJournalReminderEnabled())) {
+            return;
+        }
 
         LocalDate today = LocalDate.now();
 
@@ -103,6 +107,10 @@ public class NotificationService {
     private void addMedicationReminders(
             User user,
             List<NotificationResponse> notifications) {
+        // Respect user's global medication reminder preference.
+        if (!Boolean.TRUE.equals(user.getMedicationReminderEnabled())) {
+            return;
+        }
 
         // Compare only hour/minute so seconds/nanoseconds do not block matches.
         LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
@@ -174,7 +182,9 @@ public class NotificationService {
      * This reuses the existing in-app notification system.
      */
     private void addGoalReminders(User user, List<NotificationResponse> notifications) {
-
+        if (!Boolean.TRUE.equals(user.getGoalReminderEnabled())) {
+            return;
+        }
         List<Goal> goals = goalRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
 
         for (Goal goal : goals) {

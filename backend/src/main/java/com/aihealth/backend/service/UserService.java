@@ -63,6 +63,14 @@ public class UserService {
 
     public UserResponse createUser(UserRequest request) {
 
+        // Validate username rules before account creation.
+        validateUsername(request.getUsername());
+
+        // Prevent duplicate usernames.
+        if (userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
+            throw new RuntimeException("Username is already taken.");
+        }
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email is already in use");
         }
@@ -72,7 +80,7 @@ public class UserService {
         // Generate verification token
         String verificationToken = UUID.randomUUID().toString();
 
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getUsername().trim());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("USER");
@@ -100,14 +108,22 @@ public class UserService {
         return mapToResponse(user);
     }
 
+    /*
+     * Converts User entity into API response DTO.
+     */
     private UserResponse mapToResponse(User user) {
-       return new UserResponse(
-        user.getId(),
-        user.getUsername(),
-        user.getEmail(),
-        user.getRole(),
-        user.getProfileImageUrl(),
-        user.getCreatedAt());
+
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole(),
+                user.getProfileImageUrl(),
+                user.getJournalReminderEnabled(),
+                user.getGoalReminderEnabled(),
+                user.getMedicationReminderEnabled(),
+                user.getCommunityNotificationEnabled(),
+                user.getCreatedAt());
     }
 
     // Verifies a user's email using the token sent during signup.
@@ -268,13 +284,215 @@ public class UserService {
     }
 
     // Updates the current user's profile image URL.
-public UserResponse updateCurrentUserProfileImage(String profileImageUrl) {
-    User user = getCurrentAuthenticatedUser();
+    public UserResponse updateCurrentUserProfileImage(
+            String profileImageUrl) {
 
-    user.setProfileImageUrl(profileImageUrl);
+        User user = getCurrentAuthenticatedUser();
 
-    User savedUser = userRepository.save(user);
+        user.setProfileImageUrl(profileImageUrl);
 
-    return mapToResponse(savedUser);
-}
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    /*
+     * Updates the username of the currently authenticated user.
+     * Requires current password because username is an account-level change.
+     */
+    public UserResponse updateCurrentUsername(
+            String username,
+            String currentPassword) {
+
+        User user = getCurrentAuthenticatedUser();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect.");
+        }
+
+        validateUsername(username);
+
+        String cleanedUsername = username.trim();
+
+        // Only check uniqueness if username is actually changing.
+        if (!user.getUsername().equalsIgnoreCase(cleanedUsername)
+                && userRepository.existsByUsernameIgnoreCase(cleanedUsername)) {
+
+            throw new RuntimeException("Username is already taken.");
+        }
+
+        user.setUsername(cleanedUsername);
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    /*
+     * Validates username rules used throughout the application.
+     *
+     * Rules:
+     * - Required
+     * - 3 to 20 characters
+     * - Letters, numbers, and underscores only
+     */
+    private void validateUsername(String username) {
+
+        if (username == null || username.trim().isEmpty()) {
+            throw new RuntimeException("Username is required.");
+        }
+
+        String cleanedUsername = username.trim();
+
+        if (cleanedUsername.length() < 3 ||
+                cleanedUsername.length() > 20) {
+
+            throw new RuntimeException(
+                    "Username must be between 3 and 20 characters.");
+        }
+
+        if (!cleanedUsername.matches("^[a-zA-Z0-9_]+$")) {
+
+            throw new RuntimeException(
+                    "Username can only contain letters, numbers, and underscores.");
+        }
+    }
+
+    /*
+     * Changes the currently authenticated user's password.
+     *
+     * Requires current password so someone cannot change the password
+     * just because they found an unlocked session.
+     */
+    public void changeCurrentUserPassword(
+            String currentPassword,
+            String newPassword,
+            String confirmPassword) {
+
+        User user = getCurrentAuthenticatedUser();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect.");
+        }
+
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new RuntimeException("New password must be at least 8 characters.");
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("New passwords do not match.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+    }
+
+    /*
+     * Starts secure email change flow.
+     * The current email is not changed until the new email is verified.
+     */
+    public void requestEmailChange(String newEmail, String currentPassword) {
+        User user = getCurrentAuthenticatedUser();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect.");
+        }
+
+        if (newEmail == null || newEmail.trim().isEmpty()) {
+            throw new RuntimeException("New email is required.");
+        }
+
+        String cleanedEmail = newEmail.trim().toLowerCase();
+
+        if (userRepository.existsByEmail(cleanedEmail)) {
+            throw new RuntimeException("Email is already in use.");
+        }
+
+        String token = UUID.randomUUID().toString();
+
+        user.setPendingEmail(cleanedEmail);
+        user.setEmailChangeToken(token);
+        user.setEmailChangeTokenExpiresAt(LocalDateTime.now().plusMinutes(30));
+
+        userRepository.save(user);
+
+        emailService.sendEmailChangeVerificationEmail(cleanedEmail, token);
+    }
+
+    /*
+     * Confirms email change after user clicks verification link.
+     */
+    public UserResponse confirmEmailChange(String token) {
+        User user = userRepository.findByEmailChangeToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid email change token."));
+
+        if (user.getEmailChangeTokenExpiresAt() == null
+                || user.getEmailChangeTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Email change link has expired.");
+        }
+
+        if (user.getPendingEmail() == null || user.getPendingEmail().isBlank()) {
+            throw new RuntimeException("No pending email change found.");
+        }
+
+        if (userRepository.existsByEmail(user.getPendingEmail())) {
+            throw new RuntimeException("Email is already in use.");
+        }
+
+        user.setEmail(user.getPendingEmail());
+        user.setPendingEmail(null);
+        user.setEmailChangeToken(null);
+        user.setEmailChangeTokenExpiresAt(null);
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    // Updates whether the current user receives daily journal reminders.
+    public UserResponse updateJournalReminderPreference(Boolean enabled) {
+        User user = getCurrentAuthenticatedUser();
+
+        user.setJournalReminderEnabled(Boolean.TRUE.equals(enabled));
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    // Updates whether the current user receives goal reminder notifications.
+    public UserResponse updateGoalReminderPreference(Boolean enabled) {
+        User user = getCurrentAuthenticatedUser();
+
+        user.setGoalReminderEnabled(Boolean.TRUE.equals(enabled));
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    // Updates whether the current user receives medication reminder notifications.
+    public UserResponse updateMedicationReminderPreference(Boolean enabled) {
+        User user = getCurrentAuthenticatedUser();
+
+        user.setMedicationReminderEnabled(Boolean.TRUE.equals(enabled));
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    // Updates whether the current user receives community notifications.
+    public UserResponse updateCommunityNotificationPreference(Boolean enabled) {
+
+        User user = getCurrentAuthenticatedUser();
+
+        user.setCommunityNotificationEnabled(
+                Boolean.TRUE.equals(enabled));
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
 }

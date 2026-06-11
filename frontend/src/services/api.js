@@ -1,5 +1,5 @@
 const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 // Gets JWT from browser storage and adds it to protected backend requests
 const getAuthHeaders = () => {
@@ -76,6 +76,61 @@ export const resendVerificationEmail = async (email) => {
 
     return response.text();
 };
+
+// Changes the current user's password.
+export const changePassword = async ({
+    currentPassword,
+    newPassword,
+    confirmPassword,
+}) => {
+    const response = await fetch(`${BASE_URL}/users/me/password`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+            currentPassword,
+            newPassword,
+            confirmPassword,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update password.");
+    }
+
+    return response.text();
+};
+
+// Starts email change verification flow.
+export const requestEmailChange = async ({ newEmail, currentPassword }) => {
+    const response = await fetch(`${BASE_URL}/users/me/email-change-request`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ newEmail, currentPassword }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to start email change.");
+    }
+
+    return response.text();
+};
+
+// Confirms email change using the verification token.
+export const confirmEmailChange = async (token) => {
+    const response = await fetch(
+        `${BASE_URL}/users/confirm-email-change?token=${token}`
+    );
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to confirm email change.");
+    }
+
+    return response.json();
+};
+
 // ===== USER =====
 export const createUser = async (data) => {
     const response = await fetch(`${BASE_URL}/users`, {
@@ -91,66 +146,86 @@ export const createUser = async (data) => {
 
 // Delete User Account
 export const deleteAccount = async () => {
-  const response = await fetch(`${BASE_URL}/users/me`, {
-    method: "DELETE",
-    headers: getAuthHeaders(),
-  });
+    const response = await fetch(`${BASE_URL}/users/me`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
 
-  if (!response.ok) {
-    throw new Error("Delete account failed.");
-  }
+    if (!response.ok) {
+        throw new Error("Delete account failed.");
+    }
 
-  return response;
+    return response;
 };
 
 // Update current user's profile image URL
 export const updateProfileImage = async (profileImageUrl) => {
-  const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ profileImageUrl }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ profileImageUrl }),
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to update profile image.");
-  }
+    if (!response.ok) {
+        throw new Error("Failed to update profile image.");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // Upload current user's profile image
 export const uploadProfileImage = async (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const response = await fetch(`${BASE_URL}/users/me/profile-image/upload`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-    },
-    body: formData,
-  });
+    const response = await fetch(`${BASE_URL}/users/me/profile-image/upload`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+        body: formData,
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to upload profile image.");
-  }
+    if (!response.ok) {
+        throw new Error("Failed to upload profile image.");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // Remove current user's profile image
 export const removeProfileImage = async () => {
-  const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ profileImageUrl: null }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/profile-image`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ profileImageUrl: null }),
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to remove profile image.");
-  }
+    if (!response.ok) {
+        throw new Error("Failed to remove profile image.");
+    }
 
-  return response.json();
+    return response.json();
+};
+
+// Updates the current user's username.
+// Current password is required for account-level changes.
+export const updateUsername = async ({ username, currentPassword }) => {
+    const response = await fetch(`${BASE_URL}/users/me/username`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+            username,
+            currentPassword,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update username.");
+    }
+
+    return response.json();
 };
 
 // ===== JOURNAL =====
@@ -214,12 +289,12 @@ const handleResponse = async (response) => {
 };
 
 export const logoutUser = () => {
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("userId");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("userId");
 };
 
 export const isLoggedIn = () => {
-      return !!sessionStorage.getItem("token");
+    return !!sessionStorage.getItem("token");
 };
 
 // Fetches all conversation messages (USER + AI) for a specific journal entry
@@ -374,6 +449,74 @@ export const getNotifications = async () => {
     });
 
     return response.json();
+};
+
+// Updates current user's daily journal reminder preference.
+export const updateJournalReminderPreference = async (journalReminderEnabled) => {
+  const response = await fetch(`${BASE_URL}/users/me/journal-reminder`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ journalReminderEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update journal reminder.");
+  }
+
+  return response.json();
+};
+
+// Updates current user's goal reminder preference.
+export const updateGoalReminderPreference = async (goalReminderEnabled) => {
+  const response = await fetch(`${BASE_URL}/users/me/goal-reminder`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ goalReminderEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update goal reminder.");
+  }
+
+  return response.json();
+};
+
+// Updates current user's medication reminder preference.
+export const updateMedicationReminderPreference = async (
+  medicationReminderEnabled
+) => {
+  const response = await fetch(`${BASE_URL}/users/me/medication-reminder`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ medicationReminderEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update medication reminder.");
+  }
+
+  return response.json();
+};
+
+// Updates current user's community notification preference.
+export const updateCommunityNotificationPreference = async (
+  communityNotificationEnabled
+) => {
+  const response = await fetch(`${BASE_URL}/users/me/community-notifications`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ communityNotificationEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update community notifications.");
+  }
+
+  return response.json();
 };
 
 // ===== Game Results =====
@@ -738,17 +881,17 @@ export const resetPassword = async (token, newPassword) => {
  * - story: AI-generated story that will be read aloud
  */
 export const generateStoryRecallGame = async (difficulty) => {
-  const response = await fetch(`${BASE_URL}/games/story-recall/generate`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ difficulty }),
-  });
+    const response = await fetch(`${BASE_URL}/games/story-recall/generate`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ difficulty }),
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to generate Story Recall game");
-  }
+    if (!response.ok) {
+        throw new Error("Failed to generate Story Recall game");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // ===== FEEDBACK =====

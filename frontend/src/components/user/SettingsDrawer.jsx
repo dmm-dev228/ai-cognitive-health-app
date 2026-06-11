@@ -161,10 +161,12 @@ function SettingsDrawer({
             text="Manage reminder and notification preferences."
             isOpen={openSection === "notifications"}
             onClick={() => toggleSection("notifications")}
+
           >
             <div className="rounded-2xl bg-white/10 p-4 text-sm">
               Notification preferences will go here.
             </div>
+            <NotificationsSection isDarkMode={isDarkMode} />
           </ExpandableSection>
         </div>
 
@@ -409,8 +411,8 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
           value={newUsername}
           onChange={(e) => setNewUsername(e.target.value)}
           className={`mt-3 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
-              ? "border-white/10 bg-white/10 text-white"
-              : "border-slate-200 bg-slate-50 text-slate-900"
+            ? "border-white/10 bg-white/10 text-white"
+            : "border-slate-200 bg-slate-50 text-slate-900"
             }`}
           placeholder="New username"
         />
@@ -420,8 +422,8 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
           value={usernamePassword}
           onChange={(e) => setUsernamePassword(e.target.value)}
           className={`mt-3 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${isDarkMode
-              ? "border-white/10 bg-white/10 text-white"
-              : "border-slate-200 bg-slate-50 text-slate-900"
+            ? "border-white/10 bg-white/10 text-white"
+            : "border-slate-200 bg-slate-50 text-slate-900"
             }`}
           placeholder="Current password"
         />
@@ -572,6 +574,54 @@ function SecurityPanel({ title, description, isOpen, onClick, isDarkMode, childr
       </button>
 
       {isOpen && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+}
+
+function NotificationsSection({ isDarkMode }) {
+  return (
+    <div className="space-y-4">
+      <NotificationPanel
+        title="Journal Reminders"
+        description="Choose whether CogniHaven reminds you to reflect."
+        isDarkMode={isDarkMode}
+      />
+
+      <NotificationPanel
+        title="Medication Reminders"
+        description="Manage reminder channels for medication routines."
+        isDarkMode={isDarkMode}
+      />
+
+      <NotificationPanel
+        title="Goal Reminders"
+        description="Stay encouraged with progress reminders."
+        isDarkMode={isDarkMode}
+      />
+
+      <NotificationPanel
+        title="Community Updates"
+        description="Control future community activity notifications."
+        isDarkMode={isDarkMode}
+      />
+    </div>
+  );
+}
+
+function NotificationPanel({ title, description, isDarkMode }) {
+  return (
+    <div
+      className={`rounded-3xl border p-4 ${isDarkMode
+          ? "border-white/10 bg-white/10"
+          : "border-slate-100 bg-white"
+        }`}
+    >
+      <p className="text-sm font-bold">{title}</p>
+      <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
+
+      <p className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold opacity-80">
+        Notification controls coming soon.
+      </p>
     </div>
   );
 }

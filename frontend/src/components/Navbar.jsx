@@ -138,9 +138,10 @@ function Navbar({
                     isDarkMode={isDarkMode}
                     setIsDarkMode={setIsDarkMode}
                     onLogout={handleLogout}
+                    onDeleteAccount={handleDeleteAccount}
                   />
 
-                  
+
                 </>
               )}
             </div>

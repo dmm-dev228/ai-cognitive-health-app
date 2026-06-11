@@ -63,6 +63,14 @@ public class UserService {
 
     public UserResponse createUser(UserRequest request) {
 
+        // Validate username rules before account creation.
+        validateUsername(request.getUsername());
+
+        // Prevent duplicate usernames.
+        if (userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
+            throw new RuntimeException("Username is already taken.");
+        }
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email is already in use");
         }
@@ -72,7 +80,7 @@ public class UserService {
         // Generate verification token
         String verificationToken = UUID.randomUUID().toString();
 
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getUsername().trim());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("USER");
@@ -268,7 +276,9 @@ public class UserService {
     }
 
     // Updates the current user's profile image URL.
-    public UserResponse updateCurrentUserProfileImage(String profileImageUrl) {
+    public UserResponse updateCurrentUserProfileImage(
+            String profileImageUrl) {
+
         User user = getCurrentAuthenticatedUser();
 
         user.setProfileImageUrl(profileImageUrl);
@@ -278,18 +288,58 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
-    // Updates the current user's username.
+    // Updates the username of the currently authenticated user.
     public UserResponse updateCurrentUsername(String username) {
+
         User user = getCurrentAuthenticatedUser();
 
-        if (username == null || username.trim().isEmpty()) {
-            throw new RuntimeException("Username cannot be empty.");
+        validateUsername(username);
+
+        String cleanedUsername = username.trim();
+
+        // Only check uniqueness if username is changing.
+        if (!user.getUsername().equalsIgnoreCase(cleanedUsername)
+                && userRepository.existsByUsernameIgnoreCase(
+                        cleanedUsername)) {
+
+            throw new RuntimeException(
+                    "Username is already taken.");
         }
 
-        user.setUsername(username.trim());
+        user.setUsername(cleanedUsername);
 
         User savedUser = userRepository.save(user);
 
         return mapToResponse(savedUser);
+    }
+
+    /*
+     * Validates username rules used throughout the application.
+     *
+     * Rules:
+     * - Required
+     * - 3 to 20 characters
+     * - Letters, numbers, and underscores only
+     */
+    private void validateUsername(String username) {
+
+        if (username == null || username.trim().isEmpty()) {
+            throw new RuntimeException("Username is required.");
+        }
+
+        String cleanedUsername = username.trim();
+
+        if (cleanedUsername.length() < 3 ||
+                cleanedUsername.length() > 20) {
+
+            throw new RuntimeException(
+                    "Username must be between 3 and 20 characters.");
+        }
+
+        if (!cleanedUsername.matches("^[a-zA-Z0-9_]+$")) {
+
+            throw new RuntimeException(
+                    "Username can only contain letters, numbers, and underscores.");
+        }
     }
 }

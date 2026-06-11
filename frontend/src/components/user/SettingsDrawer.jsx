@@ -94,8 +94,8 @@ function SettingsDrawer({
             />
             <div
               className={`rounded-3xl border p-4 ${isDarkMode
-                  ? "border-red-400/20 bg-red-500/10"
-                  : "border-red-100 bg-red-50"
+                ? "border-red-400/20 bg-red-500/10"
+                : "border-red-100 bg-red-50"
                 }`}
             >
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-500">

@@ -81,6 +81,10 @@ public class User {
     @Column(name = "medication_reminder_enabled")
     private Boolean medicationReminderEnabled = true;
 
+    // Controls whether the user receives community update notifications.
+    @Column(name = "community_notification_enabled")
+    private Boolean communityNotificationEnabled = true;
+
     public User() {
     }
 
@@ -214,5 +218,13 @@ public class User {
 
     public void setMedicationReminderEnabled(Boolean medicationReminderEnabled) {
         this.medicationReminderEnabled = medicationReminderEnabled;
+    }
+
+    public Boolean getCommunityNotificationEnabled() {
+        return communityNotificationEnabled;
+    }
+
+    public void setCommunityNotificationEnabled(Boolean communityNotificationEnabled) {
+        this.communityNotificationEnabled = communityNotificationEnabled;
     }
 }

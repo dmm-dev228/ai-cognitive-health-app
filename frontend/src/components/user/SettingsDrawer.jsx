@@ -9,6 +9,7 @@ import {
   updateJournalReminderPreference,
   updateGoalReminderPreference,
   updateMedicationReminderPreference,
+  updateCommunityNotificationPreference,
 } from "../../services/api";
 
 function SettingsDrawer({
@@ -565,6 +566,10 @@ function NotificationsSection({ isDarkMode }) {
     sessionStorage.getItem("medicationReminderEnabled") !== "false"
   );
 
+  const [communityNotificationEnabled, setCommunityNotificationEnabled] = useState(
+    sessionStorage.getItem("communityNotificationEnabled") !== "false"
+  );
+
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -647,6 +652,37 @@ function NotificationsSection({ isDarkMode }) {
     } catch (err) {
       console.error("Medication reminder update failed:", err);
       setMessage(err.message || "Could not update medication reminders.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCommunityNotificationToggle = async () => {
+    try {
+      setIsSaving(true);
+      setMessage("");
+
+      const nextValue = !communityNotificationEnabled;
+
+      const updatedUser =
+        await updateCommunityNotificationPreference(nextValue);
+
+      const savedValue = Boolean(updatedUser.communityNotificationEnabled);
+
+      setCommunityNotificationEnabled(savedValue);
+      sessionStorage.setItem(
+        "communityNotificationEnabled",
+        String(savedValue)
+      );
+
+      setMessage(
+        savedValue
+          ? "Community notifications turned on."
+          : "Community notifications turned off."
+      );
+    } catch (err) {
+      console.error("Community notification update failed:", err);
+      setMessage(err.message || "Could not update community notifications.");
     } finally {
       setIsSaving(false);
     }
@@ -779,9 +815,31 @@ function NotificationsSection({ isDarkMode }) {
         }
         isDarkMode={isDarkMode}
       >
-        <p className="rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold opacity-80">
-          Community notification controls coming soon.
-        </p>
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-bold">
+              {communityNotificationEnabled ? "Enabled" : "Disabled"}
+            </p>
+
+            <p className="mt-1 text-xs opacity-70">
+              {communityNotificationEnabled
+                ? "CogniHaven may show future community activity updates."
+                : "Community notifications are disabled."}
+            </p>
+          </div>
+
+          <button
+            onClick={handleCommunityNotificationToggle}
+            disabled={isSaving}
+            className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${communityNotificationEnabled ? "bg-indigo-500" : "bg-slate-300"
+              } disabled:opacity-60`}
+          >
+            <span
+              className={`block h-6 w-6 rounded-full bg-white shadow-md transition-transform ${communityNotificationEnabled ? "translate-x-8" : "translate-x-0"
+                }`}
+            />
+          </button>
+        </div>
       </NotificationPanel>
 
       {message && (
@@ -804,8 +862,8 @@ function NotificationPanel({
   return (
     <div
       className={`rounded-3xl border ${isDarkMode
-          ? "border-white/10 bg-white/10"
-          : "border-slate-100 bg-white"
+        ? "border-white/10 bg-white/10"
+        : "border-slate-100 bg-white"
         }`}
     >
       <button

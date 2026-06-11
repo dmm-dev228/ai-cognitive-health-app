@@ -501,6 +501,24 @@ export const updateMedicationReminderPreference = async (
   return response.json();
 };
 
+// Updates current user's community notification preference.
+export const updateCommunityNotificationPreference = async (
+  communityNotificationEnabled
+) => {
+  const response = await fetch(`${BASE_URL}/users/me/community-notifications`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ communityNotificationEnabled }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update community notifications.");
+  }
+
+  return response.json();
+};
+
 // ===== Game Results =====
 
 /*

@@ -13,6 +13,7 @@ public class UserResponse {
     private Boolean journalReminderEnabled;
     private Boolean goalReminderEnabled;
     private Boolean medicationReminderEnabled;
+    private Boolean communityNotificationEnabled;
 
     private LocalDateTime createdAt;
 
@@ -25,6 +26,7 @@ public class UserResponse {
             Boolean journalReminderEnabled,
             Boolean goalReminderEnabled,
             Boolean medicationReminderEnabled,
+            Boolean communityNotificationEnabled,
             LocalDateTime createdAt) {
 
         this.id = id;
@@ -35,6 +37,7 @@ public class UserResponse {
         this.journalReminderEnabled = journalReminderEnabled;
         this.goalReminderEnabled = goalReminderEnabled;
         this.medicationReminderEnabled = medicationReminderEnabled;
+        this.communityNotificationEnabled = communityNotificationEnabled;
         this.createdAt = createdAt;
     }
 
@@ -67,6 +70,9 @@ public class UserResponse {
     }
 public Boolean getMedicationReminderEnabled() {
     return medicationReminderEnabled;
+}
+public Boolean getCommunityNotificationEnabled() {
+    return communityNotificationEnabled;
 }
     public LocalDateTime getCreatedAt() {
         return createdAt;

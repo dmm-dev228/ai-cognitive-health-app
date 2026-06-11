@@ -122,6 +122,7 @@ public class UserService {
                 user.getJournalReminderEnabled(),
                 user.getGoalReminderEnabled(),
                 user.getMedicationReminderEnabled(),
+                user.getCommunityNotificationEnabled(),
                 user.getCreatedAt());
     }
 
@@ -476,6 +477,19 @@ public class UserService {
         User user = getCurrentAuthenticatedUser();
 
         user.setMedicationReminderEnabled(Boolean.TRUE.equals(enabled));
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
+
+    // Updates whether the current user receives community notifications.
+    public UserResponse updateCommunityNotificationPreference(Boolean enabled) {
+
+        User user = getCurrentAuthenticatedUser();
+
+        user.setCommunityNotificationEnabled(
+                Boolean.TRUE.equals(enabled));
 
         User savedUser = userRepository.save(user);
 

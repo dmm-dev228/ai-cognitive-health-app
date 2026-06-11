@@ -8,9 +8,11 @@ import com.aihealth.backend.service.UserService;
 import com.aihealth.backend.dto.UpdateUsernameRequest;
 import com.aihealth.backend.dto.ChangePasswordRequest;
 import com.aihealth.backend.dto.EmailChangeRequest;
+import com.aihealth.backend.dto.UpdateCommunityNotificationRequest;
 import com.aihealth.backend.dto.UpdateGoalReminderRequest;
 import com.aihealth.backend.dto.UpdateJournalReminderRequest;
 import com.aihealth.backend.dto.UpdateMedicationReminderRequest;
+import com.aihealth.backend.dto.UpdateCommunityNotificationRequest;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -166,4 +168,15 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/me/community-notifications")
+public ResponseEntity<UserResponse> updateCommunityNotificationPreference(
+        @RequestBody UpdateCommunityNotificationRequest request) {
+
+    UserResponse response =
+            userService.updateCommunityNotificationPreference(
+                    request.getCommunityNotificationEnabled());
+
+    return ResponseEntity.ok(response);
+}
 }

@@ -79,56 +79,56 @@ export const resendVerificationEmail = async (email) => {
 
 // Changes the current user's password.
 export const changePassword = async ({
-  currentPassword,
-  newPassword,
-  confirmPassword,
+    currentPassword,
+    newPassword,
+    confirmPassword,
 }) => {
-  const response = await fetch(`${BASE_URL}/users/me/password`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      currentPassword,
-      newPassword,
-      confirmPassword,
-    }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/password`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+            currentPassword,
+            newPassword,
+            confirmPassword,
+        }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update password.");
-  }
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update password.");
+    }
 
-  return response.text();
+    return response.text();
 };
 
 // Starts email change verification flow.
 export const requestEmailChange = async ({ newEmail, currentPassword }) => {
-  const response = await fetch(`${BASE_URL}/users/me/email-change-request`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ newEmail, currentPassword }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/email-change-request`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ newEmail, currentPassword }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to start email change.");
-  }
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to start email change.");
+    }
 
-  return response.text();
+    return response.text();
 };
 
 // Confirms email change using the verification token.
 export const confirmEmailChange = async (token) => {
-  const response = await fetch(
-    `${BASE_URL}/users/confirm-email-change?token=${token}`
-  );
+    const response = await fetch(
+        `${BASE_URL}/users/confirm-email-change?token=${token}`
+    );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to confirm email change.");
-  }
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to confirm email change.");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // ===== USER =====
@@ -209,19 +209,20 @@ export const removeProfileImage = async () => {
 };
 
 // Updates the current user's username.
-export const updateUsername = async (username) => {
+// Current password is required for account-level changes.
+export const updateUsername = async ({ username, currentPassword }) => {
     const response = await fetch(`${BASE_URL}/users/me/username`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({
+            username,
+            currentPassword,
+        }),
     });
 
     if (!response.ok) {
         const errorData = await response.json();
-
-        throw new Error(
-            errorData.message || "Failed to update username."
-        );
+        throw new Error(errorData.message || "Failed to update username.");
     }
 
     return response.json();

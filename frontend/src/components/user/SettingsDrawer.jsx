@@ -244,8 +244,6 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
   const [newUsername, setNewUsername] = useState(username);
-
-
   const [profileImageUrl, setProfileImageUrl] = useState(
     sessionStorage.getItem("profileImageUrl") || ""
   );
@@ -255,6 +253,8 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
     message.toLowerCase().includes("success") ||
     message.toLowerCase().includes("updated") ||
     message.toLowerCase().includes("removed");
+
+  const [usernamePassword, setUsernamePassword] = useState("");
 
   const handleImageChange = async (event) => {
     const file = event.target.files?.[0];
@@ -308,26 +308,26 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
     }
   };
 
-  const handleUsernameUpdate = async () => {
-    try {
-      setMessage("");
+const handleUsernameUpdate = async () => {
+  try {
+    setMessage("");
 
-      const updatedUser = await updateUsername(newUsername);
+    const updatedUser = await updateUsername({
+      username: newUsername,
+      currentPassword: usernamePassword,
+    });
 
-      sessionStorage.setItem("username", updatedUser.username);
-      window.dispatchEvent(new Event("profileImageUpdated"));
+    sessionStorage.setItem("username", updatedUser.username);
+    setUsernamePassword("");
 
-      setMessage("Username updated successfully.");
-    } catch (err) {
-      console.error(err);
+    window.dispatchEvent(new Event("userProfileUpdated"));
 
-      if (err.message) {
-        setMessage(err.message);
-      } else {
-        setMessage("Could not update username.");
-      }
-    }
-  };
+    setMessage("Username updated successfully.");
+  } catch (err) {
+    console.error(err);
+    setMessage(err.message || "Could not update username.");
+  }
+};
 
   return (
     <div className="space-y-4">
@@ -413,6 +413,18 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
             }`}
           placeholder="Enter username"
         />
+
+        <input
+  type="password"
+  value={usernamePassword}
+  onChange={(e) => setUsernamePassword(e.target.value)}
+  className={`mt-3 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+    isDarkMode
+      ? "border-white/10 bg-white/10 text-white"
+      : "border-slate-200 bg-slate-50 text-slate-900"
+  }`}
+  placeholder="Current password"
+/>
 
         <button
           onClick={handleUsernameUpdate}

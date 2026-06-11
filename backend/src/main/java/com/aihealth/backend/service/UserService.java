@@ -288,22 +288,29 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
-    // Updates the username of the currently authenticated user.
-    public UserResponse updateCurrentUsername(String username) {
+    /*
+     * Updates the username of the currently authenticated user.
+     * Requires current password because username is an account-level change.
+     */
+    public UserResponse updateCurrentUsername(
+            String username,
+            String currentPassword) {
 
         User user = getCurrentAuthenticatedUser();
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect.");
+        }
 
         validateUsername(username);
 
         String cleanedUsername = username.trim();
 
-        // Only check uniqueness if username is changing.
+        // Only check uniqueness if username is actually changing.
         if (!user.getUsername().equalsIgnoreCase(cleanedUsername)
-                && userRepository.existsByUsernameIgnoreCase(
-                        cleanedUsername)) {
+                && userRepository.existsByUsernameIgnoreCase(cleanedUsername)) {
 
-            throw new RuntimeException(
-                    "Username is already taken.");
+            throw new RuntimeException("Username is already taken.");
         }
 
         user.setUsername(cleanedUsername);

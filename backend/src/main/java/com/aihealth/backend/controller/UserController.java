@@ -90,7 +90,9 @@ public class UserController {
     public ResponseEntity<UserResponse> updateCurrentUsername(
             @RequestBody UpdateUsernameRequest request) {
 
-        UserResponse response = userService.updateCurrentUsername(request.getUsername());
+        UserResponse response = userService.updateCurrentUsername(
+                request.getUsername(),
+                request.getCurrentPassword());
 
         return ResponseEntity.ok(response);
     }
@@ -131,4 +133,5 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
 }

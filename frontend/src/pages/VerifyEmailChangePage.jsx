@@ -26,6 +26,7 @@ function VerifyEmailChangePage() {
 
         if (updatedUser.email) {
           sessionStorage.setItem("email", updatedUser.email);
+          window.dispatchEvent(new Event("userProfileUpdated"));
         }
 
         setStatus("success");

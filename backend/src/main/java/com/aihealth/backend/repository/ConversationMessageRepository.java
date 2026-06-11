@@ -9,4 +9,5 @@ public interface ConversationMessageRepository extends JpaRepository<Conversatio
 
     // Fetch all messages for a journal thread in chronological order
     List<ConversationMessage> findByJournalEntryIdOrderByCreatedAtAsc(Long journalEntryId);
+    List<ConversationMessage> findByJournalEntryId(Long journalEntryId);
 }

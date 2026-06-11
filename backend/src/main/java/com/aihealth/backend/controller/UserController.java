@@ -5,6 +5,7 @@ import com.aihealth.backend.dto.UserRequest;
 import com.aihealth.backend.dto.UserResponse;
 import com.aihealth.backend.service.ProfileImageService;
 import com.aihealth.backend.service.UserService;
+import com.aihealth.backend.dto.UpdateUsernameRequest;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +79,16 @@ public class UserController {
         String profileImageUrl = profileImageService.uploadProfileImage(file);
 
         UserResponse response = userService.updateCurrentUserProfileImage(profileImageUrl);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Updates the currently authenticated user's username.
+    @PutMapping("/me/username")
+    public ResponseEntity<UserResponse> updateCurrentUsername(
+            @RequestBody UpdateUsernameRequest request) {
+
+        UserResponse response = userService.updateCurrentUsername(request.getUsername());
 
         return ResponseEntity.ok(response);
     }

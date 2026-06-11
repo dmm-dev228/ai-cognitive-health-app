@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { uploadProfileImage, removeProfileImage } from "../../services/api";
+import {
+  uploadProfileImage,
+  removeProfileImage,
+  updateUsername
+} from "../../services/api";
 
 function SettingsDrawer({
   isOpen,
@@ -221,6 +225,7 @@ function ExpandableSection({
 function AccountProfileSection({ isDarkMode }) {
   const username = sessionStorage.getItem("username") || "User";
   const email = sessionStorage.getItem("email") || "Signed in";
+  const [newUsername, setNewUsername] = useState(username);
 
   const [profileImageUrl, setProfileImageUrl] = useState(
     sessionStorage.getItem("profileImageUrl") || ""
@@ -280,56 +285,121 @@ function AccountProfileSection({ isDarkMode }) {
     }
   };
 
+  const handleUsernameUpdate = async () => {
+    try {
+      setMessage("");
+
+      const updatedUser = await updateUsername(newUsername);
+
+      sessionStorage.setItem("username", updatedUser.username);
+      window.dispatchEvent(new Event("profileImageUpdated"));
+
+      setMessage("Username updated successfully.");
+    } catch (err) {
+      console.error(err);
+      setMessage("Could not update username.");
+    }
+  };
+
   return (
-    <div className="rounded-2xl bg-white/10 p-4 text-sm">
-      <div className="flex items-center gap-4">
-        {profileImageUrl ? (
-          <img
-            src={profileImageUrl}
-            alt={`${username} profile`}
-            className="h-16 w-16 rounded-full object-cover shadow-lg"
-          />
-        ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-2xl font-black text-white">
-            {username.charAt(0).toUpperCase()}
-          </div>
-        )}
-
-        <div className="min-w-0">
-          <p className="font-bold">{username}</p>
-          <p className="truncate text-xs opacity-70">{email}</p>
-        </div>
-      </div>
-
-      <label
-        className={`mt-4 block cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-bold transition ${
+    <div className="space-y-4">
+      {/* Profile image settings */}
+      <div
+        className={`rounded-3xl border p-4 ${
           isDarkMode
-            ? "bg-white/10 text-white hover:bg-white/15"
-            : "bg-white text-indigo-700 hover:bg-indigo-50"
+            ? "border-white/10 bg-white/10"
+            : "border-slate-100 bg-white"
         }`}
       >
-        {isUploading ? "Uploading..." : "📷 Choose Profile Image"}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          disabled={isUploading}
-          className="hidden"
-        />
-      </label>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-60">
+          Profile Image
+        </p>
 
-      {profileImageUrl && (
-        <button
-          onClick={handleRemoveImage}
-          disabled={isUploading}
-          className="mt-3 w-full rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
+        <div className="mt-4 flex items-center gap-4">
+          {profileImageUrl ? (
+            <img
+              src={profileImageUrl}
+              alt={`${username} profile`}
+              className="h-16 w-16 rounded-full object-cover shadow-lg"
+            />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-2xl font-black text-white">
+              {username.charAt(0).toUpperCase()}
+            </div>
+          )}
+
+          <div className="min-w-0">
+            <p className="font-bold">{username}</p>
+            <p className="truncate text-xs opacity-70">{email}</p>
+          </div>
+        </div>
+
+        <label
+          className={`mt-4 block cursor-pointer rounded-2xl px-4 py-3 text-center text-sm font-bold transition ${
+            isDarkMode
+              ? "bg-white/10 text-white hover:bg-white/15"
+              : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+          }`}
         >
-          Remove Profile Image
+          {isUploading ? "Uploading..." : "📷 Choose Profile Image"}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            disabled={isUploading}
+            className="hidden"
+          />
+        </label>
+
+        {profileImageUrl && (
+          <button
+            onClick={handleRemoveImage}
+            disabled={isUploading}
+            className="mt-3 w-full rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
+          >
+            Remove Profile Image
+          </button>
+        )}
+      </div>
+
+      {/* Username settings */}
+      <div
+        className={`rounded-3xl border p-4 ${
+          isDarkMode
+            ? "border-white/10 bg-white/10"
+            : "border-slate-100 bg-white"
+        }`}
+      >
+        <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-60">
+          Username
+        </p>
+
+        <p className="mt-2 text-xs leading-5 opacity-70">
+          This name appears in your account menu and profile areas.
+        </p>
+
+        <input
+          type="text"
+          value={newUsername}
+          onChange={(e) => setNewUsername(e.target.value)}
+          className={`mt-4 w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+            isDarkMode
+              ? "border-white/10 bg-white/10 text-white"
+              : "border-slate-200 bg-slate-50 text-slate-900"
+          }`}
+          placeholder="Enter username"
+        />
+
+        <button
+          onClick={handleUsernameUpdate}
+          className="mt-3 w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700"
+        >
+          Save Username
         </button>
-      )}
+      </div>
 
       {message && (
-        <p className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold">
+        <p className="rounded-2xl bg-white/10 px-4 py-3 text-xs font-semibold">
           {message}
         </p>
       )}

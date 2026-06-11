@@ -101,13 +101,13 @@ public class UserService {
     }
 
     private UserResponse mapToResponse(User user) {
-       return new UserResponse(
-        user.getId(),
-        user.getUsername(),
-        user.getEmail(),
-        user.getRole(),
-        user.getProfileImageUrl(),
-        user.getCreatedAt());
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole(),
+                user.getProfileImageUrl(),
+                user.getCreatedAt());
     }
 
     // Verifies a user's email using the token sent during signup.
@@ -268,13 +268,28 @@ public class UserService {
     }
 
     // Updates the current user's profile image URL.
-public UserResponse updateCurrentUserProfileImage(String profileImageUrl) {
-    User user = getCurrentAuthenticatedUser();
+    public UserResponse updateCurrentUserProfileImage(String profileImageUrl) {
+        User user = getCurrentAuthenticatedUser();
 
-    user.setProfileImageUrl(profileImageUrl);
+        user.setProfileImageUrl(profileImageUrl);
 
-    User savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-    return mapToResponse(savedUser);
-}
+        return mapToResponse(savedUser);
+    }
+
+    // Updates the current user's username.
+    public UserResponse updateCurrentUsername(String username) {
+        User user = getCurrentAuthenticatedUser();
+
+        if (username == null || username.trim().isEmpty()) {
+            throw new RuntimeException("Username cannot be empty.");
+        }
+
+        user.setUsername(username.trim());
+
+        User savedUser = userRepository.save(user);
+
+        return mapToResponse(savedUser);
+    }
 }

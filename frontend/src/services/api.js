@@ -153,6 +153,21 @@ export const removeProfileImage = async () => {
   return response.json();
 };
 
+// Updates the current user's username.
+export const updateUsername = async (username) => {
+  const response = await fetch(`${BASE_URL}/users/me/username`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ username }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update username.");
+  }
+
+  return response.json();
+};
+
 // ===== JOURNAL =====
 export const createJournalEntry = async (data) => {
     const response = await fetch(`${BASE_URL}/journal`, {

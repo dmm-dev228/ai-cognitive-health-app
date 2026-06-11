@@ -12,9 +12,14 @@ import com.aihealth.backend.repository.UserRepository;
 import com.aihealth.backend.security.SecurityUtils;
 import com.aihealth.backend.repository.GoalLogRepository;
 import com.aihealth.backend.repository.GoalRepository;
+import com.aihealth.backend.repository.JournalEntryRepository;
 import com.aihealth.backend.repository.CommunityReactionRepository;
+import com.aihealth.backend.repository.ConversationMessageRepository;
 import com.aihealth.backend.repository.CommunityCommentRepository;
 import com.aihealth.backend.repository.DailyPromptRepository;
+import com.aihealth.backend.repository.JournalEntryRepository;
+import com.aihealth.backend.repository.ConversationMessageRepository;
+import com.aihealth.backend.model.ConversationMessage;
 
 import org.springframework.lang.NonNull;
 import org.springframework.mail.SimpleMailMessage;
@@ -38,6 +43,9 @@ public class UserService {
     private final CommunityReactionRepository communityReactionRepository;
     private final CommunityCommentRepository communityCommentRepository;
     private final DailyPromptRepository dailyPromptRepository;
+    private final JournalEntryRepository journalEntryRepository;
+    private final ConversationMessageRepository conversationMessageRepository;
+    
 
     public UserService(
             UserRepository userRepository,
@@ -47,7 +55,10 @@ public class UserService {
             GoalLogRepository goalLogRepository,
             GoalRepository goalRepository,
             CommunityReactionRepository communityReactionRepository,
-            CommunityCommentRepository communityCommentRepository, DailyPromptRepository dailyPromptRepository) {
+            CommunityCommentRepository communityCommentRepository, 
+            DailyPromptRepository dailyPromptRepository,
+        JournalEntryRepository journalEntryRepository,
+ConversationMessageRepository conversationMessageRepository) {
 
         this.userRepository = userRepository;
         this.emailService = emailService;
@@ -58,6 +69,9 @@ public class UserService {
         this.communityReactionRepository = communityReactionRepository;
         this.communityCommentRepository = communityCommentRepository;
         this.dailyPromptRepository = dailyPromptRepository;
+        this.journalEntryRepository = journalEntryRepository;
+        this.conversationMessageRepository = conversationMessageRepository;
+
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -196,6 +210,25 @@ public class UserService {
         if (!dailyPrompts.isEmpty()) {
             dailyPromptRepository.deleteAll(dailyPrompts);
             dailyPromptRepository.flush();
+        }
+        // Delete journal conversation messages before journal entries.
+       var journalEntries =
+        journalEntryRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+
+        for (var journalEntry : journalEntries) {
+            var messages = conversationMessageRepository.findByJournalEntryId(
+                    journalEntry.getId());
+
+            if (!messages.isEmpty()) {
+                conversationMessageRepository.deleteAll(messages);
+                conversationMessageRepository.flush();
+            }
+        }
+
+        // Delete journal entries after conversation messages are removed.
+        if (!journalEntries.isEmpty()) {
+            journalEntryRepository.deleteAll(journalEntries);
+            journalEntryRepository.flush();
         }
         // Finally delete the user.
         userRepository.delete(user);

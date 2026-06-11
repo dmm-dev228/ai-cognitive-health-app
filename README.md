@@ -17,7 +17,7 @@ The platform focuses on cognitive wellness rather than medical diagnosis and pro
 
 ## Authentication & Email Verification Demo
 
-[![Watch Demo](./assets/EmailVerificationDemo.png)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+[![Watch Demo](./assets/EmailVerificationDemo.png)](https://youtu.be/Ng3uUpbvEks?si=lAmn-HeKzPWdehgq)
 
 ### Cognitive Games Demo
 

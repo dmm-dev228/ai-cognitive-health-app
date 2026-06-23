@@ -41,6 +41,9 @@ CogniHaven is deployed using a production-style cloud architecture:
 
 [![Watch Demo](./assets/EmailVerificationDemo.png)](https://youtu.be/Ng3uUpbvEks?si=lAmn-HeKzPWdehgq)
 
+## Medication Reminders & Notifications Demo
+[![Watch Demo](./assets/MedicationNotificationsDemo.png)](https://youtu.be/fY1184p3D3Y)
+
 ## Cognitive Games Demo
 
 🎬 **Watch Demo**
@@ -828,17 +831,100 @@ Current process:
 
 dev
 ↓
-feature development
+Feature Development
 ↓
-commit
+Commit
 ↓
-push origin dev
+Push origin dev
 ↓
 GitHub Pull Request
 ↓
-merge into main
+GitHub Actions Validation
+↓
+Merge Into Main
+
+Main remains stable while new work is validated through automated testing before release.
 
 This mirrors real development team workflows and keeps main stable.
+
+---
+
+# 🧪 Testing & Quality Assurance
+
+CogniHaven includes automated testing across both frontend and backend systems to improve reliability and prevent regressions.
+
+## Backend Testing
+
+Testing Stack:
+
+* JUnit 5
+* Mockito
+* Spring Boot Test
+* MockMvc
+
+Coverage Includes:
+
+* Authentication Flows
+* Email Verification
+* User Service Logic
+* Goal Service Logic
+* Notification Service Logic
+* Repository Interaction Validation
+* Business Rule Validation
+
+Implemented Test Suites:
+
+* AuthControllerTest
+* UserServiceTest
+* GoalServiceTest
+* NotificationServiceTest
+
+Backend Test Results:
+
+* 24 Automated Tests
+* 0 Failures
+* 0 Errors
+* 1 Intentionally Skipped Context Test
+
+## Frontend Testing
+
+Testing Stack:
+
+* Vitest
+* React Testing Library
+* jsdom
+
+Coverage Includes:
+
+* Login Validation
+* Signup Validation
+* Password Reset Flows
+* Component Rendering
+* User Interaction Testing
+
+Implemented Test Suites:
+
+* LoginPage.test.jsx
+* SignUpPage.test.jsx
+* ForgotPasswordPage.test.jsx
+
+Frontend Test Results:
+
+* 6 Automated Tests
+* All Passing
+
+## Testing Philosophy
+
+CogniHaven prioritizes testing of:
+
+* Authentication
+* Security Workflows
+* User Account Operations
+* Notification Logic
+* Goal Management
+* Critical User Flows
+
+This strategy focuses testing effort on the highest-risk areas of the application.
 
 ---
 
@@ -897,6 +983,63 @@ CogniHaven is fully deployed using a modern cloud architecture.
 * Production Environment Variables
 * Backend Health Check Endpoint
 * React Router Refresh Support Through Vercel Rewrites
+* Automated Frontend Testing
+* Automated Backend Testing
+* GitHub Actions CI Validation
+* Pull Request Validation Workflow
+
+---
+
+# 🔄 Continuous Integration (CI)
+
+CogniHaven uses GitHub Actions to automatically validate application quality before deployment.
+
+## Pipeline Workflow
+
+Developer Push
+↓
+GitHub Actions
+↓
+Backend Tests
+↓
+Frontend Tests
+↓
+Build Validation
+↓
+Pass → Ready For Deployment
+
+Fail → Deployment Blocked
+
+## Automated Validation
+
+Backend:
+
+* Maven Test Execution
+* Spring Boot Build Validation
+
+Frontend:
+
+* Vitest Test Execution
+* Production Build Validation
+
+## GitHub Actions
+
+Pipeline Location:
+
+.github/workflows/ci.yml
+
+Triggers:
+
+* Push To Main
+* Pull Requests Targeting Main
+
+## Benefits
+
+* Prevents Broken Deployments
+* Detects Regressions Early
+* Improves Development Confidence
+* Maintains Application Stability
+* Encourages Safe Refactoring
 
 ---
 
@@ -952,11 +1095,12 @@ CogniHaven is fully deployed using a modern cloud architecture.
 
 ## Engineering Improvements
 
-* Automated Testing
-* CI/CD Pipelines
+* Increase Test Coverage
+* End-to-End Testing With Playwright
 * Monitoring & Logging
 * AWS/Azure Cloud Learning
 * Production Observability
+* Advanced CI/CD Enhancements
 
 ---
 

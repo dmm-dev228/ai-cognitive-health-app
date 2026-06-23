@@ -39,7 +39,7 @@ CogniHaven is deployed using a production-style cloud architecture:
 
 ## Authentication & Email Verification Demo
 
-[![Watch Demo](./assets/EmailVerificationDemo.png)](https://youtu.be/Ng3uUpbvEks?si=lAmn-HeKzPWdehgq)
+[![Watch Demo](./assets/email-verification-demo.png)](https://youtu.be/Ng3uUpbvEks?si=lAmn-HeKzPWdehgq)
 
 ## Medication Reminders & Notifications Demo
 [![Watch Demo](./assets/MedicationNotificationsDemo.png)](https://youtu.be/fY1184p3D3Y)

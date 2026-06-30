@@ -45,9 +45,7 @@ CogniHaven is deployed using a production-style cloud architecture:
 [![Watch Demo](./assets/MedicationNotificationsDemo.png)](https://youtu.be/fY1184p3D3Y)
 
 ## Cognitive Games Demo
-
-🎬 **Watch Demo**
-(Add Link)
+[![Watch Demo](./assets/GameDemo.png)](https://youtu.be/ChKPjOAyg5I)
 
 ## Community Experience Demo
 

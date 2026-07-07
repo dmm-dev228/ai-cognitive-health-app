@@ -3,6 +3,7 @@
 */
 import { useEffect, useRef, useState } from "react";
 import VoiceControls from "../components/VoiceControls";
+import { useToast } from "../components/notifications/useToast";
 import {
   createJournalEntry,
   getJournalEntries,
@@ -79,13 +80,13 @@ function JournalPage() {
   const [mood, setMood] = useState("neutral");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
 
   const [conversationMap, setConversationMap] = useState({});
   const [followUpMap, setFollowUpMap] = useState({});
   const [loadingMap, setLoadingMap] = useState({});
   const [selectedEntryId, setSelectedEntryId] = useState(null);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
+  const { showToast } = useToast();
 
   const [journalTheme, setJournalTheme] = useState(
     localStorage.getItem("journalTheme") || "default"
@@ -172,7 +173,11 @@ function JournalPage() {
       setConversationMap(conversationData);
     } catch (err) {
       console.error("Failed to fetch journal entries:", err);
-      setError("Could not load journal entries.");
+      showToast({
+    type: "error",
+    title: "Unable to Load Journal",
+    message: "We couldn't load your journal entries. Please refresh and try again.",
+});
     } finally {
       setIsLoading(false);
     }
@@ -204,17 +209,29 @@ function JournalPage() {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      setError("Title is required. Please add a title before saving.");
+      showToast({
+    type: "warning",
+    title: "Title Required",
+    message: "Please add a title before saving your journal entry.",
+});
       return;
     }
 
     if (!content.trim()) {
-      setError("Journal Entry is required. Please write your thoughts before saving.");
+      showToast({
+    type: "warning",
+    title: "Journal Entry Required",
+    message: "Please write your thoughts before saving.",
+});
       return;
     }
 
     if (!storedUserId) {
-      setError("No user found. Please log in again.");
+      showToast({
+    type: "error",
+    title: "Session Expired",
+    message: "Please sign in again to continue.",
+});
       return;
     }
 
@@ -255,11 +272,20 @@ function JournalPage() {
       setTitle("");
       setContent("");
       setMood("neutral");
+      showToast({
+    type: "success",
+    title: "Journal Saved",
+    message: "Your journal entry has been saved successfully.",
+});
 
       scrollToBottom();
     } catch (err) {
       console.error("Failed to save journal entry:", err);
-      setError("Could not save journal entry.");
+      showToast({
+    type: "error",
+    title: "Save Failed",
+    message: "Your journal entry couldn't be saved. Please try again.",
+});
     } finally {
       setIsSaving(false);
     }
@@ -269,7 +295,11 @@ function JournalPage() {
     const message = followUpMap[entryId];
 
     if (!message || !message.trim()) {
-      setError("Please enter a follow-up message.");
+ showToast({
+    type: "warning",
+    title: "Message Required",
+    message: "Please enter a follow-up message before sending.",
+});
       return;
     }
 
@@ -317,7 +347,11 @@ function JournalPage() {
       scrollToBottom();
     } catch (err) {
       console.error("Failed to send follow-up message:", err);
-      setError("Could not send follow-up message.");
+showToast({
+    type: "error",
+    title: "Message Failed",
+    message: "Your message couldn't be sent. Please try again.",
+});
 
       /*
        * Remove temporary optimistic message if the request fails.
@@ -352,12 +386,6 @@ function JournalPage() {
           AI-guided insights.
         </p>
       </div>
-
-      {error && (
-        <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-          {error}
-        </div>
-      )}
 
       <div className="grid gap-8 xl:grid-cols-[340px_1fr]">
         <aside className="glass-card h-fit rounded-[2rem] p-5 xl:sticky xl:top-28">

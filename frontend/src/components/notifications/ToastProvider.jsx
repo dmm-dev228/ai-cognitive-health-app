@@ -68,43 +68,33 @@ function ToastNotification({ type, title, message, onClose }) {
     const theme = getToastTheme(type);
 
     return (
-        <div className="fixed right-6 top-6 z-[60] w-[calc(100%-3rem)] max-w-sm animate-fade-in overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 shadow-2xl shadow-indigo-200/50 backdrop-blur-xl">
-            <div className={`h-1.5 bg-gradient-to-r ${theme.gradient}`} />
-
-            <div className="relative p-5">
-                <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-indigo-100/60 blur-2xl" />
-
-                <div className="relative flex items-start gap-4">
-                    <div
-                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br ${theme.gradient} text-xl font-black text-white shadow-lg`}
-                    >
-                        {theme.icon}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
-                            CogniHaven
-                        </p>
-
-                        <p className="mt-1 text-base font-black text-slate-900">
-                            {title}
-                        </p>
-
-                        {message && (
-                            <p className="mt-1 text-sm leading-5 text-slate-600">
-                                {message}
-                            </p>
-                        )}
-                    </div>
-
-                    <button
-                        onClick={onClose}
-                        className="rounded-full bg-slate-100 px-2.5 py-1 text-sm font-bold text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
-                        aria-label="Close notification"
-                    >
-                        ×
-                    </button>
+        <div className={`fixed right-6 top-6 z-[60] w-[calc(100%-3rem)] max-w-sm animate-fade-in overflow-hidden rounded-[1.75rem] border ${theme.border} ${theme.bg} p-4 shadow-xl ${theme.shadow} backdrop-blur-xl`}>
+            <div className="flex items-start gap-3">
+                <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${theme.gradient} text-lg font-black text-white shadow-lg`}
+                >
+                    {theme.icon}
                 </div>
+
+                <div className="min-w-0 flex-1">
+                    <p className={`text-sm font-bold ${theme.titleColor}`}>
+                        {title}
+                    </p>
+
+                    {message && (
+                        <p className={`mt-1 text-sm leading-5 ${theme.messageColor}`}>
+                            {message}
+                        </p>
+                    )}
+                </div>
+
+                <button
+                    onClick={onClose}
+                    className="rounded-full px-2 text-sm font-bold text-slate-400 transition hover:bg-white/70 hover:text-slate-700"
+                    aria-label="Close notification"
+                >
+                    ×
+                </button>
             </div>
         </div>
     );
@@ -116,25 +106,45 @@ function getToastTheme(type) {
             return {
                 icon: "!",
                 gradient: "from-red-500 to-rose-500",
+                bg: "bg-red-50/95",
+                border: "border-red-100",
+                shadow: "shadow-red-200/50",
+                titleColor: "text-red-800",
+                messageColor: "text-red-700",
             };
 
         case "info":
             return {
                 icon: "i",
                 gradient: "from-sky-500 to-cyan-500",
+                bg: "bg-sky-50/95",
+                border: "border-sky-100",
+                shadow: "shadow-sky-200/50",
+                titleColor: "text-sky-800",
+                messageColor: "text-sky-700",
             };
 
         case "warning":
             return {
                 icon: "!",
                 gradient: "from-amber-400 to-orange-400",
+                bg: "bg-amber-50/95",
+                border: "border-amber-100",
+                shadow: "shadow-amber-200/50",
+                titleColor: "text-amber-800",
+                messageColor: "text-amber-700",
             };
 
         case "success":
         default:
             return {
                 icon: "✓",
-                gradient: "from-indigo-500 via-violet-500 to-emerald-500",
+                gradient: "from-emerald-500 to-teal-500",
+                bg: "bg-emerald-50/95",
+                border: "border-emerald-100",
+                shadow: "shadow-emerald-200/50",
+                titleColor: "text-emerald-800",
+                messageColor: "text-emerald-700",
             };
     }
 }

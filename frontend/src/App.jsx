@@ -21,7 +21,7 @@ import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
 import FeedbackCard from "./components/FeedbackCard";
 import UserMenu from "./components/user/UserMenu";
 import VerifyEmailChangePage from "./pages/VerifyEmailChangePage";
-
+import ToastProvider from "./components/notifications/ToastProvider";
 import {
   logoutUser,
   isLoggedIn,
@@ -125,6 +125,7 @@ function App() {
   };
 
   return (
+       <ToastProvider>
     <main
       className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "dark bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 text-slate-100"
         : "bg-gradient-to-br from-sky-50 via-violet-50 to-emerald-50 text-slate-800"
@@ -136,6 +137,7 @@ function App() {
         <div className="absolute -right-20 top-40 h-80 w-80 rounded-full bg-violet-200/40 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
       </div>
+      
 
       <div className="relative z-10">
         <Navbar
@@ -434,6 +436,7 @@ function App() {
         </section>
       </div>
     </main>
+    </ToastProvider>
   );
 }
 

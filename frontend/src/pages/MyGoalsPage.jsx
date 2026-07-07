@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createGoal, getGoals, logGoalProgress } from "../services/api";
 import CogniHavenLogo from "../components/CogniHavenLogo";
-
+import { useToast } from "../components/notifications/useToast";
 
 /*
  * MyGoalsPage
@@ -20,8 +20,8 @@ function MyGoalsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
 
+    const { showToast } = useToast();
 
     const [formData, setFormData] = useState({
         title: "",
@@ -54,6 +54,12 @@ function MyGoalsPage() {
         } catch (err) {
             console.error("Failed to fetch goals:", err);
             setError("Could not load your goals.");
+
+            showToast({
+                type: "error",
+                title: "Goals Not Loaded",
+                message: "Could not load your goals. Please try again.",
+            });
         } finally {
             setIsLoading(false);
         }
@@ -99,25 +105,31 @@ function MyGoalsPage() {
 
         if (validationMessage) {
             setError(validationMessage);
+
+            showToast({
+                type: "warning",
+                title: "Check Goal Details",
+                message: validationMessage,
+            });
+
             return;
         }
 
         try {
             setIsCreating(true);
-
-            // Clear previous messages
             setError("");
-            setSuccess("");
+
             await createGoal({
                 ...formData,
                 targetCount: Number(formData.targetCount),
                 targetDate: formData.targetDate || null,
             });
 
-            // Tell the user the goal was successfully created
-            setSuccess(
-                "Goal created! Your AI plan is ready to help you build momentum."
-            );
+            showToast({
+                type: "success",
+                title: "Goal Created",
+                message: "Your AI plan is ready to help you build momentum.",
+            });
 
             setFormData({
                 title: "",
@@ -134,6 +146,12 @@ function MyGoalsPage() {
         } catch (err) {
             console.error("Failed to create goal:", err);
             setError("Could not create goal. Please check your fields.");
+
+            showToast({
+                type: "error",
+                title: "Goal Not Created",
+                message: "Could not create goal. Please check your fields.",
+            });
         } finally {
             setIsCreating(false);
         }
@@ -165,22 +183,29 @@ function MyGoalsPage() {
 
         if (!logData.progressAmount || Number(logData.progressAmount) < 1) {
             setError("Progress amount must be at least 1.");
+
+            showToast({
+                type: "warning",
+                title: "Check Progress Amount",
+                message: "Progress amount must be at least 1.",
+            });
+
             return;
         }
 
         try {
             setError("");
-            setSuccess("");
 
             await logGoalProgress(goalId, {
                 progressAmount: Number(logData.progressAmount),
                 note: logData.note || "",
             });
 
-            // Let the user know their progress was saved
-            setSuccess(
-                "Progress logged successfully. Every small step counts."
-            );
+            showToast({
+                type: "success",
+                title: "Progress Logged",
+                message: "Every small step counts.",
+            });
 
             setLogMap((prev) => ({
                 ...prev,
@@ -194,6 +219,12 @@ function MyGoalsPage() {
         } catch (err) {
             console.error("Failed to log goal progress:", err);
             setError("Could not log progress.");
+
+            showToast({
+                type: "error",
+                title: "Progress Not Logged",
+                message: "Could not log progress. Please try again.",
+            });
         }
     };
 
@@ -286,9 +317,11 @@ function MyGoalsPage() {
         goals.length === 0
             ? 0
             : Math.round(
-                goals.reduce((sum, goal) => sum + getProgressPercent(goal), 0) /
-                goals.length
-            );
+                  goals.reduce(
+                      (sum, goal) => sum + getProgressPercent(goal),
+                      0
+                  ) / goals.length
+              );
 
     const nextMilestoneGoal = activeGoals.find(
         (goal) => getProgressPercent(goal) > 0 && getProgressPercent(goal) < 100
@@ -297,7 +330,7 @@ function MyGoalsPage() {
     return (
         <section className="animate-fade-in">
             {/* Motivational page hero */}
-            <div className="relative mb-8 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 p-8 text-white shadow-2xl shadow-indigo-200">
+            <div className="relative mb-8 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 p-6 text-white shadow-2xl shadow-indigo-200 sm:p-8">
                 <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-white/20 blur-3xl animate-float" />
                 <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
 
@@ -307,7 +340,7 @@ function MyGoalsPage() {
                             Goal Mission Control
                         </p>
 
-                        <h2 className="mt-6 max-w-4xl text-5xl font-black leading-tight tracking-tight">
+                        <h2 className="mt-6 max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">
                             Build momentum one small win at a time.
                         </h2>
 
@@ -318,14 +351,16 @@ function MyGoalsPage() {
                     </div>
 
                     <div className="flex flex-col items-center">
-                        <CogniHavenLogo className="mb-4 h-40 w-40 object-contain drop-shadow-2xl animate-float" />
+                        <CogniHavenLogo className="mb-4 h-28 w-28 object-contain drop-shadow-2xl animate-float sm:h-36 sm:w-36 lg:h-40 lg:w-40" />
 
                         <p className="text-sm font-semibold text-white/80">
                             Overall Progress
                         </p>
 
                         <div className="mt-4 flex items-end gap-3">
-                            <p className="text-5xl font-black">{averageProgress}%</p>
+                            <p className="text-5xl font-black">
+                                {averageProgress}%
+                            </p>
 
                             <p className="pb-2 text-sm font-semibold text-white/75">
                                 across all goals
@@ -347,24 +382,30 @@ function MyGoalsPage() {
                     {error}
                 </div>
             )}
-            {success && (
-                <div className="mb-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-                    {success}
-                </div>
-            )}
 
             {/* Dashboard summary cards */}
             <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <SummaryCard label="Active Goals" value={activeGoals.length} icon="🔥" />
+
                 <SummaryCard
                     label="Completed"
                     value={completedGoals.length}
                     icon="🏆"
                 />
-                <SummaryCard label="Average Progress" value={`${averageProgress}%`} icon="📈" />
+
+                <SummaryCard
+                    label="Average Progress"
+                    value={`${averageProgress}%`}
+                    icon="📈"
+                />
+
                 <SummaryCard
                     label="Next Milestone"
-                    value={nextMilestoneGoal ? getMilestoneBadge(nextMilestoneGoal) : "Start Today"}
+                    value={
+                        nextMilestoneGoal
+                            ? getMilestoneBadge(nextMilestoneGoal)
+                            : "Start Today"
+                    }
                     icon="✨"
                 />
             </div>
@@ -372,7 +413,9 @@ function MyGoalsPage() {
             <div className="grid gap-8 xl:grid-cols-[400px_1fr]">
                 {/* AI goal coach / create goal panel */}
                 <div className="glass-card h-fit rounded-[2rem] p-6 xl:sticky xl:top-28">
-                    <p className="text-sm font-semibold text-indigo-600">AI Goal Coach</p>
+                    <p className="text-sm font-semibold text-indigo-600">
+                        AI Goal Coach
+                    </p>
 
                     <h3 className="mt-2 text-2xl font-bold text-slate-900">
                         Create a goal that feels achievable.
@@ -521,6 +564,7 @@ function MyGoalsPage() {
                     {isLoading ? (
                         <div className="glass-card rounded-3xl p-10 text-center">
                             <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-500" />
+
                             <p className="font-semibold text-slate-700">
                                 Loading your goals...
                             </p>
@@ -530,6 +574,8 @@ function MyGoalsPage() {
                             <GoalSection
                                 title="Active Goals"
                                 description="Goals you are currently building momentum toward."
+                                emptyTitle="No active goals yet."
+                                emptyDescription="Start with one small goal. CogniHaven will help you build a plan that feels realistic."
                                 goals={activeGoals}
                                 getProgressPercent={getProgressPercent}
                                 getMilestoneBadge={getMilestoneBadge}
@@ -541,8 +587,24 @@ function MyGoalsPage() {
                             />
 
                             <GoalSection
+                                title="Paused Goals"
+                                description="Goals saved for later when the timing feels right."
+                                emptyTitle="No paused goals."
+                                emptyDescription="Paused goals will appear here when you decide to take a break from a goal."
+                                goals={pausedGoals}
+                                getProgressPercent={getProgressPercent}
+                                getMilestoneBadge={getMilestoneBadge}
+                                getCategoryMeta={getCategoryMeta}
+                                logMap={logMap}
+                                handleLogChange={handleLogChange}
+                                handleLogProgress={handleLogProgress}
+                            />
+
+                            <GoalSection
                                 title="Completed Goals"
                                 description="Completed goals and wins worth celebrating."
+                                emptyTitle="Completed goals will appear here."
+                                emptyDescription="Each completed goal becomes proof that small steps can turn into meaningful progress."
                                 goals={completedGoals}
                                 getProgressPercent={getProgressPercent}
                                 getMilestoneBadge={getMilestoneBadge}
@@ -574,7 +636,7 @@ function SummaryCard({ label, value, icon }) {
 
 function ReminderToggle({ title, description, name, checked, onChange }) {
     return (
-        <label className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+        <label className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
             <div>
                 <p className="text-sm font-semibold text-slate-800">{title}</p>
                 <p className="text-xs text-slate-500">{description}</p>
@@ -585,7 +647,7 @@ function ReminderToggle({ title, description, name, checked, onChange }) {
                 name={name}
                 checked={checked}
                 onChange={onChange}
-                className="h-5 w-5 accent-indigo-500"
+                className="h-5 w-5 shrink-0 accent-indigo-500"
             />
         </label>
     );
@@ -594,6 +656,8 @@ function ReminderToggle({ title, description, name, checked, onChange }) {
 function GoalSection({
     title,
     description,
+    emptyTitle,
+    emptyDescription,
     goals,
     getProgressPercent,
     getMilestoneBadge,
@@ -605,7 +669,7 @@ function GoalSection({
 }) {
     return (
         <div>
-            <div className="mb-4 flex items-center justify-between rounded-3xl border border-white/60 bg-white/60 px-5 py-4 shadow-sm backdrop-blur">
+            <div className="mb-4 flex items-center justify-between gap-4 rounded-3xl border border-white/60 bg-white/60 px-5 py-4 shadow-sm backdrop-blur">
                 <div>
                     <h3 className="text-xl font-bold text-slate-900">{title}</h3>
                     <p className="text-sm text-slate-500">{description}</p>
@@ -623,12 +687,11 @@ function GoalSection({
                     </div>
 
                     <h3 className="text-2xl font-bold text-slate-900">
-                        No goals here yet.
+                        {emptyTitle}
                     </h3>
 
                     <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
-                        Create a goal to start building momentum with small, consistent
-                        progress.
+                        {emptyDescription}
                     </p>
                 </div>
             ) : (
@@ -637,6 +700,7 @@ function GoalSection({
                         const progressPercent = getProgressPercent(goal);
                         const milestone = getMilestoneBadge(goal);
                         const meta = getCategoryMeta(goal.category);
+                        const isCompleted = goal.status === "COMPLETED";
                         const logData = logMap[goal.id] || {
                             progressAmount: 1,
                             note: "",
@@ -645,7 +709,11 @@ function GoalSection({
                         return (
                             <article
                                 key={goal.id}
-                                className="group overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 shadow-xl shadow-slate-200/60 backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-2xl"
+                                className={`group overflow-hidden rounded-[2rem] border shadow-xl backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-2xl ${
+                                    isCompleted
+                                        ? "border-emerald-100 bg-emerald-50/80 shadow-emerald-100/60"
+                                        : "border-white/70 bg-white/80 shadow-slate-200/60"
+                                }`}
                             >
                                 <div className={`h-2 bg-gradient-to-r ${meta.color}`} />
 
@@ -655,7 +723,7 @@ function GoalSection({
                                             <div
                                                 className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br ${meta.color} text-2xl shadow-lg`}
                                             >
-                                                {meta.icon}
+                                                {isCompleted ? "🏆" : meta.icon}
                                             </div>
 
                                             <div>
@@ -676,10 +744,13 @@ function GoalSection({
                                         </div>
 
                                         <span
-                                            className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold ${goal.status === "COMPLETED"
-                                                ? "bg-emerald-50 text-emerald-700"
-                                                : "bg-slate-100 text-slate-600"
-                                                }`}
+                                            className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold ${
+                                                isCompleted
+                                                    ? "bg-emerald-100 text-emerald-700"
+                                                    : goal.status === "PAUSED"
+                                                      ? "bg-amber-50 text-amber-700"
+                                                      : "bg-slate-100 text-slate-600"
+                                            }`}
                                         >
                                             {goal.status}
                                         </span>
@@ -729,30 +800,40 @@ function GoalSection({
                                     {showLogging && (
                                         <div className="rounded-3xl border border-slate-100 bg-white/80 p-4">
                                             <p className="mb-3 text-sm font-bold text-slate-800">
-                                                Log a small win
+                                                Log a small win toward this goal
                                             </p>
 
-                                            <div className="grid gap-3 sm:grid-cols-[100px_1fr]">
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    value={logData.progressAmount}
-                                                    onChange={(e) =>
-                                                        handleLogChange(
-                                                            goal.id,
-                                                            "progressAmount",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-                                                />
+                                            <div className="grid gap-3 sm:grid-cols-[120px_1fr]">
+                                                <div className="flex items-center rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-100">
+                                                    <span className="pl-4 text-sm font-bold text-slate-400">
+                                                        +
+                                                    </span>
+
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={logData.progressAmount}
+                                                        onChange={(e) =>
+                                                            handleLogChange(
+                                                                goal.id,
+                                                                "progressAmount",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className="w-full rounded-2xl border-0 bg-transparent px-2 py-3 text-sm text-slate-700 focus:ring-0"
+                                                    />
+                                                </div>
 
                                                 <input
                                                     value={logData.note}
                                                     onChange={(e) =>
-                                                        handleLogChange(goal.id, "note", e.target.value)
+                                                        handleLogChange(
+                                                            goal.id,
+                                                            "note",
+                                                            e.target.value
+                                                        )
                                                     }
-                                                    placeholder="Optional note..."
+                                                    placeholder="Optional note about this win..."
                                                     className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                                                 />
                                             </div>
@@ -761,7 +842,7 @@ function GoalSection({
                                                 onClick={() => handleLogProgress(goal.id)}
                                                 className={`mt-3 w-full rounded-2xl bg-gradient-to-r ${meta.color} px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl`}
                                             >
-                                                Log Progress
+                                                Log {goal.unitLabel || "Progress"}
                                             </button>
                                         </div>
                                     )}

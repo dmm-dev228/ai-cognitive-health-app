@@ -20,6 +20,8 @@ function MyGoalsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
 
     const [formData, setFormData] = useState({
         title: "",
@@ -102,13 +104,20 @@ function MyGoalsPage() {
 
         try {
             setIsCreating(true);
-            setError("");
 
+            // Clear previous messages
+            setError("");
+            setSuccess("");
             await createGoal({
                 ...formData,
                 targetCount: Number(formData.targetCount),
                 targetDate: formData.targetDate || null,
             });
+
+            // Tell the user the goal was successfully created
+            setSuccess(
+                "Goal created! Your AI plan is ready to help you build momentum."
+            );
 
             setFormData({
                 title: "",
@@ -161,11 +170,17 @@ function MyGoalsPage() {
 
         try {
             setError("");
+            setSuccess("");
 
             await logGoalProgress(goalId, {
                 progressAmount: Number(logData.progressAmount),
                 note: logData.note || "",
             });
+
+            // Let the user know their progress was saved
+            setSuccess(
+                "Progress logged successfully. Every small step counts."
+            );
 
             setLogMap((prev) => ({
                 ...prev,
@@ -263,7 +278,8 @@ function MyGoalsPage() {
         );
     };
 
-    const activeGoals = goals.filter((goal) => goal.status !== "COMPLETED");
+    const activeGoals = goals.filter((goal) => goal.status === "ACTIVE");
+    const pausedGoals = goals.filter((goal) => goal.status === "PAUSED");
     const completedGoals = goals.filter((goal) => goal.status === "COMPLETED");
 
     const averageProgress =
@@ -301,7 +317,7 @@ function MyGoalsPage() {
                         </p>
                     </div>
 
-                    <div className="flex flex-col items-center">  
+                    <div className="flex flex-col items-center">
                         <CogniHavenLogo className="mb-4 h-40 w-40 object-contain drop-shadow-2xl animate-float" />
 
                         <p className="text-sm font-semibold text-white/80">
@@ -329,6 +345,11 @@ function MyGoalsPage() {
             {error && (
                 <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
                     {error}
+                </div>
+            )}
+            {success && (
+                <div className="mb-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                    {success}
                 </div>
             )}
 

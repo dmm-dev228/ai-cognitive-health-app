@@ -17,7 +17,7 @@ function CommunityFeed({
   filteredPosts,
   activeFilter,
   getCategoryMeta,
-  getInitial
+  getInitial,
 }) {
   if (isLoading) {
     return <CommunityLoadingState />;
@@ -28,7 +28,7 @@ function CommunityFeed({
   }
 
   return (
-    <>
+    <div className="min-w-0 space-y-4 sm:space-y-5">
       {filteredPosts.map((post) => {
         const meta = getCategoryMeta(post.category);
 
@@ -41,7 +41,7 @@ function CommunityFeed({
           />
         );
       })}
-    </>
+    </div>
   );
 }
 

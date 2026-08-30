@@ -3,7 +3,7 @@ import {
   createMedicationReminder,
   getMedicationReminders,
   deleteMedicationReminder,
-  toggleMedicationReminder
+  toggleMedicationReminder,
 } from "../services/api";
 
 function MedicationReminderPage() {
@@ -23,7 +23,7 @@ function MedicationReminderPage() {
     reminderTimes: [""],
     notes: "",
     inAppReminderEnabled: true,
-    emailReminderEnabled: false
+    emailReminderEnabled: false,
   });
 
   useEffect(() => {
@@ -33,7 +33,9 @@ function MedicationReminderPage() {
   const fetchReminders = async () => {
     try {
       setIsLoading(true);
+
       const data = await getMedicationReminders();
+
       setReminders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch medication reminders:", err);
@@ -48,7 +50,7 @@ function MedicationReminderPage() {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -58,18 +60,19 @@ function MedicationReminderPage() {
     setFormData((prev) => ({
       ...prev,
       frequencyPerDay: count,
-      reminderTimes: Array(count).fill("")
+      reminderTimes: Array(count).fill(""),
     }));
   };
 
   const handleReminderTimeChange = (index, value) => {
     setFormData((prev) => {
       const updatedTimes = [...prev.reminderTimes];
+
       updatedTimes[index] = value;
 
       return {
         ...prev,
-        reminderTimes: updatedTimes
+        reminderTimes: updatedTimes,
       };
     });
   };
@@ -79,7 +82,7 @@ function MedicationReminderPage() {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: checked
+      [name]: checked,
     }));
   };
 
@@ -107,6 +110,7 @@ function MedicationReminderPage() {
     if (event) {
       event.preventDefault();
     }
+
     const validationMessage = validateForm();
 
     if (validationMessage) {
@@ -129,13 +133,16 @@ function MedicationReminderPage() {
         reminderTimes: [""],
         notes: "",
         inAppReminderEnabled: true,
-        emailReminderEnabled: false
+        emailReminderEnabled: false,
       });
 
       await fetchReminders();
     } catch (err) {
       console.error("Failed to create medication reminder:", err);
-      setError("Could not create medication reminder. Please check your fields and try again.");
+
+      setError(
+        "Could not create medication reminder. Please check your fields and try again."
+      );
     }
   };
 
@@ -150,7 +157,7 @@ function MedicationReminderPage() {
 
       await toggleMedicationReminder(id);
 
-      const reminder = reminders.find(r => r.id === id);
+      const reminder = reminders.find((r) => r.id === id);
 
       setSuccessMessage(
         reminder?.isActive
@@ -163,13 +170,10 @@ function MedicationReminderPage() {
       setTimeout(() => {
         setSuccessMessage("");
       }, 5000);
-
     } catch (err) {
       console.error(err);
 
-      setError(
-        "Could not update reminder status."
-      );
+      setError("Could not update reminder status.");
     } finally {
       setTogglingId(null);
     }
@@ -177,12 +181,15 @@ function MedicationReminderPage() {
 
   return (
     <section className="animate-fade-in">
-      <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-500">
+      {/* =========================================================
+          PAGE HEADER
+          ========================================================= */}
+      <div className="mb-5 sm:mb-7 lg:mb-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-500 sm:text-sm sm:tracking-[0.25em]">
           Supportive Wellness Reminders
         </p>
 
-        <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
+        <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-slate-900 min-[390px]:text-3xl sm:mt-3 sm:text-4xl">
           Medication Reminder Center
         </h2>
 
@@ -192,62 +199,109 @@ function MedicationReminderPage() {
         </p>
       </div>
 
+      {/* =========================================================
+          FEEDBACK MESSAGES
+          ========================================================= */}
       {error && (
-        <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+        <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-600 sm:mb-6">
           {error}
         </div>
       )}
 
       {successMessage && (
-        <div className="mb-6 animate-fade-in rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-700 shadow-md">
+        <div className="mb-4 animate-fade-in rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-bold leading-6 text-emerald-700 shadow-md sm:mb-6 sm:px-5 sm:py-4">
           {successMessage}
         </div>
       )}
 
-      <div className="grid gap-8 xl:grid-cols-[420px_1fr]">
-        <div className="glass-card h-fit rounded-[2rem] p-6 lg:sticky lg:top-28">
-          <div className="mb-6">
+      {/* =========================================================
+          MAIN MEDICATION LAYOUT
+          ========================================================= */}
+      <div className="grid gap-5 sm:gap-6 xl:grid-cols-[420px_1fr] xl:gap-8">
+        {/* =======================================================
+            NEW REMINDER FORM
+            ======================================================= */}
+        <div className="glass-card h-fit rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6 xl:sticky xl:top-28">
+          <div className="mb-5 sm:mb-6">
             <p className="text-sm font-semibold text-emerald-600">
               New Reminder
             </p>
 
-            <h3 className="mt-2 text-2xl font-bold text-slate-900">
+            <h3 className="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">
               Add Medication Routine
             </h3>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Create supportive reminders that help maintain routine consistency.
+              Create supportive reminders that help maintain routine
+              consistency.
             </p>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
+            {/* Medication Name */}
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">
                 Medication Name <span className="text-red-500">*</span>
               </span>
+
               <input
                 name="medicationName"
                 placeholder="Medication Name"
                 value={formData.medicationName}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
               />
             </label>
 
-            <input
-              name="dosage"
-              placeholder="Dosage"
-              value={formData.dosage}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
-            />
+            {/* Dosage */}
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">
+                Dosage
+              </span>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <input name="pillShape" placeholder="Shape" value={formData.pillShape} onChange={handleChange} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
-              <input name="pillColor" placeholder="Color" value={formData.pillColor} onChange={handleChange} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
-              <input name="pillSize" placeholder="Size" value={formData.pillSize} onChange={handleChange} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
+              <input
+                name="dosage"
+                placeholder="Example: 10 mg"
+                value={formData.dosage}
+                onChange={handleChange}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+              />
+            </label>
+
+            {/* Pill Appearance */}
+            <div>
+              <p className="mb-2 text-sm font-semibold text-slate-700">
+                Pill Appearance
+              </p>
+
+              <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+                <input
+                  name="pillShape"
+                  placeholder="Shape"
+                  value={formData.pillShape}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                />
+
+                <input
+                  name="pillColor"
+                  placeholder="Color"
+                  value={formData.pillColor}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                />
+
+                <input
+                  name="pillSize"
+                  placeholder="Size"
+                  value={formData.pillSize}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+                />
+              </div>
             </div>
 
+            {/* Frequency */}
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">
                 Frequency Per Day <span className="text-red-500">*</span>
@@ -257,7 +311,7 @@ function MedicationReminderPage() {
                 name="frequencyPerDay"
                 value={formData.frequencyPerDay}
                 onChange={handleFrequencyChange}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
               >
                 <option value={1}>Once daily</option>
                 <option value={2}>Twice daily</option>
@@ -266,11 +320,13 @@ function MedicationReminderPage() {
               </select>
             </label>
 
+            {/* Reminder Times */}
             <div className="space-y-3">
               {formData.reminderTimes.map((time, index) => (
                 <label key={index} className="block">
                   <span className="mb-2 block text-sm font-semibold text-slate-700">
-                    Reminder Time {index + 1} <span className="text-red-500">*</span>
+                    Reminder Time {index + 1}{" "}
+                    <span className="text-red-500">*</span>
                   </span>
 
                   <input
@@ -280,36 +336,46 @@ function MedicationReminderPage() {
                     onChange={(e) =>
                       handleReminderTimeChange(index, e.target.value)
                     }
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
                   />
                 </label>
               ))}
             </div>
 
-            <textarea
-              name="notes"
-              placeholder="Supportive notes..."
-              value={formData.notes}
-              onChange={handleChange}
-              rows="4"
-              className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"
-            />
-            <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5">
+            {/* Notes */}
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-slate-700">
+                Notes
+              </span>
+
+              <textarea
+                name="notes"
+                placeholder="Supportive notes..."
+                value={formData.notes}
+                onChange={handleChange}
+                rows="4"
+                className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+              />
+            </label>
+
+            {/* Reminder Channels */}
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:rounded-3xl sm:p-5">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
                 Reminder Channels
               </p>
 
-              <div className="mt-4 grid gap-3">
+              <div className="mt-3 grid gap-3 sm:mt-4">
+                {/* In-App */}
                 <div
                   onClick={(event) => event.stopPropagation()}
-                  className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 shadow-sm"
+                  className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 shadow-sm sm:py-4"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-800">
                       In-app notifications
                     </p>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs leading-5 text-slate-500">
                       Show reminders inside CogniHaven
                     </p>
                   </div>
@@ -320,20 +386,21 @@ function MedicationReminderPage() {
                     checked={formData.inAppReminderEnabled}
                     onChange={handleCheckboxChange}
                     onClick={(event) => event.stopPropagation()}
-                    className="h-5 w-5 accent-emerald-500"
+                    className="h-5 w-5 shrink-0 accent-emerald-500"
                   />
                 </div>
 
+                {/* Email */}
                 <div
                   onClick={(event) => event.stopPropagation()}
-                  className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 shadow-sm"
+                  className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 shadow-sm sm:py-4"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-800">
                       Email reminders
                     </p>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs leading-5 text-slate-500">
                       Send reminder emails
                     </p>
                   </div>
@@ -344,11 +411,13 @@ function MedicationReminderPage() {
                     checked={formData.emailReminderEnabled}
                     onChange={handleCheckboxChange}
                     onClick={(event) => event.stopPropagation()}
-                    className="h-5 w-5 accent-emerald-500"
+                    className="h-5 w-5 shrink-0 accent-emerald-500"
                   />
                 </div>
               </div>
             </div>
+
+            {/* Add Reminder */}
             <button
               type="button"
               onClick={handleSubmit}
@@ -359,26 +428,30 @@ function MedicationReminderPage() {
           </div>
         </div>
 
-        {/* Reminder List */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between rounded-3xl border border-white/60 bg-white/60 px-5 py-4 shadow-sm backdrop-blur">
-            <div>
-              <h3 className="text-xl font-bold text-slate-900">
+        {/* =======================================================
+            REMINDER LIST
+            ======================================================= */}
+        <div className="min-w-0 space-y-4 sm:space-y-6">
+          {/* Reminder List Header */}
+          <div className="flex flex-col gap-3 rounded-2xl border border-white/60 bg-white/60 px-4 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:rounded-3xl sm:px-5">
+            <div className="min-w-0">
+              <h3 className="text-lg font-bold text-slate-900 sm:text-xl">
                 Your Medication Routines
               </h3>
 
-              <p className="text-sm text-slate-500">
+              <p className="mt-1 text-sm leading-6 text-slate-500">
                 View and manage supportive reminder schedules.
               </p>
             </div>
 
-            <span className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
+            <span className="w-fit shrink-0 rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 sm:text-sm">
               {reminders.length} reminders
             </span>
           </div>
 
+          {/* Loading */}
           {isLoading ? (
-            <div className="glass-card rounded-3xl p-10 text-center">
+            <div className="glass-card rounded-2xl p-7 text-center sm:rounded-3xl sm:p-10">
               <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-500" />
 
               <p className="font-semibold text-slate-700">
@@ -386,12 +459,13 @@ function MedicationReminderPage() {
               </p>
             </div>
           ) : reminders.length === 0 ? (
-            <div className="glass-card rounded-3xl p-10 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-50 text-3xl">
+            /* Empty State */
+            <div className="glass-card rounded-2xl p-7 text-center sm:rounded-3xl sm:p-10">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-3xl sm:mb-5 sm:h-16 sm:w-16 sm:rounded-3xl">
                 💊
               </div>
 
-              <h3 className="text-2xl font-bold text-slate-900">
+              <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
                 No reminders yet.
               </h3>
 
@@ -404,40 +478,45 @@ function MedicationReminderPage() {
             reminders.map((r) => (
               <div
                 key={r.id}
-                className="glass-card overflow-hidden rounded-[2rem]"
+                className="glass-card min-w-0 overflow-hidden rounded-[1.5rem] sm:rounded-[2rem]"
               >
-                {/* Card Header */}
-                <div className="border-b border-slate-100 bg-white/70 px-6 py-5">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
+                {/* =================================================
+                    REMINDER CARD HEADER
+                    ================================================= */}
+                <div className="border-b border-slate-100 bg-white/70 px-4 py-4 sm:px-6 sm:py-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                    <div className="min-w-0">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-100 text-2xl">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-xl sm:h-14 sm:w-14 sm:rounded-3xl sm:text-2xl">
                           💊
                         </div>
 
-                        <div>
-                          <h3 className="text-2xl font-bold text-slate-900">
+                        <div className="min-w-0">
+                          <h3 className="break-words text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
                             {r.medicationName}
                           </h3>
 
-                          <p className="text-sm text-slate-500">
+                          <p className="mt-1 break-words text-sm text-slate-500">
                             {r.dosage || "Dosage not set"}
                           </p>
                         </div>
                       </div>
                     </div>
 
+                    {/* Reminder Status */}
                     <span
-                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${r.isActive
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-red-50 text-red-600"
-                        }`}
+                      className={`flex w-fit shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${
+                        r.isActive
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-red-50 text-red-600"
+                      }`}
                     >
                       <span
-                        className={`h-2 w-2 rounded-full ${r.isActive
-                          ? "bg-emerald-500"
-                          : "bg-red-500"
-                          }`}
+                        className={`h-2 w-2 rounded-full ${
+                          r.isActive
+                            ? "bg-emerald-500"
+                            : "bg-red-500"
+                        }`}
                       />
 
                       {r.isActive ? "Active" : "Inactive"}
@@ -445,78 +524,85 @@ function MedicationReminderPage() {
                   </div>
                 </div>
 
-                {/* Card Body */}
-                <div className="grid gap-6 p-6 lg:grid-cols-2">
-                  <div className="space-y-5">
+                {/* =================================================
+                    REMINDER CARD BODY
+                    ================================================= */}
+                <div className="grid gap-5 p-4 sm:p-6 lg:grid-cols-2 lg:gap-6">
+                  {/* Left Column */}
+                  <div className="min-w-0 space-y-5">
+                    {/* Pill Details */}
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
                         Pill Details
                       </p>
 
-                      <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                        <div className="rounded-2xl bg-slate-50 p-4">
+                      <div className="mt-3 grid gap-2 sm:grid-cols-3 sm:gap-3">
+                        <div className="min-w-0 rounded-2xl bg-slate-50 p-3 sm:p-4">
                           <p className="text-xs font-semibold text-slate-400">
                             Shape
                           </p>
 
-                          <p className="mt-1 text-sm font-bold text-slate-800">
+                          <p className="mt-1 break-words text-sm font-bold text-slate-800">
                             {r.pillShape || "Not set"}
                           </p>
                         </div>
 
-                        <div className="rounded-2xl bg-slate-50 p-4">
+                        <div className="min-w-0 rounded-2xl bg-slate-50 p-3 sm:p-4">
                           <p className="text-xs font-semibold text-slate-400">
                             Color
                           </p>
 
-                          <p className="mt-1 text-sm font-bold text-slate-800">
+                          <p className="mt-1 break-words text-sm font-bold text-slate-800">
                             {r.pillColor || "Not set"}
                           </p>
                         </div>
 
-                        <div className="rounded-2xl bg-slate-50 p-4">
+                        <div className="min-w-0 rounded-2xl bg-slate-50 p-3 sm:p-4">
                           <p className="text-xs font-semibold text-slate-400">
                             Size
                           </p>
 
-                          <p className="mt-1 text-sm font-bold text-slate-800">
+                          <p className="mt-1 break-words text-sm font-bold text-slate-800">
                             {r.pillSize || "Not set"}
                           </p>
                         </div>
                       </div>
                     </div>
 
+                    {/* Notes */}
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
                         Notes
                       </p>
 
-                      <p className="mt-3 text-sm leading-7 text-slate-600">
+                      <p className="mt-3 break-words text-sm leading-7 text-slate-600">
                         {r.notes || "No notes added."}
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-5">
+                  {/* Right Column */}
+                  <div className="min-w-0 space-y-5">
+                    {/* Daily Routine */}
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
                         Daily Routine
                       </p>
 
-                      <div className="mt-3 rounded-3xl bg-emerald-50 p-5">
+                      <div className="mt-3 rounded-2xl bg-emerald-50 p-4 sm:rounded-3xl sm:p-5">
                         <p className="text-sm font-semibold text-emerald-700">
                           {r.frequencyPerDay
                             ? `${r.frequencyPerDay} time(s) per day`
                             : "Frequency not set"}
                         </p>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
+                        <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
                           {Array.isArray(r.reminderTimes) &&
-                            r.reminderTimes.length > 0 ? (
+                          r.reminderTimes.length > 0 ? (
                             r.reminderTimes.map((time, index) => (
                               <span
                                 key={index}
-                                className="rounded-full bg-white px-4 py-2 text-xs font-bold text-emerald-700 shadow-sm"
+                                className="rounded-full bg-white px-3 py-2 text-xs font-bold text-emerald-700 shadow-sm sm:px-4"
                               >
                                 {time}
                               </span>
@@ -530,6 +616,7 @@ function MedicationReminderPage() {
                       </div>
                     </div>
 
+                    {/* Reminder Channels */}
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
                         Reminder Channels
@@ -538,13 +625,13 @@ function MedicationReminderPage() {
                       <div className="mt-3 flex flex-wrap gap-2">
                         {[
                           r.inAppReminderEnabled ? "In-app" : null,
-                          r.emailReminderEnabled ? "Email" : null
+                          r.emailReminderEnabled ? "Email" : null,
                         ]
                           .filter(Boolean)
                           .map((channel) => (
                             <span
                               key={channel}
-                              className="rounded-full bg-sky-50 px-4 py-2 text-xs font-bold text-sky-700"
+                              className="rounded-full bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 sm:px-4"
                             >
                               {channel}
                             </span>
@@ -553,22 +640,28 @@ function MedicationReminderPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-wrap gap-3 pt-2">
+                    <div className="grid gap-2 pt-2 sm:flex sm:flex-wrap sm:gap-3">
                       <button
+                        type="button"
                         onClick={() => handleToggle(r.id)}
-                        className={`rounded-2xl px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 disabled:opacity-60 ${r.isActive
-                          ? "bg-amber-500 hover:bg-amber-600"
-                          : "bg-emerald-500 hover:bg-emerald-600"
-                          }`}
+                        disabled={togglingId === r.id}
+                        className={`w-full rounded-2xl px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto ${
+                          r.isActive
+                            ? "bg-amber-500 hover:bg-amber-600"
+                            : "bg-emerald-500 hover:bg-emerald-600"
+                        }`}
                       >
-                        {r.isActive
-                          ? "Pause Reminder"
-                          : "Resume Reminder"}
+                        {togglingId === r.id
+                          ? "Updating..."
+                          : r.isActive
+                            ? "Pause Reminder"
+                            : "Resume Reminder"}
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => handleDelete(r.id)}
-                        className="rounded-2xl bg-red-50 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                        className="w-full rounded-2xl bg-red-50 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 sm:w-auto"
                       >
                         Delete
                       </button>

@@ -39,43 +39,45 @@ function GamePage() {
 
   const [wordBloomData, setWordBloomData] = useState(null);
 
-
   const { speak } = useTextToSpeech();
 
   const scrollToGameArea = () => {
     setTimeout(() => {
       gameAreaRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "start"
+        block: "start",
       });
     }, 100);
   };
+
   const scrollToMemoryMatch = () => {
     setTimeout(() => {
       memoryMatchRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "start"
+        block: "start",
       });
     }, 250);
   };
+
   const scrollToRef = (ref, delay = 150) => {
     setTimeout(() => {
       ref.current?.scrollIntoView({
         behavior: "smooth",
-        block: "start"
+        block: "start",
       });
     }, delay);
   };
+
   const getGameLabel = () => {
     if (selectedGame === "STORY_RECALL") return "Story Recall";
-    if (selectedGame === "CARD_MATCH") return "Memory Match";
+    if (selectedGame === "MEMORY_MATCH") return "Memory Match";
     if (selectedGame === "WORD_BLOOM") return "Word Bloom";
     return "Pattern Recall";
   };
 
   const getGameHeading = () => {
     if (selectedGame === "STORY_RECALL") return "Story Memory Challenge";
-    if (selectedGame === "CARD_MATCH") return "Memory Match Challenge";
+    if (selectedGame === "MEMORY_MATCH") return "Memory Match Challenge";
     if (selectedGame === "WORD_BLOOM") return "Word Bloom Challenge";
     return "Memory Challenge";
   };
@@ -85,7 +87,7 @@ function GamePage() {
       return "Memorize the target words, listen to the story, then recall the original words.";
     }
 
-    if (selectedGame === "CARD_MATCH") {
+    if (selectedGame === "MEMORY_MATCH") {
       return "Flip cards, find matching pairs, and practice focus, recognition, and memory.";
     }
 
@@ -137,6 +139,7 @@ function GamePage() {
     setSpokenStory("");
     setWordBloomData(null);
   };
+
   useEffect(() => {
     if (
       gameStarted &&
@@ -149,15 +152,15 @@ function GamePage() {
   }, [gameStarted, isShowingPrompt, selectedGame, isGeneratingReflection]);
 
   const startGame = async () => {
-
     const scrollToGameArea = () => {
       setTimeout(() => {
         gameAreaRef.current?.scrollIntoView({
           behavior: "smooth",
-          block: "start"
+          block: "start",
         });
       }, 100);
     };
+
     resetGameState();
     setGameStarted(true);
     setIsShowingPrompt(true);
@@ -202,10 +205,11 @@ function GamePage() {
     if (selectedGame === "STORY_RECALL") {
       try {
         /*
-          Generate a fresh Story Recall round from the backend.
-          Backend returns AI-generated target words and a fresh story.
-        */
-        const generatedStoryGame = await generateStoryRecallGame(difficulty);
+         * Generate a fresh Story Recall round from the backend.
+         * Backend returns AI-generated target words and a fresh story.
+         */
+        const generatedStoryGame =
+          await generateStoryRecallGame(difficulty);
 
         setStoryData(generatedStoryGame);
         setStoryPhase("WORDS");
@@ -226,17 +230,17 @@ function GamePage() {
             clearInterval(countdownInterval);
 
             /*
-              After the words disappear, show the story and automatically
-              read it aloud as part of the game.
-            */
+             * After the words disappear, show the story and automatically
+             * read it aloud as part of the game.
+             */
             setStoryPhase("STORY");
             setSpokenStory(generatedStoryGame.story);
             scrollToRef(storyNarrationRef);
 
             /*
-              Move to the recall phase only after the story narration finishes.
-              This prevents the answer screen from appearing before the AI is done reading.
-            */
+             * Move to the recall phase only after the story narration finishes.
+             * This prevents the answer screen from appearing before the AI is done reading.
+             */
             speak(generatedStoryGame.story, () => {
               setStoryPhase("RECALL");
               setIsShowingPrompt(false);
@@ -247,7 +251,9 @@ function GamePage() {
         }, 1000);
       } catch (err) {
         console.error("Failed to generate Story Recall game:", err);
-        setResultMessage("Could not generate a Story Recall game. Please try again.");
+        setResultMessage(
+          "Could not generate a Story Recall game. Please try again."
+        );
         setGameStarted(false);
         setIsShowingPrompt(false);
       }
@@ -270,7 +276,7 @@ function GamePage() {
 
         setAiReflection(
           aiResult.supportiveResponse ||
-          "CogniHaven generated a reflection, but no response text was returned."
+            "CogniHaven generated a reflection, but no response text was returned."
         );
       } catch (reflectionError) {
         console.error("AI reflection failed:", reflectionError);
@@ -356,13 +362,11 @@ function GamePage() {
       score === 100
         ? `Excellent recall! You remembered all ${totalQuestions} items. Score: ${score}%.`
         : `You remembered ${correctAnswers}/${totalQuestions} items. Score: ${score}%. The original items were: ${storyData.targetWords.join(
-          ", "
-        )}.`;
+            ", "
+          )}.`;
 
     await saveResultAndReflect(gameResult, message);
   };
-
-
 
   const submitAnswer = () => {
     if (selectedGame === "STORY_RECALL") {
@@ -374,43 +378,55 @@ function GamePage() {
 
   return (
     <section className="animate-fade-in">
-      <div className="mb-10 text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-violet-500">
+      {/* =========================================================
+          PAGE HEADER
+          ========================================================= */}
+      <div className="mb-6 text-center sm:mb-8 lg:mb-10">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500 sm:text-sm sm:tracking-[0.25em]">
           Cognitive Wellness Games
         </p>
 
-        <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
+        <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-slate-900 min-[390px]:text-3xl sm:mt-3 sm:text-4xl">
           Train focus, memory, and attention.
         </h2>
 
-        <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-slate-600">
+        <p className="mx-auto mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:mt-4 sm:leading-7">
           Practice short memory exercises designed for cognitive engagement,
           supportive wellness tracking, and AI-guided reflection.
         </p>
       </div>
 
-      <div ref={gameAreaRef} className="mx-auto max-w-5xl scroll-mt-28">
-        <div className="glass-card overflow-hidden rounded-[2rem]">
-          <div className="border-b border-white/60 bg-gradient-to-r from-violet-500 via-indigo-500 to-sky-500 px-8 py-10 text-white">
+      {/* =========================================================
+          GAME CONTAINER
+          ========================================================= */}
+      <div
+        ref={gameAreaRef}
+        className="mx-auto min-w-0 max-w-5xl scroll-mt-24 sm:scroll-mt-28"
+      >
+        <div className="glass-card min-w-0 overflow-hidden rounded-[1.5rem] sm:rounded-[2rem]">
+          {/* =====================================================
+              GAME HEADER / CONTROLS
+              ===================================================== */}
+          <div className="border-b border-white/60 bg-gradient-to-r from-violet-500 via-indigo-500 to-sky-500 px-4 py-6 text-white sm:px-6 sm:py-8 lg:px-8 lg:py-10">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/80">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80 sm:text-sm sm:tracking-[0.25em]">
                   {getGameLabel()}
                 </p>
 
-                <h3 className="mt-3 text-4xl font-black tracking-tight">
+                <h3 className="mt-2 break-words text-2xl font-black leading-tight tracking-tight min-[390px]:text-3xl sm:mt-3 sm:text-4xl">
                   {getGameHeading()}
                 </h3>
 
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-white/85">
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/85 sm:leading-7">
                   {getGameDescription()}
                 </p>
               </div>
 
               {!gameStarted && (
-                <div className="grid gap-4 rounded-3xl bg-white/15 p-5 backdrop-blur-xl sm:grid-cols-2 lg:w-[420px]">
+                <div className="grid w-full gap-4 rounded-2xl bg-white/15 p-4 backdrop-blur-xl sm:grid-cols-2 sm:rounded-3xl sm:p-5 lg:w-[420px] lg:shrink-0">
                   <label className="block">
-                    <span className="mb-3 block text-sm font-semibold text-white">
+                    <span className="mb-2 block text-sm font-semibold text-white sm:mb-3">
                       Game
                     </span>
 
@@ -419,26 +435,38 @@ function GamePage() {
                       onChange={(e) => setSelectedGame(e.target.value)}
                       className="w-full rounded-2xl border border-white/20 bg-white/20 px-4 py-3 text-sm font-semibold text-white backdrop-blur focus:outline-none focus:ring-4 focus:ring-white/20"
                     >
-                      <option className="text-slate-900" value="PATTERN_RECALL">
+                      <option
+                        className="text-slate-900"
+                        value="PATTERN_RECALL"
+                      >
                         Pattern Recall
                       </option>
 
-                      <option className="text-slate-900" value="STORY_RECALL">
+                      <option
+                        className="text-slate-900"
+                        value="STORY_RECALL"
+                      >
                         Story Recall
                       </option>
 
-                      <option className="text-slate-900" value="MEMORY_MATCH">
+                      <option
+                        className="text-slate-900"
+                        value="MEMORY_MATCH"
+                      >
                         Memory Match
                       </option>
 
-                      <option className="text-slate-900" value="WORD_BLOOM">
+                      <option
+                        className="text-slate-900"
+                        value="WORD_BLOOM"
+                      >
                         Word Bloom
                       </option>
                     </select>
                   </label>
 
                   <label className="block">
-                    <span className="mb-3 block text-sm font-semibold text-white">
+                    <span className="mb-2 block text-sm font-semibold text-white sm:mb-3">
                       Difficulty
                     </span>
 
@@ -463,7 +491,7 @@ function GamePage() {
 
                   <button
                     onClick={startGame}
-                    className="sm:col-span-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                    className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl sm:col-span-2"
                   >
                     Start Game
                   </button>
@@ -472,9 +500,18 @@ function GamePage() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-8">
+          {/* =====================================================
+              GAME BODY
+              ===================================================== */}
+          <div className="min-w-0 p-3 sm:p-6 md:p-8">
+            {/* ===================================================
+                MEMORY MATCH
+                =================================================== */}
             {gameStarted && selectedGame === "MEMORY_MATCH" && (
-              <div ref={memoryMatchRef} className="scroll-mt-28">
+              <div
+                ref={memoryMatchRef}
+                className="min-w-0 scroll-mt-24 sm:scroll-mt-28"
+              >
                 <MemoryMatchGame
                   difficulty={difficulty}
                   onChangeGame={() => {
@@ -490,7 +527,7 @@ function GamePage() {
                       totalQuestions: result.totalQuestions,
                       correctAnswers: result.correctAnswers,
                       timeTakenSeconds: result.timeTakenSeconds,
-                      difficulty: result.difficulty
+                      difficulty: result.difficulty,
                     };
 
                     const message = `Great work! You matched ${result.correctAnswers}/${result.totalQuestions} pairs with ${result.score}% accuracy in ${result.timeTakenSeconds} seconds.`;
@@ -501,94 +538,108 @@ function GamePage() {
               </div>
             )}
 
-            {gameStarted && selectedGame === "WORD_BLOOM" && wordBloomData && (
-              <>
-                <WordBloomGame
-                  difficulty={difficulty}
-                  wordData={wordBloomData}
-                  onComplete={async (result) => {
-                    const message = result.didWin
-                      ? `Great work! You solved Word Bloom in ${result.attemptsUsed} guesses.`
-                      : `Good effort! The Word Bloom answer was ${result.secretWord}.`;
+            {/* ===================================================
+                WORD BLOOM
+                =================================================== */}
+            {gameStarted &&
+              selectedGame === "WORD_BLOOM" &&
+              wordBloomData && (
+                <>
+                  <div className="min-w-0 overflow-x-auto">
+                    <WordBloomGame
+                      difficulty={difficulty}
+                      wordData={wordBloomData}
+                      onComplete={async (result) => {
+                        const message = result.didWin
+                          ? `Great work! You solved Word Bloom in ${result.attemptsUsed} guesses.`
+                          : `Good effort! The Word Bloom answer was ${result.secretWord}.`;
 
-                    const gameResult = {
-                      gameType: "WORD_BLOOM",
-                      score: result.score,
-                      totalQuestions: result.totalQuestions,
-                      correctAnswers: result.correctAnswers,
-                      timeTakenSeconds: result.timeTakenSeconds,
-                      difficulty,
-                    };
+                        const gameResult = {
+                          gameType: "WORD_BLOOM",
+                          score: result.score,
+                          totalQuestions: result.totalQuestions,
+                          correctAnswers: result.correctAnswers,
+                          timeTakenSeconds: result.timeTakenSeconds,
+                          difficulty,
+                        };
 
-                    await saveResultAndReflect(gameResult, message);
-                  }}
-                />
+                        await saveResultAndReflect(gameResult, message);
+                      }}
+                    />
+                  </div>
 
-                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    onClick={startGame}
-                    disabled={isGeneratingReflection}
-                    className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Play Again
-                  </button>
+                  <div className="mt-5 grid gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
+                    <button
+                      onClick={startGame}
+                      disabled={isGeneratingReflection}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    >
+                      Play Again
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      setGameStarted(false);
-                      resetGameState();
-                    }}
-                    disabled={isGeneratingReflection}
-                    className="rounded-2xl bg-red-50 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Change Game
-                  </button>
-                </div>
-              </>
-            )}
+                    <button
+                      onClick={() => {
+                        setGameStarted(false);
+                        resetGameState();
+                      }}
+                      disabled={isGeneratingReflection}
+                      className="w-full rounded-2xl bg-red-50 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    >
+                      Change Game
+                    </button>
+                  </div>
+                </>
+              )}
 
+            {/* ===================================================
+                PATTERN RECALL - MEMORIZE
+                =================================================== */}
             {gameStarted &&
               isShowingPrompt &&
               selectedGame === "PATTERN_RECALL" && (
                 <div className="animate-fade-in text-center">
-                  <div className="mx-auto max-w-2xl rounded-[2rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-10 shadow-inner">
-                    <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-500">
+                  <div className="mx-auto max-w-2xl rounded-[1.5rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-4 shadow-inner sm:rounded-[2rem] sm:p-8 lg:p-10">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500 sm:text-sm sm:tracking-[0.25em]">
                       Memorize This Pattern
                     </p>
 
-                    <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2 min-[390px]:gap-3 sm:mt-8 sm:gap-4">
                       {pattern.map((number, index) => (
                         <div
                           key={index}
-                          className="flex h-20 w-20 animate-pulse items-center justify-center rounded-3xl bg-white text-3xl font-black text-indigo-700 shadow-lg shadow-indigo-100"
+                          className="flex h-12 w-12 animate-pulse items-center justify-center rounded-2xl bg-white text-xl font-black text-indigo-700 shadow-lg shadow-indigo-100 min-[390px]:h-14 min-[390px]:w-14 min-[390px]:text-2xl sm:h-20 sm:w-20 sm:rounded-3xl sm:text-3xl"
                         >
                           {number}
                         </div>
                       ))}
                     </div>
 
-                    <p className="mt-8 text-sm font-medium text-slate-500">
+                    <p className="mt-5 text-sm font-medium leading-6 text-slate-500 sm:mt-8">
                       Focus and remember the sequence before it disappears.
                     </p>
                   </div>
                 </div>
               )}
 
+            {/* ===================================================
+                STORY RECALL
+                =================================================== */}
             {gameStarted &&
               isShowingPrompt &&
               selectedGame === "STORY_RECALL" &&
               storyData && (
                 <div className="animate-fade-in text-center">
+                  {/* Memorize Words */}
                   {storyPhase === "WORDS" && (
                     <div
                       ref={storyWordsRef}
-                      className="mx-auto max-w-3xl scroll-mt-28 rounded-[2rem] bg-gradient-to-br from-emerald-50 to-sky-50 p-10 shadow-inner"
+                      className="mx-auto max-w-3xl scroll-mt-24 rounded-[1.5rem] bg-gradient-to-br from-emerald-50 to-sky-50 p-4 shadow-inner sm:scroll-mt-28 sm:rounded-[2rem] sm:p-8 lg:p-10"
                     >
-                      <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-600">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 sm:text-sm sm:tracking-[0.25em]">
                         Memorize These Words
                       </p>
 
-                      <h3 className="mt-4 text-3xl font-black text-slate-900">
+                      <h3 className="mt-3 text-2xl font-black leading-tight text-slate-900 sm:mt-4 sm:text-3xl">
                         Remember the original words
                       </h3>
 
@@ -596,11 +647,11 @@ function GamePage() {
                         Words disappear in {countdown} seconds
                       </p>
 
-                      <div className="mt-8 flex flex-wrap justify-center gap-4">
+                      <div className="mt-5 flex flex-wrap justify-center gap-2 sm:mt-8 sm:gap-4">
                         {storyData.targetWords.map((word) => (
                           <span
                             key={word}
-                            className="rounded-3xl bg-white px-6 py-4 text-xl font-black text-emerald-700 shadow-lg shadow-emerald-100"
+                            className="max-w-full break-words rounded-2xl bg-white px-4 py-3 text-base font-black text-emerald-700 shadow-lg shadow-emerald-100 sm:rounded-3xl sm:px-6 sm:py-4 sm:text-xl"
                           >
                             {word}
                           </span>
@@ -609,23 +660,25 @@ function GamePage() {
                     </div>
                   )}
 
+                  {/* Story Narration */}
                   {storyPhase === "STORY" && (
                     <div
                       ref={storyNarrationRef}
-                      className="mx-auto max-w-3xl scroll-mt-28 rounded-[2rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-10 shadow-inner"
-                    >                      <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-600">
+                      className="mx-auto max-w-3xl scroll-mt-24 rounded-[1.5rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-4 shadow-inner sm:scroll-mt-28 sm:rounded-[2rem] sm:p-8 lg:p-10"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 sm:text-sm sm:tracking-[0.25em]">
                         Listen to the Story
                       </p>
 
-                      <p className="mt-6 text-xl font-bold leading-9 text-slate-800">
+                      <p className="mt-4 break-words text-base font-bold leading-7 text-slate-800 sm:mt-6 sm:text-xl sm:leading-9">
                         {spokenStory}
                       </p>
 
                       {/*
-                        Users do not need to click this during the first story reading.
-                        This is only here in case they want to replay the story audio.
-                      */}
-                      <div className="mt-6">
+                       * Users do not need to click this during the first story reading.
+                       * This is only here in case they want to replay the story audio.
+                       */}
+                      <div className="mt-5 sm:mt-6">
                         <VoiceControls
                           textToRead={spokenStory}
                           showTextToSpeech={true}
@@ -638,44 +691,52 @@ function GamePage() {
                 </div>
               )}
 
+            {/* ===================================================
+                RECALL / ANSWER PHASE
+                =================================================== */}
             {gameStarted &&
               selectedGame !== "MEMORY_MATCH" &&
               selectedGame !== "WORD_BLOOM" &&
               !isShowingPrompt &&
-              (selectedGame !== "STORY_RECALL" || storyPhase === "RECALL") && (
+              (selectedGame !== "STORY_RECALL" ||
+                storyPhase === "RECALL") && (
                 <div
                   ref={storyRecallRef}
-                  className="mx-auto max-w-2xl scroll-mt-28"
+                  className="mx-auto min-w-0 max-w-2xl scroll-mt-24 sm:scroll-mt-28"
                 >
-                  <div className="rounded-[2rem] border border-violet-100 bg-gradient-to-br from-white to-violet-50 p-6 shadow-lg shadow-violet-100">
+                  <div className="rounded-[1.5rem] border border-violet-100 bg-white p-4 shadow-lg shadow-violet-100 dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-violet-950/50 dark:shadow-none sm:rounded-[2rem] sm:p-6">
                     <div className="text-center">
-                      <p className="text-sm font-semibold uppercase tracking-[0.25em] text-violet-500">
-                        Recall Phase
-                      </p>
+  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500 sm:text-sm sm:tracking-[0.25em]">
+    Recall Phase
+  </p>
 
-                      <h3 className="mt-3 text-3xl font-bold text-slate-900">
-                        {selectedGame === "STORY_RECALL"
-                          ? `What were the original ${storyData?.targetWords?.length || 3
-                          } items?`
-                          : "Enter the pattern you remember"}
-                      </h3>
+  <h3 className="mt-2 text-2xl font-bold leading-tight text-slate-900 dark:text-white sm:mt-3 sm:text-3xl">
+    {selectedGame === "STORY_RECALL"
+      ? `What were the original ${
+          storyData?.targetWords?.length || 3
+        } items?`
+      : "Enter the pattern you remember"}
+  </h3>
 
-                      <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-slate-500">
-                        {selectedGame === "STORY_RECALL"
-                          ? "Type or speak the words you remember. You can also replay the story if needed."
-                          : "Type the sequence without spaces."}
-                      </p>
-                    </div>
+  <p className="mx-auto mt-3 max-w-lg text-sm font-medium leading-6 text-slate-600 dark:text-slate-300 sm:leading-7">
+    {selectedGame === "STORY_RECALL"
+      ? "Type or speak the words you remember. You can also replay the story if needed."
+      : "Type the sequence without spaces."}
+  </p>
+</div>
 
-                    <div className="mt-6 space-y-4">
-                      <div className="relative">
+                    <div className="mt-5 space-y-4 sm:mt-6">
+                      <div className="relative min-w-0">
                         <input
                           ref={answerInputRef}
                           type="text"
                           value={userInput}
                           onChange={(e) => setUserInput(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter" && !isGeneratingReflection) {
+                            if (
+                              e.key === "Enter" &&
+                              !isGeneratingReflection
+                            ) {
                               submitAnswer();
                             }
                           }}
@@ -685,15 +746,18 @@ function GamePage() {
                               : "Example: 1234"
                           }
                           disabled={isGeneratingReflection}
-                          className={`w-full rounded-[1.5rem] border border-slate-200 bg-white px-5 py-4 pr-16 text-center font-bold text-slate-700 shadow-sm transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 ${selectedGame === "STORY_RECALL"
-                            ? "text-lg"
-                            : "text-3xl tracking-[0.5em]"
-                            }`}
+                          className={`w-full min-w-0 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-4 text-center font-bold text-slate-700 shadow-sm transition focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-[1.5rem] sm:px-5 ${
+                            selectedGame === "STORY_RECALL"
+                              ? "pr-14 text-base sm:pr-16 sm:text-lg"
+                              : "text-2xl tracking-[0.25em] min-[390px]:text-3xl min-[390px]:tracking-[0.35em] sm:tracking-[0.5em]"
+                          }`}
                         />
 
                         {selectedGame === "STORY_RECALL" && (
                           <VoiceControls
-                            onTranscript={(spokenText) => setUserInput(spokenText)}
+                            onTranscript={(spokenText) =>
+                              setUserInput(spokenText)
+                            }
                             showTextToSpeech={false}
                             showSpeechToText={true}
                             insideInput={true}
@@ -701,53 +765,75 @@ function GamePage() {
                         )}
                       </div>
 
+                      {/* Story Recall Helpers */}
                       {selectedGame === "STORY_RECALL" && storyData && (
-                        <div className="flex flex-wrap items-center justify-center gap-3">
-                          <div className="rounded-2xl bg-white px-4 py-3 shadow-sm">
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                              Replay Story
-                            </p>
-                            <div className="mt-2 flex justify-Center">
-                              <VoiceControls
-                                textToRead={storyData.story}
-                                showTextToSpeech={true}
-                                showSpeechToText={false}
-                              />
-                            </div>
-                          </div>
+                        <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
+                          <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-violet-50 to-white shadow-sm dark:border-indigo-400/20 dark:from-indigo-950/70 dark:via-violet-950/60 dark:to-slate-900">
+  <div className="flex items-center gap-3 border-b border-indigo-100/80 px-4 py-3 dark:border-white/10">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
+      🔊
+    </div>
+
+    <div className="min-w-0 text-left">
+      <p className="text-sm font-bold text-slate-900 dark:text-white">
+        Replay Story
+      </p>
+
+      <p className="mt-0.5 text-xs leading-5 text-slate-500 dark:text-slate-300">
+        Listen again before submitting your answer.
+      </p>
+    </div>
+  </div>
+
+  <div className="flex justify-center px-4 py-3">
+    <VoiceControls
+      textToRead={storyData.story}
+      showTextToSpeech={true}
+      showSpeechToText={false}
+      readButtonLabel="Play Story Again"
+    />
+  </div>
+</div>
 
                           <button
                             onClick={() => setShowClue(true)}
                             disabled={isGeneratingReflection}
-                            className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700 shadow-sm transition hover:bg-amber-100 disabled:opacity-60"
+                            className="w-full rounded-2xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700 shadow-sm transition hover:bg-amber-100 disabled:opacity-60 sm:w-auto"
                           >
                             Need a clue?
                           </button>
                         </div>
                       )}
 
-                      {selectedGame === "STORY_RECALL" && showClue && storyData && (
-                        <p className="rounded-2xl bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-700">
-                          Clue: The original words start with{" "}
-                          {storyData.targetWords
-                            .map((item) => item.charAt(0).toUpperCase())
-                            .join(", ")}
-                        </p>
-                      )}
+                      {selectedGame === "STORY_RECALL" &&
+                        showClue &&
+                        storyData && (
+                          <p className="break-words rounded-2xl bg-amber-50 px-4 py-3 text-center text-sm font-semibold leading-6 text-amber-700">
+                            Clue: The original words start with{" "}
+                            {storyData.targetWords
+                              .map((item) =>
+                                item.charAt(0).toUpperCase()
+                              )
+                              .join(", ")}
+                          </p>
+                        )}
 
-                      <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                      {/* Game Actions */}
+                      <div className="grid gap-2 pt-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
                         <button
                           onClick={submitAnswer}
                           disabled={isGeneratingReflection}
-                          className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                          className="w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
-                          {isGeneratingReflection ? "Saving..." : "Submit Answer"}
+                          {isGeneratingReflection
+                            ? "Saving..."
+                            : "Submit Answer"}
                         </button>
 
                         <button
                           onClick={startGame}
                           disabled={isGeneratingReflection}
-                          className="rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="w-full rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                           Play Again
                         </button>
@@ -758,7 +844,7 @@ function GamePage() {
                             resetGameState();
                           }}
                           disabled={isGeneratingReflection}
-                          className="rounded-2xl bg-red-50 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="w-full rounded-2xl bg-red-50 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                           Change Game
                         </button>
@@ -768,37 +854,46 @@ function GamePage() {
                 </div>
               )}
 
+            {/* ===================================================
+                RESULT MESSAGE
+                =================================================== */}
             {resultMessage && (
-              <div className="mt-8 rounded-3xl border border-indigo-100 bg-indigo-50 p-5 text-center">
-                <p className="text-sm font-semibold leading-7 text-indigo-700">
+              <div className="mt-5 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-center sm:mt-8 sm:rounded-3xl sm:p-5">
+                <p className="break-words text-sm font-semibold leading-6 text-indigo-700 sm:leading-7">
                   {resultMessage}
                 </p>
               </div>
             )}
 
+            {/* ===================================================
+                AI REFLECTION LOADING
+                =================================================== */}
             {isGeneratingReflection && (
-              <div className="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50 p-5">
+              <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 sm:mt-8 sm:rounded-3xl sm:p-5">
                 <div className="flex items-center gap-3">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
+                  <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
 
-                  <p className="text-sm font-semibold text-emerald-700">
+                  <p className="text-sm font-semibold leading-6 text-emerald-700">
                     CogniHaven is reflecting on your progress...
                   </p>
                 </div>
               </div>
             )}
 
+            {/* ===================================================
+                AI REFLECTION
+                =================================================== */}
             {aiReflection && (
-              <div className="mt-8 overflow-hidden rounded-[2rem] border border-emerald-100 bg-white shadow-lg shadow-emerald-100">
-                <div className="border-b border-emerald-100 bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-4 text-white">
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-white/80">
+              <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-emerald-100 bg-white shadow-lg shadow-emerald-100 sm:mt-8 sm:rounded-[2rem]">
+                <div className="border-b border-emerald-100 bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-4 text-white sm:px-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80 sm:text-sm sm:tracking-[0.25em]">
                     AI Reflection
                   </p>
 
                   {/*
-                    Voice controls for AI reflections.
-                    Allows users to listen to supportive AI responses.
-                  */}
+                   * Voice controls for AI reflections.
+                   * Allows users to listen to supportive AI responses.
+                   */}
                   <div className="mt-3">
                     <VoiceControls
                       textToRead={aiReflection}
@@ -808,22 +903,25 @@ function GamePage() {
                     />
                   </div>
 
-                  <h3 className="mt-4 text-2xl font-bold">
+                  <h3 className="mt-4 text-xl font-bold sm:text-2xl">
                     CogniHaven Insight
                   </h3>
                 </div>
 
-                <div className="p-6">
-                  <p className="text-sm leading-8 text-slate-700">
+                <div className="p-4 sm:p-6">
+                  <p className="break-words text-sm leading-7 text-slate-700 sm:leading-8">
                     {aiReflection}
                   </p>
                 </div>
               </div>
             )}
 
+            {/* ===================================================
+                GAME BENEFIT CARDS
+                =================================================== */}
             {!gameStarted && (
-              <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-3xl bg-sky-50 p-5">
+              <div className="mt-6 grid gap-3 sm:mt-10 sm:grid-cols-3 sm:gap-4">
+                <div className="rounded-2xl bg-sky-50 p-4 sm:rounded-3xl sm:p-5">
                   <div className="mb-3 text-3xl">🧠</div>
 
                   <h4 className="text-lg font-bold text-slate-900">
@@ -835,7 +933,7 @@ function GamePage() {
                   </p>
                 </div>
 
-                <div className="rounded-3xl bg-violet-50 p-5">
+                <div className="rounded-2xl bg-violet-50 p-4 sm:rounded-3xl sm:p-5">
                   <div className="mb-3 text-3xl">📈</div>
 
                   <h4 className="text-lg font-bold text-slate-900">
@@ -847,7 +945,7 @@ function GamePage() {
                   </p>
                 </div>
 
-                <div className="rounded-3xl bg-emerald-50 p-5">
+                <div className="rounded-2xl bg-emerald-50 p-4 sm:rounded-3xl sm:p-5">
                   <div className="mb-3 text-3xl">✨</div>
 
                   <h4 className="text-lg font-bold text-slate-900">

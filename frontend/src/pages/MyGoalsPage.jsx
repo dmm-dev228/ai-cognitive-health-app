@@ -330,17 +330,17 @@ function MyGoalsPage() {
     return (
         <section className="animate-fade-in">
             {/* Motivational page hero */}
-            <div className="relative mb-8 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 p-6 text-white shadow-2xl shadow-indigo-200 sm:p-8">
+            <div className="relative mb-6 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 p-5 sm:mb-8 sm:rounded-[2.5rem] sm:p-8 text-white shadow-2xl shadow-indigo-200 sm:p-8">
                 <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-white/20 blur-3xl animate-float" />
                 <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
 
-                <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_340px] lg:items-end">
+                <div className="relative z-10 grid gap-6 sm:gap-8 lg:grid-cols-[1fr_340px] lg:items-end">
                     <div>
-                        <p className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
+                        <p className="inline-flex rounded-full bg-white/15 px-3 py-2 text-xs font-semibold backdrop-blur sm:px-4 sm:text-sm">
                             Goal Mission Control
                         </p>
 
-                        <h2 className="mt-6 max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                        <h2 className="mt-5 max-w-4xl text-2xl font-black leading-tight tracking-tight min-[390px]:text-3xl sm:mt-6 sm:text-4xl lg:text-5xl">
                             Build momentum one small win at a time.
                         </h2>
 
@@ -351,14 +351,14 @@ function MyGoalsPage() {
                     </div>
 
                     <div className="flex flex-col items-center">
-                        <CogniHavenLogo className="mb-4 h-28 w-28 object-contain drop-shadow-2xl animate-float sm:h-36 sm:w-36 lg:h-40 lg:w-40" />
+                        <CogniHavenLogo className="mb-3 h-24 w-24 object-contain drop-shadow-2xl animate-float sm:mb-4 sm:h-36 sm:w-36 lg:h-40 lg:w-40" />
 
                         <p className="text-sm font-semibold text-white/80">
                             Overall Progress
                         </p>
 
-                        <div className="mt-4 flex items-end gap-3">
-                            <p className="text-5xl font-black">
+                        <div className="mt-3 flex flex-wrap items-end justify-center gap-2 sm:mt-4 sm:gap-3">
+                            <p className="text-4xl font-black sm:text-5xl">
                                 {averageProgress}%
                             </p>
 
@@ -384,7 +384,7 @@ function MyGoalsPage() {
             )}
 
             {/* Dashboard summary cards */}
-            <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4 xl:grid-cols-4">
                 <SummaryCard label="Active Goals" value={activeGoals.length} icon="🔥" />
 
                 <SummaryCard
@@ -410,23 +410,23 @@ function MyGoalsPage() {
                 />
             </div>
 
-            <div className="grid gap-8 xl:grid-cols-[400px_1fr]">
+            <div className="grid gap-5 sm:gap-6 xl:grid-cols-[400px_1fr] xl:gap-8">
                 {/* AI goal coach / create goal panel */}
-                <div className="glass-card h-fit rounded-[2rem] p-6 xl:sticky xl:top-28">
+                <div className="glass-card h-fit rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6 xl:sticky xl:top-28">
                     <p className="text-sm font-semibold text-indigo-600">
                         AI Goal Coach
                     </p>
 
-                    <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                    <h3 className="mt-2 text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
                         Create a goal that feels achievable.
                     </h3>
 
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                    <p className="mt-2 break-words text-sm leading-6 text-slate-500">
                         Set a clear target and CogniHaven will generate a supportive plan to
                         help you take the first step.
                     </p>
 
-                    <div className="mt-6 space-y-5">
+                    <div className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
                         <label className="block">
                             <span className="mb-2 block text-sm font-semibold text-slate-700">
                                 Goal Title <span className="text-red-500">*</span>
@@ -525,7 +525,7 @@ function MyGoalsPage() {
                             </label>
                         </div>
 
-                        <div className="rounded-3xl border border-slate-100 bg-white/70 p-5">
+                        <div className="rounded-2xl border border-slate-100 bg-white/70 p-4 sm:rounded-3xl sm:p-5">
                             <p className="mb-4 text-sm font-bold text-slate-900">
                                 Reminder Preferences
                             </p>
@@ -560,9 +560,9 @@ function MyGoalsPage() {
                 </div>
 
                 {/* Goal achievement board */}
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
                     {isLoading ? (
-                        <div className="glass-card rounded-3xl p-10 text-center">
+                        <div className="glass-card rounded-2xl p-7 text-center sm:rounded-3xl sm:p-10">
                             <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-500" />
 
                             <p className="font-semibold text-slate-700">
@@ -623,20 +623,20 @@ function MyGoalsPage() {
 
 function SummaryCard({ label, value, icon }) {
     return (
-        <div className="glass-card rounded-3xl p-5 hover-lift">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">
+        <div className="glass-card rounded-2xl p-4 hover-lift sm:rounded-3xl sm:p-5">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-xl sm:mb-4 sm:h-12 sm:w-12 sm:rounded-2xl sm:text-2xl">
                 {icon}
             </div>
 
             <p className="text-sm font-semibold text-slate-500">{label}</p>
-            <p className="mt-2 text-3xl font-black text-slate-900">{value}</p>
+            <p className="mt-1 text-2xl font-black text-slate-900 sm:mt-2 sm:text-3xl">{value}</p>
         </div>
     );
 }
 
 function ReminderToggle({ title, description, name, checked, onChange }) {
     return (
-        <label className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
+        <label className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm sm:gap-4 sm:px-4">
             <div>
                 <p className="text-sm font-semibold text-slate-800">{title}</p>
                 <p className="text-xs text-slate-500">{description}</p>
@@ -669,19 +669,19 @@ function GoalSection({
 }) {
     return (
         <div>
-            <div className="mb-4 flex items-center justify-between gap-4 rounded-3xl border border-white/60 bg-white/60 px-5 py-4 shadow-sm backdrop-blur">
+            <div className="mb-3 flex flex-col gap-3 rounded-2xl border border-white/60 bg-white/60 px-4 py-4 shadow-sm backdrop-blur sm:mb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:rounded-3xl sm:px-5">
                 <div>
                     <h3 className="text-xl font-bold text-slate-900">{title}</h3>
                     <p className="text-sm text-slate-500">{description}</p>
                 </div>
 
-                <span className="rounded-full bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
+                <span className="w-fit shrink-0 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 sm:px-4 sm:py-2 sm:text-sm">
                     {goals.length}
                 </span>
             </div>
 
             {goals.length === 0 ? (
-                <div className="glass-card rounded-3xl p-10 text-center">
+                <div className="glass-card rounded-2xl p-7 text-center sm:rounded-3xl sm:p-10">
                     <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-indigo-50 text-3xl">
                         🎯
                     </div>
@@ -695,7 +695,7 @@ function GoalSection({
                     </p>
                 </div>
             ) : (
-                <div className="grid gap-5 2xl:grid-cols-2">
+                <div className="grid gap-4 sm:gap-5 2xl:grid-cols-2">
                     {goals.map((goal) => {
                         const progressPercent = getProgressPercent(goal);
                         const milestone = getMilestoneBadge(goal);
@@ -709,7 +709,7 @@ function GoalSection({
                         return (
                             <article
                                 key={goal.id}
-                                className={`group overflow-hidden rounded-[2rem] border shadow-xl backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-2xl ${
+                                className={`group min-w-0 overflow-hidden rounded-[1.5rem] border shadow-xl sm:rounded-[2rem] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-2xl ${
                                     isCompleted
                                         ? "border-emerald-100 bg-emerald-50/80 shadow-emerald-100/60"
                                         : "border-white/70 bg-white/80 shadow-slate-200/60"
@@ -717,34 +717,34 @@ function GoalSection({
                             >
                                 <div className={`h-2 bg-gradient-to-r ${meta.color}`} />
 
-                                <div className="p-6">
-                                    <div className="mb-5 flex items-start justify-between gap-4">
-                                        <div className="flex items-start gap-4">
+                                <div className="p-4 sm:p-6">
+                                    <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                                        <div className="min-w-0 flex items-start gap-3 sm:gap-4">
                                             <div
-                                                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br ${meta.color} text-2xl shadow-lg`}
+                                                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14 sm:rounded-3xl bg-gradient-to-br ${meta.color} text-2xl shadow-lg`}
                                             >
                                                 {isCompleted ? "🏆" : meta.icon}
                                             </div>
 
-                                            <div>
+                                            <div className="min-w-0">
                                                 <span
                                                     className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.15em] ${meta.soft}`}
                                                 >
                                                     {goal.category}
                                                 </span>
 
-                                                <h3 className="mt-3 text-2xl font-black text-slate-900">
+                                                <h3 className="mt-3 break-words text-xl font-black text-slate-900 sm:text-2xl">
                                                     {goal.title}
                                                 </h3>
 
-                                                <p className="mt-2 text-sm leading-6 text-slate-500">
+                                                <p className="mt-2 break-words text-sm leading-6 text-slate-500">
                                                     {goal.description || "No description added."}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <span
-                                            className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold ${
+                                            className={`w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-bold sm:px-4 sm:py-2 ${
                                                 isCompleted
                                                     ? "bg-emerald-100 text-emerald-700"
                                                     : goal.status === "PAUSED"
@@ -756,8 +756,8 @@ function GoalSection({
                                         </span>
                                     </div>
 
-                                    <div className="mb-5 rounded-3xl bg-slate-50 p-5">
-                                        <div className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-600">
+                                    <div className="mb-4 rounded-2xl bg-slate-50 p-4 sm:mb-5 sm:rounded-3xl sm:p-5">
+                                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm font-semibold text-slate-600">
                                             <span>
                                                 {goal.currentProgress} / {goal.targetCount}{" "}
                                                 {goal.unitLabel || "steps"}
@@ -773,12 +773,12 @@ function GoalSection({
                                         </div>
 
                                         <div className="mt-4 flex flex-wrap gap-2">
-                                            <span className="rounded-full bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700">
+                                            <span className="rounded-full bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 sm:px-4">
                                                 ✨ {milestone}
                                             </span>
 
                                             {goal.targetDate && (
-                                                <span className="rounded-full bg-sky-50 px-4 py-2 text-xs font-bold text-sky-700">
+                                                <span className="rounded-full bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 sm:px-4">
                                                     Target:{" "}
                                                     {new Date(goal.targetDate).toLocaleDateString()}
                                                 </span>
@@ -786,7 +786,7 @@ function GoalSection({
                                         </div>
                                     </div>
 
-                                    <div className="mb-5 rounded-3xl border border-indigo-100 bg-indigo-50/80 p-5">
+                                    <div className="mb-4 rounded-2xl border border-indigo-100 bg-indigo-50/80 p-4 sm:mb-5 sm:rounded-3xl sm:p-5">
                                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-500">
                                             AI Coach Plan
                                         </p>
@@ -798,7 +798,7 @@ function GoalSection({
                                     </div>
 
                                     {showLogging && (
-                                        <div className="rounded-3xl border border-slate-100 bg-white/80 p-4">
+                                        <div className="rounded-2xl border border-slate-100 bg-white/80 p-4 sm:rounded-3xl">
                                             <p className="mb-3 text-sm font-bold text-slate-800">
                                                 Log a small win toward this goal
                                             </p>

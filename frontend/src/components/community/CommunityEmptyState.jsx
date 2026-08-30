@@ -10,16 +10,16 @@ function CommunityEmptyState({ activeFilter }) {
       : "No posts are here yet. You can help start this space with something kind, helpful, or encouraging.";
 
   return (
-    <div className="glass-card rounded-3xl p-10 text-center">
-      <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-violet-50 text-3xl">
+    <div className="glass-card min-w-0 rounded-2xl p-6 text-center sm:rounded-3xl sm:p-10">
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-2xl sm:mb-5 sm:h-16 sm:w-16 sm:rounded-3xl sm:text-3xl">
         💬
       </div>
 
-      <h3 className="text-2xl font-bold text-slate-900">
+      <h3 className="break-words text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
         No posts here yet.
       </h3>
 
-      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+      <p className="mx-auto mt-3 max-w-md break-words text-sm leading-6 text-slate-500">
         {message}
       </p>
     </div>

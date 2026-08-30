@@ -3,6 +3,7 @@
 */
 import { useEffect, useRef, useState } from "react";
 import VoiceControls from "../components/VoiceControls";
+import { useToast } from "../components/notifications/useToast";
 import {
   createJournalEntry,
   getJournalEntries,
@@ -79,13 +80,13 @@ function JournalPage() {
   const [mood, setMood] = useState("neutral");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
 
   const [conversationMap, setConversationMap] = useState({});
   const [followUpMap, setFollowUpMap] = useState({});
   const [loadingMap, setLoadingMap] = useState({});
   const [selectedEntryId, setSelectedEntryId] = useState(null);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
+  const { showToast } = useToast();
 
   const [journalTheme, setJournalTheme] = useState(
     localStorage.getItem("journalTheme") || "default"
@@ -172,7 +173,11 @@ function JournalPage() {
       setConversationMap(conversationData);
     } catch (err) {
       console.error("Failed to fetch journal entries:", err);
-      setError("Could not load journal entries.");
+      showToast({
+        type: "error",
+        title: "Unable to Load Journal",
+        message: "We couldn't load your journal entries. Please refresh and try again.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -204,17 +209,29 @@ function JournalPage() {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      setError("Title is required. Please add a title before saving.");
+      showToast({
+        type: "warning",
+        title: "Title Required",
+        message: "Please add a title before saving your journal entry.",
+      });
       return;
     }
 
     if (!content.trim()) {
-      setError("Journal Entry is required. Please write your thoughts before saving.");
+      showToast({
+        type: "warning",
+        title: "Journal Entry Required",
+        message: "Please write your thoughts before saving.",
+      });
       return;
     }
 
     if (!storedUserId) {
-      setError("No user found. Please log in again.");
+      showToast({
+        type: "error",
+        title: "Session Expired",
+        message: "Please sign in again to continue.",
+      });
       return;
     }
 
@@ -255,11 +272,20 @@ function JournalPage() {
       setTitle("");
       setContent("");
       setMood("neutral");
+      showToast({
+        type: "success",
+        title: "Journal Saved",
+        message: "Your journal entry has been saved successfully.",
+      });
 
       scrollToBottom();
     } catch (err) {
       console.error("Failed to save journal entry:", err);
-      setError("Could not save journal entry.");
+      showToast({
+        type: "error",
+        title: "Save Failed",
+        message: "Your journal entry couldn't be saved. Please try again.",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -269,7 +295,11 @@ function JournalPage() {
     const message = followUpMap[entryId];
 
     if (!message || !message.trim()) {
-      setError("Please enter a follow-up message.");
+      showToast({
+        type: "warning",
+        title: "Message Required",
+        message: "Please enter a follow-up message before sending.",
+      });
       return;
     }
 
@@ -317,7 +347,11 @@ function JournalPage() {
       scrollToBottom();
     } catch (err) {
       console.error("Failed to send follow-up message:", err);
-      setError("Could not send follow-up message.");
+      showToast({
+        type: "error",
+        title: "Message Failed",
+        message: "Your message couldn't be sent. Please try again.",
+      });
 
       /*
        * Remove temporary optimistic message if the request fails.
@@ -338,12 +372,14 @@ function JournalPage() {
 
   return (
     <section className="animate-fade-in">
-      <div className="mb-8">
-        <p className={`text-sm font-semibold uppercase tracking-[0.25em] ${activeTheme.accent}`}>
+      <div className="mb-5 sm:mb-7 lg:mb-8">
+        <p
+          className={`text-xs font-semibold uppercase tracking-[0.2em] sm:text-sm sm:tracking-[0.25em] ${activeTheme.accent}`}
+        >
           Digital Journal
         </p>
 
-        <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
+        <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-slate-900 min-[390px]:text-3xl sm:mt-3 sm:text-4xl">
           Open your journal, write, and continue the conversation.
         </h2>
 
@@ -353,20 +389,16 @@ function JournalPage() {
         </p>
       </div>
 
-      {error && (
-        <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-          {error}
-        </div>
-      )}
-
-      <div className="grid gap-8 xl:grid-cols-[340px_1fr]">
-        <aside className="glass-card h-fit rounded-[2rem] p-5 xl:sticky xl:top-28">
-          <div className={`rounded-[1.75rem] bg-gradient-to-br ${activeTheme.cover} p-5 text-white shadow-xl`}>
+      <div className="grid gap-5 sm:gap-6 xl:grid-cols-[340px_1fr] xl:gap-8">
+     <aside className="glass-card h-fit rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-5 xl:sticky xl:top-28">
+          <div
+  className={`rounded-[1.25rem] bg-gradient-to-br ${activeTheme.cover} p-4 text-white shadow-xl sm:rounded-[1.75rem] sm:p-5`}
+>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/70">
               My Journal
             </p>
 
-            <h3 className="mt-3 text-3xl font-black tracking-tight">
+            <h3 className="mt-2 text-2xl font-black tracking-tight sm:mt-3 sm:text-3xl">
               {activeTheme.name}
             </h3>
 
@@ -382,7 +414,7 @@ function JournalPage() {
             </button>
           </div>
 
-          <div className="mt-5 rounded-3xl border border-slate-100 bg-white/70 p-4">
+          <div className="mt-4 rounded-2xl border border-slate-100 bg-white/70 p-3 sm:mt-5 sm:rounded-3xl sm:p-4">
             <p className="mb-3 text-sm font-bold text-slate-800">
               Customize Journal
             </p>
@@ -392,7 +424,7 @@ function JournalPage() {
                 <button
                   key={themeKey}
                   onClick={() => handleThemeChange(themeKey)}
-                  className={`rounded-2xl px-3 py-2 text-xs font-semibold transition ${journalTheme === themeKey
+                  className={`min-h-10 rounded-xl px-2 py-2 text-xs font-semibold transition sm:rounded-2xl sm:px-3 ${journalTheme === themeKey
                     ? "bg-slate-900 text-white"
                     : "bg-white text-slate-600 hover:bg-slate-50"
                     }`}
@@ -429,12 +461,12 @@ function JournalPage() {
                 </p>
               </div>
             ) : (
-              <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
+             <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1 sm:max-h-[380px] sm:space-y-3 xl:max-h-[460px]">
                 {entries.map((entry) => (
                   <button
                     key={entry.id}
                     onClick={() => openExistingEntryPage(entry.id)}
-                    className={`w-full rounded-3xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 ${selectedEntryId === entry.id && !isCreatingEntry
+                    className={`w-full rounded-2xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 sm:rounded-3xl sm:p-4 ${selectedEntryId === entry.id && !isCreatingEntry
                       ? "border-indigo-200 bg-indigo-50 shadow-md"
                       : "border-white/60 bg-white/70 hover:bg-white"
                       }`}
@@ -462,11 +494,13 @@ function JournalPage() {
           </div>
         </aside>
 
-        <div className="relative">
-          <div className={`absolute inset-0 rounded-[2.5rem] bg-gradient-to-br ${activeTheme.cover} opacity-20 blur-2xl`} />
+ <div className="relative min-w-0">
+  <div
+    className={`absolute inset-0 rounded-[1.75rem] bg-gradient-to-br ${activeTheme.cover} opacity-20 blur-2xl sm:rounded-[2.5rem]`}
+  />
 
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-50 p-3 shadow-2xl shadow-slate-300/60">
-            <div className="grid min-h-[720px] overflow-hidden rounded-[2rem] border border-amber-200/70 bg-white shadow-inner lg:grid-cols-[1fr_1.1fr]">
+  <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-50 p-1.5 shadow-xl shadow-slate-300/50 sm:rounded-[2.5rem] sm:p-3 sm:shadow-2xl sm:shadow-slate-300/60">
+    <div className="grid min-h-[560px] overflow-hidden rounded-[1.25rem] border border-amber-200/70 bg-white shadow-inner sm:min-h-[640px] sm:rounded-[2rem] lg:min-h-[720px] lg:grid-cols-[1fr_1.1fr]">
               <div className={`hidden border-r border-amber-200/70 ${activeTheme.page} p-8 lg:block`}>
                 <div className="flex h-full flex-col justify-between">
                   <div>
@@ -496,21 +530,23 @@ function JournalPage() {
               </div>
 
               <div
-                className={`min-h-[720px] bg-white p-6 transition-all duration-300 sm:p-8 ${isPageTurning
+     className={`min-h-[560px] min-w-0 bg-white p-4 transition-all duration-300 sm:min-h-[640px] sm:p-6 md:p-8 lg:min-h-[720px] ${isPageTurning
                   ? "scale-[0.98] rotate-1 opacity-40 blur-sm"
                   : "scale-100 rotate-0 opacity-100 blur-0"
                   }`}
               >
                 {isCreatingEntry ? (
                   <div className="flex h-full flex-col">
-                    <div className="mb-8">
-                      <p className={`text-sm font-semibold uppercase tracking-[0.25em] ${activeTheme.accent}`}>
-                        New Entry
-                      </p>
+                   <div className="mb-5 sm:mb-8">
+  <p
+    className={`text-xs font-semibold uppercase tracking-[0.2em] sm:text-sm sm:tracking-[0.25em] ${activeTheme.accent}`}
+  >
+    New Entry
+  </p>
 
-                      <h3 className="mt-3 text-3xl font-black text-slate-900">
-                        Write a fresh journal page.
-                      </h3>
+  <h3 className="mt-2 text-2xl font-black leading-tight text-slate-900 sm:mt-3 sm:text-3xl">
+    Write a fresh journal page.
+  </h3>
 
                       <p className="mt-3 text-sm leading-6 text-slate-500">
                         Add a title, choose your mood, and write your thoughts.
@@ -518,7 +554,7 @@ function JournalPage() {
                       </p>
                     </div>
 
-                    <div className="space-y-5">
+                   <div className="space-y-4 sm:space-y-5">
                       <label className="block">
                         <span className="mb-2 block text-sm font-semibold text-slate-700">
                           Title
@@ -565,8 +601,8 @@ function JournalPage() {
                           value={content}
                           onChange={(e) => setContent(e.target.value)}
                           placeholder="Write your thoughts..."
-                          rows="12"
-                          className="w-full resize-none rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(transparent_95%,rgba(99,102,241,0.12)_96%)] px-5 py-4 text-sm leading-8 text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+rows="10"
+className="w-full resize-none rounded-[1.25rem] border border-slate-200 bg-[linear-gradient(transparent_95%,rgba(99,102,241,0.12)_96%)] px-4 py-4 text-sm leading-7 text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 sm:rounded-[1.5rem] sm:px-5 sm:leading-8"
                         />
                       </label>
 
@@ -603,14 +639,14 @@ function JournalPage() {
                   </div>
                 ) : selectedEntry ? (
                   <div className="flex h-full flex-col">
-                    <div className="mb-6 border-b border-slate-100 pb-5">
+<div className="mb-4 border-b border-slate-100 pb-4 sm:mb-6 sm:pb-5">
                       <p className={`text-sm font-semibold uppercase tracking-[0.25em] ${activeTheme.accent}`}>
                         Open Entry
                       </p>
 
                       <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <h3 className="text-3xl font-black text-slate-900">
+                          <h3 className="break-words text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
                             {selectedEntry.title || "Untitled Entry"}
                           </h3>
 
@@ -637,7 +673,7 @@ function JournalPage() {
                               }`}
                           >
                             <div
-                              className={`max-w-[85%] rounded-3xl px-5 py-4 text-sm leading-7 shadow-sm ${msg.senderType === "USER"
+                             className={`max-w-[94%] break-words rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm sm:max-w-[85%] sm:rounded-3xl sm:px-5 sm:py-4 sm:leading-7 ${msg.senderType === "USER"
                                 ? `rounded-br-md bg-gradient-to-r ${activeTheme.button} text-white`
                                 : "rounded-bl-md border border-slate-100 bg-slate-50 text-slate-700"
                                 }`}
@@ -672,7 +708,7 @@ function JournalPage() {
                       ) : (
                         <>
                           <div className="flex justify-end">
-                            <div className={`max-w-[85%] rounded-3xl rounded-br-md bg-gradient-to-r ${activeTheme.button} px-5 py-4 text-sm leading-7 text-white shadow-sm`}>
+                            <div className={`max-w-[94%] break-words rounded-2xl rounded-br-md bg-gradient-to-r ${activeTheme.button} px-4 py-3 text-sm leading-6 text-white shadow-sm sm:max-w-[85%] sm:rounded-3xl sm:px-5 sm:py-4 sm:leading-7`}>
                               {/*
                                 Text-to-speech support for the user's saved journal entry.
                               */}
@@ -696,7 +732,7 @@ function JournalPage() {
                           </div>
 
                           <div className="flex justify-start">
-                            <div className="max-w-[85%] rounded-3xl rounded-bl-md border border-slate-100 bg-slate-50 px-5 py-4 text-sm leading-7 text-slate-700 shadow-sm">
+                            <div className="max-w-[94%] break-words rounded-2xl rounded-bl-md border border-slate-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm sm:max-w-[85%] sm:rounded-3xl sm:px-5 sm:py-4 sm:leading-7">
                               <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
                                 CogniHaven
                               </p>
@@ -802,7 +838,7 @@ function JournalPage() {
                         📖
                       </div>
 
-                      <h3 className="text-3xl font-black text-slate-900">
+                    <h3 className="break-words text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
                         Open your journal.
                       </h3>
 

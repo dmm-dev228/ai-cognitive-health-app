@@ -1,54 +1,59 @@
 import { useState } from "react";
 import { submitFeedback } from "../services/api";
+import { useToast } from "../components/notifications/useToast";
 
 function FeedbackCard({ isDarkMode }) {
     const [feedbackText, setFeedbackText] = useState("");
-    const [feedbackMessage, setFeedbackMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
-    const [isError, setIsError] = useState(false);
+
+    const { showToast } = useToast();
 
     // Sends feedback to the backend so it can be emailed to the CogniHaven owner.
     const handleFeedbackSubmit = async () => {
         if (!feedbackText.trim()) {
-            setIsError(true);
-            setFeedbackMessage("Please write your feedback first.");
+            showToast({
+                type: "warning",
+                title: "Feedback needed",
+                message: "Please write your feedback first.",
+            });
             return;
         }
 
         const token = sessionStorage.getItem("token");
 
         if (!token) {
-            setIsError(true);
-            setFeedbackMessage(
-                "Please sign in to send feedback. This helps us keep feedback meaningful and secure."
-            );
+            showToast({
+                type: "error",
+                title: "Sign in required",
+                message:
+                    "Please sign in to send feedback. This helps us keep feedback meaningful and secure.",
+            });
             return;
         }
 
         try {
             setIsSending(true);
-            setIsError(false);
 
             const responseMessage = await submitFeedback({
-                message: feedbackText
+                message: feedbackText,
             });
 
-            setFeedbackMessage(
-                responseMessage || "Thank you for helping improve CogniHaven."
-            );
+            showToast({
+                type: "success",
+                title: "Feedback sent",
+                message:
+                    responseMessage || "Thank you for helping improve CogniHaven.",
+            });
 
             setFeedbackText("");
-
-            setTimeout(() => {
-                setFeedbackMessage("");
-                setIsError(false);
-            }, 3000);
         } catch (error) {
             console.error("Feedback submission failed:", error);
-            setIsError(true);
-            setFeedbackMessage(
-                "Feedback could not be sent right now. Please try again."
-            );
+
+            showToast({
+                type: "error",
+                title: "Feedback not sent",
+                message: "Feedback could not be sent right now. Please try again.",
+            });
         } finally {
             setIsSending(false);
         }
@@ -98,18 +103,6 @@ function FeedbackCard({ isDarkMode }) {
             >
                 {isSending ? "Sending..." : "Send Feedback"}
             </button>
-
-            {feedbackMessage && (
-                <p
-                    className={`mt-4 rounded-2xl px-4 py-3 text-sm font-semibold ${
-                        isError
-                            ? "bg-red-50 text-red-700"
-                            : "bg-emerald-50 text-emerald-700"
-                    }`}
-                >
-                    {feedbackMessage}
-                </p>
-            )}
         </div>
     );
 }

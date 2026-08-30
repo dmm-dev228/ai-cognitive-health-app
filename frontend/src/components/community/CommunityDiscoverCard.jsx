@@ -19,7 +19,7 @@ function CommunityDiscoverCard() {
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
     "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
     "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
-    "https://images.unsplash.com/photo-1495020689067-958852a7765e"
+    "https://images.unsplash.com/photo-1495020689067-958852a7765e",
   ];
 
   useEffect(() => {
@@ -63,11 +63,11 @@ function CommunityDiscoverCard() {
 
   if (isLoading) {
     return (
-      <div className="glass-card rounded-[2rem] p-5">
+      <div className="glass-card min-w-0 rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-5">
         <p className="text-sm font-bold text-slate-900">✨ Discover</p>
 
-        <div className="mt-4 rounded-3xl bg-gradient-to-br from-violet-50 to-emerald-50 p-5">
-          <p className="text-sm font-semibold text-slate-500">
+        <div className="mt-3 rounded-2xl bg-gradient-to-br from-violet-50 to-emerald-50 p-4 sm:mt-4 sm:rounded-3xl sm:p-5">
+          <p className="text-sm font-semibold leading-6 text-slate-500">
             Loading interesting reads...
           </p>
         </div>
@@ -77,17 +77,17 @@ function CommunityDiscoverCard() {
 
   if (!activeArticle) {
     return (
-      <div className="glass-card rounded-[2rem] p-5">
+      <div className="glass-card min-w-0 rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-5">
         <p className="text-sm font-bold text-slate-900">✨ Discover</p>
 
-        <div className="mt-4 rounded-3xl bg-gradient-to-br from-violet-50 to-emerald-50 p-5">
+        <div className="mt-3 rounded-2xl bg-gradient-to-br from-violet-50 to-emerald-50 p-4 sm:mt-4 sm:rounded-3xl sm:p-5">
           <img
             src={fallbackImages[0]}
             alt="Reading material"
-            className="h-40 w-full rounded-2xl object-cover"
+            className="h-36 w-full rounded-xl object-cover sm:h-40 sm:rounded-2xl"
           />
 
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 break-words text-sm leading-6 text-slate-600 sm:leading-7">
             Discover articles are unavailable right now. Check back soon.
           </p>
         </div>
@@ -96,27 +96,27 @@ function CommunityDiscoverCard() {
   }
 
   return (
-    <div className="glass-card rounded-[2rem] p-5">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-bold text-slate-900">✨ Discover</p>
+    <div className="glass-card min-w-0 rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-5">
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <p className="min-w-0 text-sm font-bold text-slate-900">✨ Discover</p>
 
-        <span className="rounded-full bg-violet-50 px-3 py-1 text-[11px] font-bold text-violet-700">
+        <span className="shrink-0 rounded-full bg-violet-50 px-3 py-1 text-[11px] font-bold text-violet-700">
           Guardian
         </span>
       </div>
 
-      <div className="mt-4 rounded-3xl bg-gradient-to-br from-violet-50 to-emerald-50 p-5">
+      <div className="mt-3 min-w-0 rounded-2xl bg-gradient-to-br from-violet-50 to-emerald-50 p-4 sm:mt-4 sm:rounded-3xl sm:p-5">
         <img
           src={getArticleImage(activeArticle, activeIndex)}
           alt={activeArticle.title}
-          className="h-40 w-full rounded-2xl object-cover"
+          className="h-36 w-full rounded-xl object-cover sm:h-40 sm:rounded-2xl"
         />
 
-        <p className="mt-3 text-xs font-bold uppercase tracking-[0.15em] text-emerald-700">
+        <p className="mt-3 break-words text-[11px] font-bold uppercase leading-5 tracking-[0.12em] text-emerald-700 sm:text-xs sm:tracking-[0.15em]">
           {activeArticle.section || "Interesting Read"}
         </p>
 
-        <h3 className="mt-2 text-sm font-bold leading-6 text-slate-800">
+        <h3 className="mt-2 break-words text-sm font-bold leading-6 text-slate-800">
           {activeArticle.title}
         </h3>
 
@@ -124,55 +124,57 @@ function CommunityDiscoverCard() {
           href={activeArticle.url}
           target="_blank"
           rel="noreferrer"
-          className="mt-4 inline-flex text-xs font-bold text-violet-700 hover:text-violet-900"
+          className="mt-4 inline-flex min-h-11 items-center text-xs font-bold text-violet-700 transition hover:text-violet-900"
         >
           Read article →
         </a>
       </div>
 
-  <div className="mt-4 flex items-center justify-between gap-3">
-  <button
-    type="button"
-    onClick={() =>
-      setActiveIndex((currentIndex) =>
-        currentIndex === 0 ? articles.length - 1 : currentIndex - 1
-      )
-    }
-    className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-violet-700 shadow-sm transition hover:bg-violet-50"
-    aria-label="Previous article"
-  >
-    ←
-  </button>
+      {articles.length > 1 && (
+        <div className="mt-4 flex min-w-0 items-center justify-between gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              setActiveIndex((currentIndex) =>
+                currentIndex === 0 ? articles.length - 1 : currentIndex - 1
+              )
+            }
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-violet-700 shadow-sm transition hover:bg-violet-50"
+            aria-label="Previous article"
+          >
+            ←
+          </button>
 
-  <div className="flex gap-2">
-    {articles.map((article, index) => (
-      <button
-        key={`${article.url}-${index}`}
-        type="button"
-        onClick={() => setActiveIndex(index)}
-        className={`h-2 rounded-full transition ${
-          activeIndex === index
-            ? "w-6 bg-violet-500"
-            : "w-2 bg-slate-200 hover:bg-slate-300"
-        }`}
-        aria-label={`View article ${index + 1}`}
-      />
-    ))}
-  </div>
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden sm:gap-2">
+            {articles.map((article, index) => (
+              <button
+                key={`${article.url}-${index}`}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                className={`h-2 shrink-0 rounded-full transition ${
+                  activeIndex === index
+                    ? "w-5 bg-violet-500 sm:w-6"
+                    : "w-2 bg-slate-200 hover:bg-slate-300"
+                }`}
+                aria-label={`View article ${index + 1}`}
+              />
+            ))}
+          </div>
 
-  <button
-    type="button"
-    onClick={() =>
-      setActiveIndex((currentIndex) =>
-        currentIndex === articles.length - 1 ? 0 : currentIndex + 1
-      )
-    }
-    className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-violet-700 shadow-sm transition hover:bg-violet-50"
-    aria-label="Next article"
-  >
-    →
-  </button>
-</div>
+          <button
+            type="button"
+            onClick={() =>
+              setActiveIndex((currentIndex) =>
+                currentIndex === articles.length - 1 ? 0 : currentIndex + 1
+              )
+            }
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-violet-700 shadow-sm transition hover:bg-violet-50"
+            aria-label="Next article"
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

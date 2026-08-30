@@ -8,7 +8,7 @@ import CommunityFeed from "../components/community/CommunityFeed";
 import CommunityGuidelinesModal from "../components/community/CommunityGuidelinesModal";
 import {
   createCommunityPost,
-  getCommunityPosts
+  getCommunityPosts,
 } from "../services/api";
 
 /*
@@ -39,8 +39,8 @@ function CommunityPage() {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   const [showGuidelines, setShowGuidelines] = useState(() => {
-  return sessionStorage.getItem("communityGuidelinesAccepted") !== "true";
-});
+    return sessionStorage.getItem("communityGuidelinesAccepted") !== "true";
+  });
 
   useEffect(() => {
     fetchPosts();
@@ -102,7 +102,7 @@ function CommunityPage() {
       await createCommunityPost({
         title,
         content,
-        category
+        category,
       });
 
       setTitle("");
@@ -113,7 +113,8 @@ function CommunityPage() {
       await fetchPosts();
     } catch (err) {
       console.error("Failed to create community post:", err);
-setError(err.message || "Could not create post. Please try again.");    } finally {
+      setError(err.message || "Could not create post. Please try again.");
+    } finally {
       setIsPosting(false);
     }
   };
@@ -123,26 +124,26 @@ setError(err.message || "Could not create post. Please try again.");    } finall
       label: "Reflection",
       icon: "💭",
       badge: "bg-violet-50 text-violet-700",
-      ring: "border-violet-100"
+      ring: "border-violet-100",
     },
     ROUTINE: {
       label: "Routine",
       icon: "🌿",
       badge: "bg-emerald-50 text-emerald-700",
-      ring: "border-emerald-100"
+      ring: "border-emerald-100",
     },
     ENCOURAGEMENT: {
       label: "Encouragement",
       icon: "💜",
       badge: "bg-pink-50 text-pink-700",
-      ring: "border-pink-100"
+      ring: "border-pink-100",
     },
     WELLNESS_TIP: {
       label: "Wellness Tip",
       icon: "✨",
       badge: "bg-sky-50 text-sky-700",
-      ring: "border-sky-100"
-    }
+      ring: "border-sky-100",
+    },
   };
 
   const filters = [
@@ -150,7 +151,7 @@ setError(err.message || "Could not create post. Please try again.");    } finall
     { key: "REFLECTION", label: "Reflections", icon: "💭" },
     { key: "ROUTINE", label: "Routines", icon: "🌿" },
     { key: "ENCOURAGEMENT", label: "Encouragement", icon: "💜" },
-    { key: "WELLNESS_TIP", label: "Tips", icon: "✨" }
+    { key: "WELLNESS_TIP", label: "Tips", icon: "✨" },
   ];
 
   const filteredPosts =
@@ -163,75 +164,99 @@ setError(err.message || "Could not create post. Please try again.");    } finall
   };
 
   const getCategoryMeta = (categoryKey) => {
-    return categoryStyles[categoryKey] || {
-      label: categoryKey || "Community",
-      icon: "💬",
-      badge: "bg-slate-100 text-slate-700",
-      ring: "border-slate-100"
-    };
+    return (
+      categoryStyles[categoryKey] || {
+        label: categoryKey || "Community",
+        icon: "💬",
+        badge: "bg-slate-100 text-slate-700",
+        ring: "border-slate-100",
+      }
+    );
   };
+
   const handleAcceptGuidelines = () => {
-  sessionStorage.setItem("communityGuidelinesAccepted", "true");
-  setShowGuidelines(false);
-};
+    sessionStorage.setItem("communityGuidelinesAccepted", "true");
+    setShowGuidelines(false);
+  };
 
   return (
-    <section className="animate-fade-in">
-      
-<CommunityGuidelinesModal
-  isOpen={showGuidelines}
-  onAccept={handleAcceptGuidelines}
-/>
-      <CommunityHero onCreatePost={() => setIsComposerOpen(true)} />
+    <section className="min-w-0 animate-fade-in">
+      <CommunityGuidelinesModal
+        isOpen={showGuidelines}
+        onAccept={handleAcceptGuidelines}
+      />
+
+      {/* Community hero */}
+      <div className="min-w-0">
+        <CommunityHero onCreatePost={() => setIsComposerOpen(true)} />
+      </div>
 
       {error && (
-        <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+        <div className="mb-4 mt-4 break-words rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-600 sm:mb-6 sm:mt-6">
           {error}
         </div>
       )}
 
-      <div className="grid gap-8 xl:grid-cols-[260px_1fr_300px]">
+      {/*
+       * Desktop:
+       * Left navigation | Main feed | Right sidebar
+       *
+       * Mobile/tablet:
+       * Components stack naturally so nothing is squeezed into
+       * narrow columns or forced beyond the viewport.
+       */}
+      <div className="mt-5 grid min-w-0 gap-5 sm:mt-6 sm:gap-6 xl:mt-8 xl:grid-cols-[260px_minmax(0,1fr)_300px] xl:gap-8">
         {/* Left community navigation */}
-        <CommunityNavigation
-          filters={filters}
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-          posts={posts}
-        />
+        <div className="order-1 min-w-0 xl:sticky xl:top-28 xl:h-fit">
+          <CommunityNavigation
+            filters={filters}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            posts={posts}
+          />
+        </div>
 
         {/* Main social feed */}
-        <main className="space-y-5">
-          <CommunityComposer
-            title={title}
-            content={content}
-            category={category}
-            isPosting={isPosting}
-            isComposerOpen={isComposerOpen}
-            onOpen={() => setIsComposerOpen(true)}
-            onClose={() => setIsComposerOpen(false)}
-            onTitleChange={setTitle}
-            onContentChange={setContent}
-            onCategoryChange={setCategory}
-            onSubmit={handleSubmit}
-          />
-          
-<CommunityFeedHeader
-  activeFilter={activeFilter}
-  filteredPostCount={filteredPosts.length}
-  getCategoryMeta={getCategoryMeta}
-/>
+        <main className="order-3 min-w-0 space-y-4 sm:space-y-5 xl:order-2">
+          <div className="min-w-0">
+            <CommunityComposer
+              title={title}
+              content={content}
+              category={category}
+              isPosting={isPosting}
+              isComposerOpen={isComposerOpen}
+              onOpen={() => setIsComposerOpen(true)}
+              onClose={() => setIsComposerOpen(false)}
+              onTitleChange={setTitle}
+              onContentChange={setContent}
+              onCategoryChange={setCategory}
+              onSubmit={handleSubmit}
+            />
+          </div>
 
-<CommunityFeed
-  isLoading={isLoading}
-  filteredPosts={filteredPosts}
-  activeFilter={activeFilter}
-  getCategoryMeta={getCategoryMeta}
-  getInitial={getInitial}
-/>
+          <div className="min-w-0">
+            <CommunityFeedHeader
+              activeFilter={activeFilter}
+              filteredPostCount={filteredPosts.length}
+              getCategoryMeta={getCategoryMeta}
+            />
+          </div>
+
+          <div className="min-w-0">
+            <CommunityFeed
+              isLoading={isLoading}
+              filteredPosts={filteredPosts}
+              activeFilter={activeFilter}
+              getCategoryMeta={getCategoryMeta}
+              getInitial={getInitial}
+            />
+          </div>
         </main>
 
-        {/* Right community panel */}
-        <CommunitySidebar />
+       {/* Right community panel */}
+<aside className="order-2 min-w-0 xl:order-3 xl:sticky xl:top-28 xl:h-fit">
+  <CommunitySidebar />
+</aside>
       </div>
     </section>
   );

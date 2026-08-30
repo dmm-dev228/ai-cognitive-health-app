@@ -42,20 +42,20 @@ function SettingsDrawer({
       />
 
       <aside
-        className={`absolute right-0 top-0 h-screen w-full max-w-md overflow-y-auto p-6 shadow-2xl ${isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+        className={`absolute right-0 top-0 h-[100dvh] w-full max-w-md overflow-y-auto overscroll-contain p-4 shadow-2xl sm:p-6 ${isDarkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
           }`}
       >
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-6 flex min-w-0 items-start justify-between gap-3 sm:mb-8 sm:items-center">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-500">
               Settings
             </p>
-            <h2 className="mt-2 text-3xl font-black">Account Center</h2>
+            <h2 className="mt-2 break-words text-2xl font-black sm:text-3xl">Account Center</h2>
           </div>
 
           <button
             onClick={onClose}
-            className={`rounded-full px-4 py-2 text-sm font-bold transition ${isDarkMode
+            className={`min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${isDarkMode
               ? "bg-white/10 text-slate-200 hover:bg-white/15"
               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
@@ -64,16 +64,16 @@ function SettingsDrawer({
           </button>
         </div>
 
-        <div className="rounded-[2rem] bg-gradient-to-br from-indigo-600 to-emerald-500 p-5 text-white shadow-lg">
+        <div className="min-w-0 rounded-[1.5rem] bg-gradient-to-br from-indigo-600 to-emerald-500 p-4 text-white shadow-lg sm:rounded-[2rem] sm:p-5">
           <div className="flex items-center gap-4">
             {profileImageUrl ? (
               <img
                 src={profileImageUrl}
                 alt={`${username} profile`}
-                className="h-16 w-16 rounded-full border border-white/30 object-cover shadow-lg"
+                className="h-14 w-14 shrink-0 rounded-full border border-white/30 object-cover shadow-lg sm:h-16 sm:w-16"
               />
             ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-2xl font-black backdrop-blur">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/20 text-xl font-black backdrop-blur sm:h-16 sm:w-16 sm:text-2xl">
                 {initial}
               </div>
             )}
@@ -85,7 +85,7 @@ function SettingsDrawer({
           </div>
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-5 space-y-3 sm:mt-6 sm:space-y-4">
           <ExpandableSection
             isDarkMode={isDarkMode}
             icon="👤"
@@ -99,7 +99,7 @@ function SettingsDrawer({
               onDeleteAccount={onDeleteAccount}
             />
             <div
-              className={`rounded-3xl border p-4 ${isDarkMode
+              className={`min-w-0 rounded-2xl border p-4 sm:rounded-3xl ${isDarkMode
                 ? "border-red-400/20 bg-red-500/10"
                 : "border-red-100 bg-red-50"
                 }`}
@@ -199,23 +199,23 @@ function ExpandableSection({
 }) {
   return (
     <div
-      className={`rounded-3xl border transition ${isDarkMode
+      className={`min-w-0 rounded-2xl border transition sm:rounded-3xl ${isDarkMode
         ? "border-white/10 bg-white/10"
         : "border-slate-100 bg-slate-50"
         }`}
     >
       <button
         onClick={onClick}
-        className="flex w-full items-center gap-4 p-5 text-left"
+        className="flex min-w-0 w-full items-center gap-3 p-4 text-left sm:gap-4 sm:p-5"
       >
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm ${isDarkMode ? "bg-white/10" : "bg-white"
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-xl shadow-sm sm:h-12 sm:w-12 sm:text-2xl ${isDarkMode ? "bg-white/10" : "bg-white"
             }`}
         >
           {icon}
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <p
             className={`font-bold ${isDarkMode ? "text-white" : "text-slate-900"
               }`}
@@ -238,7 +238,7 @@ function ExpandableSection({
         </span>
       </button>
 
-      {isOpen && <div className="px-5 pb-5">{children}</div>}
+      {isOpen && <div className="min-w-0 px-4 pb-4 sm:px-5 sm:pb-5">{children}</div>}
     </div>
   );
 }
@@ -336,7 +336,7 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
     <div className="space-y-4">
       {/* Profile image settings */}
       <div
-        className={`rounded-3xl border p-4 ${isDarkMode
+        className={`min-w-0 rounded-2xl border p-4 sm:rounded-3xl ${isDarkMode
           ? "border-white/10 bg-white/10"
           : "border-slate-100 bg-white"
           }`}
@@ -345,15 +345,15 @@ function AccountProfileSection({ isDarkMode, onDeleteAccount }) {
           Profile Image
         </p>
 
-        <div className="mt-4 flex items-center gap-4">
+        <div className="mt-4 flex min-w-0 items-center gap-3 sm:gap-4">
           {profileImageUrl ? (
             <img
               src={profileImageUrl}
               alt={`${username} profile`}
-              className="h-16 w-16 rounded-full object-cover shadow-lg"
+              className="h-14 w-14 shrink-0 rounded-full object-cover shadow-lg sm:h-16 sm:w-16"
             />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-2xl font-black text-white">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-emerald-500 text-xl font-black text-white sm:h-16 sm:w-16 sm:text-2xl">
               {username.charAt(0).toUpperCase()}
             </div>
           )}
@@ -453,17 +453,17 @@ function AccountPanel({
 }) {
   return (
     <div
-      className={`rounded-3xl border ${isDarkMode
+      className={`min-w-0 rounded-2xl border sm:rounded-3xl ${isDarkMode
         ? "border-white/10 bg-white/10"
         : "border-slate-100 bg-white"
         }`}
     >
       <button
         onClick={onClick}
-        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+        className="flex min-w-0 w-full items-center justify-between gap-3 p-4 text-left"
       >
-        <div>
-          <p className="text-sm font-bold">{title}</p>
+        <div className="min-w-0">
+          <p className="break-words text-sm font-bold">{title}</p>
           <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
         </div>
 
@@ -482,8 +482,8 @@ function AccountPanel({
 
 function AppearanceToggle({ isDarkMode, setIsDarkMode }) {
   return (
-    <div className="rounded-2xl bg-white/10 p-4">
-      <div className="flex items-center justify-between gap-4">
+    <div className="min-w-0 rounded-2xl bg-white/10 p-4">
+      <div className="flex min-w-0 items-center justify-between gap-3 sm:gap-4">
         <div>
           <p className="text-sm font-bold">Theme</p>
           <p className="mt-1 text-xs opacity-70">
@@ -529,11 +529,11 @@ function SessionTimeoutOptions({ isDarkMode }) {
   };
 
   return (
-    <div className="space-y-2 rounded-2xl bg-white/10 p-4">
+    <div className="min-w-0 space-y-2 rounded-2xl bg-white/10 p-3 sm:p-4">
       {timeoutOptions.map((option) => (
         <label
           key={option.value}
-          className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold transition ${isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
+          className={`flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${isDarkMode ? "hover:bg-white/10" : "hover:bg-white"
             }`}
         >
           <span>{option.label}</span>
@@ -701,8 +701,8 @@ function NotificationsSection({ isDarkMode }) {
         }
         isDarkMode={isDarkMode}
       >
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
-          <div>
+        <div className="mt-4 flex min-w-0 items-center justify-between gap-3 rounded-2xl bg-white/10 px-3 py-3 sm:gap-4 sm:px-4">
+          <div className="min-w-0">
             <p className="text-sm font-bold">
               {journalReminderEnabled ? "Enabled" : "Disabled"}
             </p>
@@ -739,8 +739,8 @@ function NotificationsSection({ isDarkMode }) {
         }
         isDarkMode={isDarkMode}
       >
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
-          <div>
+        <div className="mt-4 flex min-w-0 items-center justify-between gap-3 rounded-2xl bg-white/10 px-3 py-3 sm:gap-4 sm:px-4">
+          <div className="min-w-0">
             <p className="text-sm font-bold">
               {medicationReminderEnabled ? "Enabled" : "Disabled"}
             </p>
@@ -777,8 +777,8 @@ function NotificationsSection({ isDarkMode }) {
         }
         isDarkMode={isDarkMode}
       >
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
-          <div>
+        <div className="mt-4 flex min-w-0 items-center justify-between gap-3 rounded-2xl bg-white/10 px-3 py-3 sm:gap-4 sm:px-4">
+          <div className="min-w-0">
             <p className="text-sm font-bold">
               {goalReminderEnabled ? "Enabled" : "Disabled"}
             </p>
@@ -815,8 +815,8 @@ function NotificationsSection({ isDarkMode }) {
         }
         isDarkMode={isDarkMode}
       >
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl bg-white/10 px-4 py-3">
-          <div>
+        <div className="mt-4 flex min-w-0 items-center justify-between gap-3 rounded-2xl bg-white/10 px-3 py-3 sm:gap-4 sm:px-4">
+          <div className="min-w-0">
             <p className="text-sm font-bold">
               {communityNotificationEnabled ? "Enabled" : "Disabled"}
             </p>
@@ -843,7 +843,7 @@ function NotificationsSection({ isDarkMode }) {
       </NotificationPanel>
 
       {message && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+        <div className="break-words rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
           {message}
         </div>
       )}
@@ -861,17 +861,17 @@ function NotificationPanel({
 }) {
   return (
     <div
-      className={`rounded-3xl border ${isDarkMode
+      className={`min-w-0 rounded-2xl border sm:rounded-3xl ${isDarkMode
         ? "border-white/10 bg-white/10"
         : "border-slate-100 bg-white"
         }`}
     >
       <button
         onClick={onClick}
-        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+        className="flex min-w-0 w-full items-center justify-between gap-3 p-4 text-left"
       >
-        <div>
-          <p className="text-sm font-bold">{title}</p>
+        <div className="min-w-0">
+          <p className="break-words text-sm font-bold">{title}</p>
           <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
         </div>
 
@@ -891,17 +891,17 @@ function NotificationPanel({
 function SecurityPanel({ title, description, isOpen, onClick, isDarkMode, children }) {
   return (
     <div
-      className={`rounded-3xl border ${isDarkMode
+      className={`min-w-0 rounded-2xl border sm:rounded-3xl ${isDarkMode
         ? "border-white/10 bg-white/10"
         : "border-slate-100 bg-white"
         }`}
     >
       <button
         onClick={onClick}
-        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+        className="flex min-w-0 w-full items-center justify-between gap-3 p-4 text-left"
       >
-        <div>
-          <p className="text-sm font-bold">{title}</p>
+        <div className="min-w-0">
+          <p className="break-words text-sm font-bold">{title}</p>
           <p className="mt-1 text-xs leading-5 opacity-70">{description}</p>
         </div>
 
@@ -1086,7 +1086,7 @@ function SecuritySection({ isDarkMode }) {
 
       {message && (
         <div
-          className={`rounded-2xl px-4 py-3 text-xs font-semibold ${isSuccessMessage
+          className={`break-words rounded-2xl px-4 py-3 text-xs font-semibold ${isSuccessMessage
             ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
             : "border border-red-200 bg-red-50 text-red-600"
             }`}

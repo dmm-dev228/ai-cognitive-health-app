@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAchievements } from "../services/api";
+import {
+    getUnseenAchievements,
+    markAchievementSeen
+} from "../services/api";
 
 /*
  * UnifiedNotificationSystem
@@ -11,6 +14,10 @@ import { getAchievements } from "../services/api";
  * - medication reminders
  * - goal reminders
  * - achievements
+ *
+ * Achievement popup state is persisted by the backend.
+ * The frontend no longer relies on localStorage to track
+ * whether an achievement notification has already been seen.
  */
 function UnifiedNotificationSystem({
     visibleNotifications,
@@ -18,47 +25,65 @@ function UnifiedNotificationSystem({
 }) {
     const [achievement, setAchievement] = useState(null);
 
-    useEffect(() => {
-        checkForNewAchievements();
+    // Keeps the polling logic aware of whether a popup is already visible.
+    const achievementRef = useRef(null);
 
-        const intervalId = setInterval(() => {
-            checkForNewAchievements();
-        }, 30000);
-
-        return () => clearInterval(intervalId);
-    }, []);
-
-    const checkForNewAchievements = async () => {
+    const fetchNextUnseenAchievement = async () => {
         try {
-            const achievements = await getAchievements();
+            // Do not replace an achievement popup that is already visible.
+            if (achievementRef.current) {
+                return;
+            }
+
+            const achievements = await getUnseenAchievements();
 
             if (!Array.isArray(achievements) || achievements.length === 0) {
                 return;
             }
 
-            const seenKeys = JSON.parse(
-                localStorage.getItem("seenAchievements") || "[]"
-            );
+            // Backend returns unseen achievements oldest first.
+            const nextAchievement = achievements[0];
 
-            const unseenAchievement = achievements.find(
-                (item) => !seenKeys.includes(item.achievementKey)
-            );
-
-            if (!unseenAchievement) {
-                return;
-            }
-
-            setAchievement(unseenAchievement);
-
-            localStorage.setItem(
-                "seenAchievements",
-                JSON.stringify([
-                    ...seenKeys,
-                    unseenAchievement.achievementKey
-                ])
-            );
+            achievementRef.current = nextAchievement;
+            setAchievement(nextAchievement);
         } catch (err) {
             console.error("Failed to check achievements:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchNextUnseenAchievement();
+
+        const intervalId = setInterval(() => {
+            fetchNextUnseenAchievement();
+        }, 30000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    const handleAchievementSeen = async () => {
+        const currentAchievement = achievementRef.current;
+
+        if (!currentAchievement) {
+            return;
+        }
+
+        try {
+            await markAchievementSeen(currentAchievement.id);
+
+            achievementRef.current = null;
+            setAchievement(null);
+
+            /*
+             * Check again shortly after dismissing.
+             * If multiple achievements were unlocked, they can appear
+             * one at a time without waiting for the 30 second poll.
+             */
+            setTimeout(() => {
+                fetchNextUnseenAchievement();
+            }, 300);
+        } catch (err) {
+            console.error("Failed to mark achievement as seen:", err);
         }
     };
 
@@ -92,7 +117,7 @@ function UnifiedNotificationSystem({
                     icon={getAchievementIcon(achievement.achievementKey)}
                     actionText="View Badges"
                     actionUrl="/achievements"
-                    onDismiss={() => setAchievement(null)}
+                    onDismiss={handleAchievementSeen}
                 />
             )}
 
@@ -131,12 +156,16 @@ function PopupCard({
 
     return (
         <div className="animate-fade-in overflow-hidden rounded-[1.75rem] border border-white/70 bg-white shadow-xl shadow-slate-300/50">
-            <div className={`bg-gradient-to-r ${theme.gradient} px-4 py-3 text-white`}>
+            <div
+                className={`bg-gradient-to-r ${theme.gradient} px-4 py-3 text-white`}
+            >
                 <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/80">
                     {label}
                 </p>
 
-                <h3 className="mt-1 text-lg font-black">{title}</h3>
+                <h3 className="mt-1 text-lg font-black">
+                    {title}
+                </h3>
             </div>
 
             <div className="p-4">
@@ -146,7 +175,9 @@ function PopupCard({
                     {icon}
                 </div>
 
-                <p className="text-sm leading-5 text-slate-600">{message}</p>
+                <p className="text-sm leading-5 text-slate-600">
+                    {message}
+                </p>
 
                 <div className="mt-4 flex gap-2">
                     {actionUrl && (
@@ -160,6 +191,7 @@ function PopupCard({
                     )}
 
                     <button
+                        type="button"
                         onClick={onDismiss}
                         className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
                     >

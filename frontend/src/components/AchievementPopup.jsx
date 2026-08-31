@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAchievements } from "../services/api";
+import {
+    getUnseenAchievements,
+    markAchievementSeen
+} from "../services/api";
 
 /*
  * AchievementPopup
  * ----------------
  * Shows a popup when the user unlocks a new achievement.
  *
- * MVP approach:
- * - Fetch achievements periodically
- * - Compare against achievements already seen in localStorage
- * - Show newest unseen achievement
+ * The backend is the source of truth for whether
+ * an achievement notification has already been seen.
  */
 function AchievementPopup() {
     const [achievement, setAchievement] = useState(null);
@@ -27,36 +28,48 @@ function AchievementPopup() {
 
     const checkForNewAchievements = async () => {
         try {
-            const achievements = await getAchievements();
+            // Do not replace a popup that is already being shown.
+            if (achievement) {
+                return;
+            }
+
+            const achievements = await getUnseenAchievements();
 
             if (!Array.isArray(achievements) || achievements.length === 0) {
                 return;
             }
 
-            const seenKeys = JSON.parse(
-                localStorage.getItem("seenAchievements") || "[]"
-            );
-
-            const unseenAchievement = achievements.find(
-                (item) => !seenKeys.includes(item.achievementKey)
-            );
-
-            if (!unseenAchievement) {
-                return;
-            }
-
-            setAchievement(unseenAchievement);
-
-            localStorage.setItem(
-                "seenAchievements",
-                JSON.stringify([
-                    ...seenKeys,
-                    unseenAchievement.achievementKey
-                ])
-            );
+            // The backend returns unseen achievements oldest first.
+            setAchievement(achievements[0]);
         } catch (err) {
             console.error("Failed to check achievements:", err);
         }
+    };
+
+    const handleAchievementSeen = async () => {
+        if (!achievement) {
+            return;
+        }
+
+        try {
+            await markAchievementSeen(achievement.id);
+            setAchievement(null);
+
+            /*
+             * Immediately check for another unseen achievement.
+             * This allows multiple newly earned badges to appear
+             * one at a time without waiting 30 seconds.
+             */
+            setTimeout(() => {
+                checkForNewAchievements();
+            }, 300);
+        } catch (err) {
+            console.error("Failed to mark achievement as seen:", err);
+        }
+    };
+
+    const handleViewBadges = async () => {
+        await handleAchievementSeen();
     };
 
     const getBadgeEmoji = (key) => {
@@ -102,14 +115,15 @@ function AchievementPopup() {
                     <div className="mt-5 flex gap-3">
                         <Link
                             to="/achievements"
-                            onClick={() => setAchievement(null)}
+                            onClick={handleViewBadges}
                             className="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-500"
                         >
                             View Badges
                         </Link>
 
                         <button
-                            onClick={() => setAchievement(null)}
+                            type="button"
+                            onClick={handleAchievementSeen}
                             className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-200"
                         >
                             Dismiss

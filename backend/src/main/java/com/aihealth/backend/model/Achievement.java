@@ -42,7 +42,11 @@ public class Achievement {
     @Column(name = "unlocked_at")
     private LocalDateTime unlockedAt;
 
-    public Achievement() {}
+    @Column(name = "notification_seen_at")
+    private LocalDateTime notificationSeenAt;
+
+    public Achievement() {
+    }
 
     public Long getId() {
         return id;
@@ -94,5 +98,13 @@ public class Achievement {
 
     public void setUnlockedAt(LocalDateTime unlockedAt) {
         this.unlockedAt = unlockedAt;
+    }
+
+    public LocalDateTime getNotificationSeenAt() {
+        return notificationSeenAt;
+    }
+
+    public void setNotificationSeenAt(LocalDateTime notificationSeenAt) {
+        this.notificationSeenAt = notificationSeenAt;
     }
 }

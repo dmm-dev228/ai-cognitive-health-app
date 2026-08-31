@@ -33,7 +33,31 @@ public class AchievementController {
     @GetMapping
     public ResponseEntity<List<AchievementResponse>> getAchievements() {
         return ResponseEntity.ok(
-                achievementService.getAchievementsForCurrentUser()
-        );
+                achievementService.getAchievementsForCurrentUser());
+    }
+
+    /*
+     * Gets achievements whose notification popup
+     * has not yet been acknowledged.
+     */
+    @GetMapping("/unseen")
+    public ResponseEntity<List<AchievementResponse>> getUnseenAchievements() {
+        return ResponseEntity.ok(
+                achievementService.getUnseenAchievementsForCurrentUser());
+    }
+
+    /*
+     * Marks one achievement notification as seen.
+     *
+     * The service verifies that the achievement belongs
+     * to the authenticated user before updating it.
+     */
+    @PatchMapping("/{achievementId}/seen")
+    public ResponseEntity<AchievementResponse> markAchievementSeen(
+            @PathVariable Long achievementId) {
+
+        return ResponseEntity.ok(
+                achievementService.markAchievementNotificationSeen(
+                        achievementId));
     }
 }

@@ -19,4 +19,8 @@ public interface AchievementRepository extends JpaRepository<Achievement, Long> 
         boolean existsByUserIdAndAchievementKey(
                         Long userId,
                         String achievementKey);
+
+        // Returns achievements whose popup has not been acknowledged yet.
+        List<Achievement> findByUserIdAndNotificationSeenAtIsNullOrderByUnlockedAtAsc(
+                        Long userId);
 }

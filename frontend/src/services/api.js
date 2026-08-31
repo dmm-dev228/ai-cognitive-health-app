@@ -453,70 +453,70 @@ export const getNotifications = async () => {
 
 // Updates current user's daily journal reminder preference.
 export const updateJournalReminderPreference = async (journalReminderEnabled) => {
-  const response = await fetch(`${BASE_URL}/users/me/journal-reminder`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ journalReminderEnabled }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/journal-reminder`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ journalReminderEnabled }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update journal reminder.");
-  }
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update journal reminder.");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // Updates current user's goal reminder preference.
 export const updateGoalReminderPreference = async (goalReminderEnabled) => {
-  const response = await fetch(`${BASE_URL}/users/me/goal-reminder`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ goalReminderEnabled }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/goal-reminder`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ goalReminderEnabled }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update goal reminder.");
-  }
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update goal reminder.");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // Updates current user's medication reminder preference.
 export const updateMedicationReminderPreference = async (
-  medicationReminderEnabled
+    medicationReminderEnabled
 ) => {
-  const response = await fetch(`${BASE_URL}/users/me/medication-reminder`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ medicationReminderEnabled }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/medication-reminder`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ medicationReminderEnabled }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update medication reminder.");
-  }
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update medication reminder.");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // Updates current user's community notification preference.
 export const updateCommunityNotificationPreference = async (
-  communityNotificationEnabled
+    communityNotificationEnabled
 ) => {
-  const response = await fetch(`${BASE_URL}/users/me/community-notifications`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ communityNotificationEnabled }),
-  });
+    const response = await fetch(`${BASE_URL}/users/me/community-notifications`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ communityNotificationEnabled }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update community notifications.");
-  }
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update community notifications.");
+    }
 
-  return response.json();
+    return response.json();
 };
 
 // ===== Game Results =====
@@ -829,6 +829,37 @@ export const getAchievements = async () => {
 
     if (!response.ok) {
         throw new Error("Failed to fetch achievements");
+    }
+
+    return response.json();
+};
+
+// Fetch achievements whose popup has not been acknowledged yet.
+export const getUnseenAchievements = async () => {
+    const response = await fetch(`${BASE_URL}/achievements/unseen`, {
+        method: "GET",
+        headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch unseen achievements");
+    }
+
+    return response.json();
+};
+
+// Mark one achievement popup as seen.
+export const markAchievementSeen = async (achievementId) => {
+    const response = await fetch(
+        `${BASE_URL}/achievements/${achievementId}/seen`,
+        {
+            method: "PATCH",
+            headers: getAuthHeaders()
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to mark achievement as seen");
     }
 
     return response.json();

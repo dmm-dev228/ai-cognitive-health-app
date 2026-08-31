@@ -21,6 +21,7 @@ import UnifiedNotificationSystem from "./components/UnifiedNotificationSystem";
 import FeedbackCard from "./components/FeedbackCard";
 import VerifyEmailChangePage from "./pages/VerifyEmailChangePage";
 import ToastProvider from "./components/notifications/ToastProvider";
+import ScrollToTop from "./components/ScrollToTop";
 
 import {
   logoutUser,
@@ -132,6 +133,7 @@ function App() {
 
   return (
     <ToastProvider>
+      <ScrollToTop />
       <main
         className={`min-h-screen transition-colors duration-300 ${
           isDarkMode

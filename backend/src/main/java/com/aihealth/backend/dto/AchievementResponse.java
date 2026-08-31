@@ -18,6 +18,7 @@ public class AchievementResponse {
     private String description;
     private String badgeLabel;
     private LocalDateTime unlockedAt;
+    private LocalDateTime notificationSeenAt;
 
     public AchievementResponse(
             Long id,
@@ -26,7 +27,8 @@ public class AchievementResponse {
             String title,
             String description,
             String badgeLabel,
-            LocalDateTime unlockedAt) {
+            LocalDateTime unlockedAt,
+            LocalDateTime notificationSeenAt) {
 
         this.id = id;
         this.userId = userId;
@@ -35,6 +37,7 @@ public class AchievementResponse {
         this.description = description;
         this.badgeLabel = badgeLabel;
         this.unlockedAt = unlockedAt;
+        this.notificationSeenAt = notificationSeenAt;
     }
 
     public Long getId() {
@@ -63,5 +66,9 @@ public class AchievementResponse {
 
     public LocalDateTime getUnlockedAt() {
         return unlockedAt;
+    }
+
+    public LocalDateTime getNotificationSeenAt() {
+        return notificationSeenAt;
     }
 }

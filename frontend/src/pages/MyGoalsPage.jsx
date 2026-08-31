@@ -317,47 +317,47 @@ function MyGoalsPage() {
         goals.length === 0
             ? 0
             : Math.round(
-                  goals.reduce(
-                      (sum, goal) => sum + getProgressPercent(goal),
-                      0
-                  ) / goals.length
-              );
+                goals.reduce(
+                    (sum, goal) => sum + getProgressPercent(goal),
+                    0
+                ) / goals.length
+            );
 
     const nextMilestoneGoal = activeGoals.find(
         (goal) => getProgressPercent(goal) > 0 && getProgressPercent(goal) < 100
     );
 
     return (
-        <section className="animate-fade-in">
+        <section className="min-w-0 animate-fade-in">
             {/* Motivational page hero */}
-            <div className="relative mb-6 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 p-5 sm:mb-8 sm:rounded-[2.5rem] sm:p-8 text-white shadow-2xl shadow-indigo-200 sm:p-8">
+            <div className="relative mb-5 min-w-0 overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-indigo-600 via-violet-600 to-emerald-500 p-4 text-white shadow-xl shadow-indigo-200 sm:mb-6 sm:rounded-[2rem] sm:p-6 lg:mb-8 lg:rounded-[2.5rem] lg:p-8 lg:shadow-2xl">
                 <div className="absolute -left-16 top-10 h-64 w-64 rounded-full bg-white/20 blur-3xl animate-float" />
                 <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-yellow-200/20 blur-3xl animate-float" />
 
-                <div className="relative z-10 grid gap-6 sm:gap-8 lg:grid-cols-[1fr_340px] lg:items-end">
+                <div className="relative z-10 grid min-w-0 gap-6 sm:gap-7 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-end xl:gap-8">
                     <div>
                         <p className="inline-flex rounded-full bg-white/15 px-3 py-2 text-xs font-semibold backdrop-blur sm:px-4 sm:text-sm">
                             Goal Mission Control
                         </p>
 
-                        <h2 className="mt-5 max-w-4xl text-2xl font-black leading-tight tracking-tight min-[390px]:text-3xl sm:mt-6 sm:text-4xl lg:text-5xl">
+                        <h2 className="mt-4 max-w-4xl break-words text-2xl font-black leading-[1.08] tracking-tight min-[390px]:text-3xl sm:mt-5 sm:text-4xl lg:text-5xl">
                             Build momentum one small win at a time.
                         </h2>
 
-                        <p className="mt-4 max-w-2xl text-sm leading-7 text-white/85">
+                        <p className="mt-3 max-w-2xl break-words text-sm leading-6 text-white/85 sm:mt-4 sm:leading-7">
                             Create meaningful goals, follow AI-generated plans, log progress,
                             and celebrate milestones as you build healthier routines.
                         </p>
                     </div>
 
-                    <div className="flex flex-col items-center">
-                        <CogniHavenLogo className="mb-3 h-24 w-24 object-contain drop-shadow-2xl animate-float sm:mb-4 sm:h-36 sm:w-36 lg:h-40 lg:w-40" />
+                    <div className="flex min-w-0 flex-col items-center xl:items-end">
+                        <CogniHavenLogo className="mb-3 h-20 w-20 object-contain drop-shadow-2xl animate-float sm:h-24 sm:w-24 lg:h-28 lg:w-28 xl:mb-4 xl:h-36 xl:w-36" />
 
                         <p className="text-sm font-semibold text-white/80">
                             Overall Progress
                         </p>
 
-                        <div className="mt-3 flex flex-wrap items-end justify-center gap-2 sm:mt-4 sm:gap-3">
+                        <div className="mt-3 flex flex-wrap items-end justify-center gap-2 sm:gap-3 xl:justify-end">
                             <p className="text-4xl font-black sm:text-5xl">
                                 {averageProgress}%
                             </p>
@@ -367,7 +367,7 @@ function MyGoalsPage() {
                             </p>
                         </div>
 
-                        <div className="mt-5 h-3 w-full overflow-hidden rounded-full bg-white/20">
+                        <div className="mt-4 h-3 w-full max-w-sm overflow-hidden rounded-full bg-white/20 xl:ml-auto">
                             <div
                                 className="h-full rounded-full bg-white transition-all duration-700"
                                 style={{ width: `${averageProgress}%` }}
@@ -384,7 +384,7 @@ function MyGoalsPage() {
             )}
 
             {/* Dashboard summary cards */}
-            <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4 xl:grid-cols-4">
+            <div className="mb-6 grid min-w-0 grid-cols-2 gap-3 sm:mb-8 sm:gap-4 lg:grid-cols-4">
                 <SummaryCard label="Active Goals" value={activeGoals.length} icon="🔥" />
 
                 <SummaryCard
@@ -410,9 +410,9 @@ function MyGoalsPage() {
                 />
             </div>
 
-            <div className="grid gap-5 sm:gap-6 xl:grid-cols-[400px_1fr] xl:gap-8">
+            <div className="grid min-w-0 gap-5 sm:gap-6 xl:grid-cols-[minmax(300px,360px)_minmax(0,1fr)] xl:items-start xl:gap-6 2xl:gap-8">
                 {/* AI goal coach / create goal panel */}
-                <div className="glass-card h-fit rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6 xl:sticky xl:top-28">
+                <div className="glass-card min-w-0 h-fit rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-5 lg:p-6 xl:sticky xl:top-28">
                     <p className="text-sm font-semibold text-indigo-600">
                         AI Goal Coach
                     </p>
@@ -437,7 +437,7 @@ function MyGoalsPage() {
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="Journal 5 times this week"
-                                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                                className="min-w-0 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                             />
                         </label>
 
@@ -452,7 +452,7 @@ function MyGoalsPage() {
                                 onChange={handleChange}
                                 rows="4"
                                 placeholder="Why does this goal matter to you?"
-                                className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                                className="min-w-0 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                             />
                         </label>
 
@@ -466,7 +466,7 @@ function MyGoalsPage() {
                                     name="category"
                                     value={formData.category}
                                     onChange={handleChange}
-                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                                    className="min-w-0 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                                 >
                                     <option value="JOURNALING">Journaling</option>
                                     <option value="MEMORY">Memory</option>
@@ -489,7 +489,7 @@ function MyGoalsPage() {
                                     name="targetDate"
                                     value={formData.targetDate}
                                     onChange={handleChange}
-                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                                    className="min-w-0 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                                 />
                             </label>
                         </div>
@@ -506,7 +506,7 @@ function MyGoalsPage() {
                                     name="targetCount"
                                     value={formData.targetCount}
                                     onChange={handleChange}
-                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                                    className="min-w-0 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                                 />
                             </label>
 
@@ -520,7 +520,7 @@ function MyGoalsPage() {
                                     value={formData.unitLabel}
                                     onChange={handleChange}
                                     placeholder="entries"
-                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                                    className="min-w-0 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                                 />
                             </label>
                         </div>
@@ -560,7 +560,7 @@ function MyGoalsPage() {
                 </div>
 
                 {/* Goal achievement board */}
-                <div className="space-y-6 sm:space-y-8">
+                <div className="min-w-0 space-y-5 sm:space-y-6 lg:space-y-8">
                     {isLoading ? (
                         <div className="glass-card rounded-2xl p-7 text-center sm:rounded-3xl sm:p-10">
                             <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-500" />
@@ -623,20 +623,20 @@ function MyGoalsPage() {
 
 function SummaryCard({ label, value, icon }) {
     return (
-        <div className="glass-card rounded-2xl p-4 hover-lift sm:rounded-3xl sm:p-5">
+        <div className="glass-card min-w-0 rounded-2xl p-3.5 hover-lift sm:rounded-3xl sm:p-5">
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-xl sm:mb-4 sm:h-12 sm:w-12 sm:rounded-2xl sm:text-2xl">
                 {icon}
             </div>
 
-            <p className="text-sm font-semibold text-slate-500">{label}</p>
-            <p className="mt-1 text-2xl font-black text-slate-900 sm:mt-2 sm:text-3xl">{value}</p>
+            <p className="break-words text-xs font-semibold leading-5 text-slate-500 sm:text-sm">{label}</p>
+            <p className="mt-1 break-words text-xl font-black leading-tight text-slate-900 sm:mt-2 sm:text-2xl lg:text-3xl">{value}</p>
         </div>
     );
 }
 
 function ReminderToggle({ title, description, name, checked, onChange }) {
     return (
-        <label className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm sm:gap-4 sm:px-4">
+        <label className="flex min-w-0 items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm sm:gap-4 sm:px-4">
             <div>
                 <p className="text-sm font-semibold text-slate-800">{title}</p>
                 <p className="text-xs text-slate-500">{description}</p>
@@ -695,7 +695,7 @@ function GoalSection({
                     </p>
                 </div>
             ) : (
-                <div className="grid gap-4 sm:gap-5 2xl:grid-cols-2">
+                <div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-5">
                     {goals.map((goal) => {
                         const progressPercent = getProgressPercent(goal);
                         const milestone = getMilestoneBadge(goal);
@@ -709,16 +709,15 @@ function GoalSection({
                         return (
                             <article
                                 key={goal.id}
-                                className={`group min-w-0 overflow-hidden rounded-[1.5rem] border shadow-xl sm:rounded-[2rem] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-2xl ${
-                                    isCompleted
+                                className={`group min-w-0 overflow-hidden rounded-[1.5rem] border shadow-xl sm:rounded-[2rem] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-2xl ${isCompleted
                                         ? "border-emerald-100 bg-emerald-50/80 shadow-emerald-100/60"
                                         : "border-white/70 bg-white/80 shadow-slate-200/60"
-                                }`}
+                                    }`}
                             >
                                 <div className={`h-2 bg-gradient-to-r ${meta.color}`} />
 
                                 <div className="p-4 sm:p-6">
-                                    <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                                    <div className="mb-4 flex min-w-0 flex-col gap-3 sm:mb-5 md:flex-row md:items-start md:justify-between md:gap-4">
                                         <div className="min-w-0 flex items-start gap-3 sm:gap-4">
                                             <div
                                                 className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14 sm:rounded-3xl bg-gradient-to-br ${meta.color} text-2xl shadow-lg`}
@@ -744,13 +743,12 @@ function GoalSection({
                                         </div>
 
                                         <span
-                                            className={`w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-bold sm:px-4 sm:py-2 ${
-                                                isCompleted
+                                            className={`w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-bold sm:px-4 sm:py-2 ${isCompleted
                                                     ? "bg-emerald-100 text-emerald-700"
                                                     : goal.status === "PAUSED"
-                                                      ? "bg-amber-50 text-amber-700"
-                                                      : "bg-slate-100 text-slate-600"
-                                            }`}
+                                                        ? "bg-amber-50 text-amber-700"
+                                                        : "bg-slate-100 text-slate-600"
+                                                }`}
                                         >
                                             {goal.status}
                                         </span>
@@ -791,7 +789,7 @@ function GoalSection({
                                             AI Coach Plan
                                         </p>
 
-                                        <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                                        <p className="mt-3 break-words whitespace-pre-wrap text-sm leading-6 text-slate-700 sm:leading-7">
                                             {goal.aiPlan ||
                                                 "CogniHaven has not generated a plan yet."}
                                         </p>
@@ -803,7 +801,7 @@ function GoalSection({
                                                 Log a small win toward this goal
                                             </p>
 
-                                            <div className="grid gap-3 sm:grid-cols-[120px_1fr]">
+                                            <div className="grid min-w-0 gap-3 md:grid-cols-[120px_minmax(0,1fr)]">
                                                 <div className="flex items-center rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-100">
                                                     <span className="pl-4 text-sm font-bold text-slate-400">
                                                         +
@@ -834,7 +832,7 @@ function GoalSection({
                                                         )
                                                     }
                                                     placeholder="Optional note about this win..."
-                                                    className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                                                    className="min-w-0 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                                                 />
                                             </div>
 

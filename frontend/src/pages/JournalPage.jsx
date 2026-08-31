@@ -141,10 +141,14 @@ function JournalPage() {
   const fetchEntries = async () => {
     try {
       setIsLoading(true);
-      setError("");
 
       if (!storedUserId) {
-        setError("No user found. Please log in again.");
+        showToast({
+          type: "error",
+          title: "Session Expired",
+          message: "Please sign in again to continue.",
+        });
+
         setIsLoading(false);
         return;
       }
@@ -237,50 +241,71 @@ function JournalPage() {
 
     try {
       setIsSaving(true);
-      setError("");
 
+
+      /*
+       * Save the journal entry first.
+       * This is the only request that determines whether saving succeeded.
+       */
       const savedEntry = await createJournalEntry({
-        title,
-        content,
+        title: title.trim(),
+        content: content.trim(),
         mood,
         isPublic: false,
       });
 
       const tempEntry = {
         ...savedEntry,
-        title: savedEntry.title || title,
-        content: savedEntry.content || content,
+        title: savedEntry.title || title.trim(),
+        content: savedEntry.content || content.trim(),
         mood: savedEntry.mood || mood,
       };
 
+      /*
+       * Immediately update the journal UI after a successful save.
+       */
       setEntries((prev) => [tempEntry, ...prev]);
-
       setSelectedEntryId(savedEntry.id);
       setIsCreatingEntry(false);
-
-      /*
-       * Backend now generates the first AI response during journal creation.
-       * We only fetch the updated conversation thread here.
-       */
-      const messages = await getConversationMessages(savedEntry.id);
-
-      setConversationMap((prev) => ({
-        ...prev,
-        [savedEntry.id]: messages,
-      }));
 
       setTitle("");
       setContent("");
       setMood("neutral");
+
       showToast({
         type: "success",
         title: "Journal Saved",
         message: "Your journal entry has been saved successfully.",
       });
 
+      /*
+       * Loading the AI conversation is secondary.
+       * A failure here should never make a successful journal save
+       * appear to have failed.
+       */
+      try {
+        const messages = await getConversationMessages(savedEntry.id);
+
+        setConversationMap((prev) => ({
+          ...prev,
+          [savedEntry.id]: Array.isArray(messages) ? messages : [],
+        }));
+      } catch (conversationError) {
+        console.error(
+          "Journal saved, but conversation could not be loaded:",
+          conversationError
+        );
+
+        setConversationMap((prev) => ({
+          ...prev,
+          [savedEntry.id]: [],
+        }));
+      }
+
       scrollToBottom();
     } catch (err) {
       console.error("Failed to save journal entry:", err);
+
       showToast({
         type: "error",
         title: "Save Failed",
@@ -318,7 +343,7 @@ function JournalPage() {
     };
 
     try {
-      setError("");
+
 
       setConversationMap((prev) => ({
         ...prev,
@@ -390,10 +415,10 @@ function JournalPage() {
       </div>
 
       <div className="grid gap-5 sm:gap-6 xl:grid-cols-[340px_1fr] xl:gap-8">
-     <aside className="glass-card h-fit rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-5 xl:sticky xl:top-28">
+        <aside className="glass-card h-fit rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-5 xl:sticky xl:top-28">
           <div
-  className={`rounded-[1.25rem] bg-gradient-to-br ${activeTheme.cover} p-4 text-white shadow-xl sm:rounded-[1.75rem] sm:p-5`}
->
+            className={`rounded-[1.25rem] bg-gradient-to-br ${activeTheme.cover} p-4 text-white shadow-xl sm:rounded-[1.75rem] sm:p-5`}
+          >
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/70">
               My Journal
             </p>
@@ -461,7 +486,7 @@ function JournalPage() {
                 </p>
               </div>
             ) : (
-             <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1 sm:max-h-[380px] sm:space-y-3 xl:max-h-[460px]">
+              <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1 sm:max-h-[380px] sm:space-y-3 xl:max-h-[460px]">
                 {entries.map((entry) => (
                   <button
                     key={entry.id}
@@ -494,13 +519,13 @@ function JournalPage() {
           </div>
         </aside>
 
- <div className="relative min-w-0">
-  <div
-    className={`absolute inset-0 rounded-[1.75rem] bg-gradient-to-br ${activeTheme.cover} opacity-20 blur-2xl sm:rounded-[2.5rem]`}
-  />
+        <div className="relative min-w-0">
+          <div
+            className={`absolute inset-0 rounded-[1.75rem] bg-gradient-to-br ${activeTheme.cover} opacity-20 blur-2xl sm:rounded-[2.5rem]`}
+          />
 
-  <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-50 p-1.5 shadow-xl shadow-slate-300/50 sm:rounded-[2.5rem] sm:p-3 sm:shadow-2xl sm:shadow-slate-300/60">
-    <div className="grid min-h-[560px] overflow-hidden rounded-[1.25rem] border border-amber-200/70 bg-white shadow-inner sm:min-h-[640px] sm:rounded-[2rem] lg:min-h-[720px] lg:grid-cols-[1fr_1.1fr]">
+          <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-50 p-1.5 shadow-xl shadow-slate-300/50 sm:rounded-[2.5rem] sm:p-3 sm:shadow-2xl sm:shadow-slate-300/60">
+            <div className="grid min-h-[560px] overflow-hidden rounded-[1.25rem] border border-amber-200/70 bg-white shadow-inner sm:min-h-[640px] sm:rounded-[2rem] lg:min-h-[720px] lg:grid-cols-[1fr_1.1fr]">
               <div className={`hidden border-r border-amber-200/70 ${activeTheme.page} p-8 lg:block`}>
                 <div className="flex h-full flex-col justify-between">
                   <div>
@@ -530,23 +555,23 @@ function JournalPage() {
               </div>
 
               <div
-     className={`min-h-[560px] min-w-0 bg-white p-4 transition-all duration-300 sm:min-h-[640px] sm:p-6 md:p-8 lg:min-h-[720px] ${isPageTurning
+                className={`min-h-[560px] min-w-0 bg-white p-4 transition-all duration-300 sm:min-h-[640px] sm:p-6 md:p-8 lg:min-h-[720px] ${isPageTurning
                   ? "scale-[0.98] rotate-1 opacity-40 blur-sm"
                   : "scale-100 rotate-0 opacity-100 blur-0"
                   }`}
               >
                 {isCreatingEntry ? (
                   <div className="flex h-full flex-col">
-                   <div className="mb-5 sm:mb-8">
-  <p
-    className={`text-xs font-semibold uppercase tracking-[0.2em] sm:text-sm sm:tracking-[0.25em] ${activeTheme.accent}`}
-  >
-    New Entry
-  </p>
+                    <div className="mb-5 sm:mb-8">
+                      <p
+                        className={`text-xs font-semibold uppercase tracking-[0.2em] sm:text-sm sm:tracking-[0.25em] ${activeTheme.accent}`}
+                      >
+                        New Entry
+                      </p>
 
-  <h3 className="mt-2 text-2xl font-black leading-tight text-slate-900 sm:mt-3 sm:text-3xl">
-    Write a fresh journal page.
-  </h3>
+                      <h3 className="mt-2 text-2xl font-black leading-tight text-slate-900 sm:mt-3 sm:text-3xl">
+                        Write a fresh journal page.
+                      </h3>
 
                       <p className="mt-3 text-sm leading-6 text-slate-500">
                         Add a title, choose your mood, and write your thoughts.
@@ -554,7 +579,7 @@ function JournalPage() {
                       </p>
                     </div>
 
-                   <div className="space-y-4 sm:space-y-5">
+                    <div className="space-y-4 sm:space-y-5">
                       <label className="block">
                         <span className="mb-2 block text-sm font-semibold text-slate-700">
                           Title
@@ -601,8 +626,8 @@ function JournalPage() {
                           value={content}
                           onChange={(e) => setContent(e.target.value)}
                           placeholder="Write your thoughts..."
-rows="10"
-className="w-full resize-none rounded-[1.25rem] border border-slate-200 bg-[linear-gradient(transparent_95%,rgba(99,102,241,0.12)_96%)] px-4 py-4 text-sm leading-7 text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 sm:rounded-[1.5rem] sm:px-5 sm:leading-8"
+                          rows="10"
+                          className="w-full resize-none rounded-[1.25rem] border border-slate-200 bg-[linear-gradient(transparent_95%,rgba(99,102,241,0.12)_96%)] px-4 py-4 text-sm leading-7 text-slate-700 shadow-sm transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 sm:rounded-[1.5rem] sm:px-5 sm:leading-8"
                         />
                       </label>
 
@@ -639,7 +664,7 @@ className="w-full resize-none rounded-[1.25rem] border border-slate-200 bg-[line
                   </div>
                 ) : selectedEntry ? (
                   <div className="flex h-full flex-col">
-<div className="mb-4 border-b border-slate-100 pb-4 sm:mb-6 sm:pb-5">
+                    <div className="mb-4 border-b border-slate-100 pb-4 sm:mb-6 sm:pb-5">
                       <p className={`text-sm font-semibold uppercase tracking-[0.25em] ${activeTheme.accent}`}>
                         Open Entry
                       </p>
@@ -673,7 +698,7 @@ className="w-full resize-none rounded-[1.25rem] border border-slate-200 bg-[line
                               }`}
                           >
                             <div
-                             className={`max-w-[94%] break-words rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm sm:max-w-[85%] sm:rounded-3xl sm:px-5 sm:py-4 sm:leading-7 ${msg.senderType === "USER"
+                              className={`max-w-[94%] break-words rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm sm:max-w-[85%] sm:rounded-3xl sm:px-5 sm:py-4 sm:leading-7 ${msg.senderType === "USER"
                                 ? `rounded-br-md bg-gradient-to-r ${activeTheme.button} text-white`
                                 : "rounded-bl-md border border-slate-100 bg-slate-50 text-slate-700"
                                 }`}
@@ -838,7 +863,7 @@ className="w-full resize-none rounded-[1.25rem] border border-slate-200 bg-[line
                         📖
                       </div>
 
-                    <h3 className="break-words text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
+                      <h3 className="break-words text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
                         Open your journal.
                       </h3>
 

@@ -53,9 +53,6 @@ CogniHaven is deployed using a production-style cloud architecture:
 ## Game Analytics & AI Insights
 [![Watch Demo](./assets/AnalyticsDemo.png)](https://youtu.be/7W3tpMeWHFM)
 
-🎬 **Watch Demo**
-(Add Link)
-
 ---
 
 # 🔒 Authentication & Security

@@ -1,68 +1,131 @@
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 
 export function useTextToSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState([]);
 
+  const utteranceRef = useRef(null);
+  const requestIdRef = useRef(0);
+
   useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+
+    const synth = window.speechSynthesis;
+
     const loadVoices = () => {
-      setVoices(window.speechSynthesis?.getVoices() || []);
+      setVoices(synth.getVoices());
     };
 
     loadVoices();
+    synth.addEventListener?.("voiceschanged", loadVoices);
 
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
+    return () => {
+      synth.removeEventListener?.("voiceschanged", loadVoices);
+      synth.cancel();
+    };
   }, []);
 
   const getBestVoice = () => {
+    const available = window.speechSynthesis?.getVoices() || [];
+    const list = available.length ? available : voices;
+
     return (
-      voices.find((voice) =>
+      list.find((voice) =>
         voice.name.toLowerCase().includes("samantha")
       ) ||
-      voices.find((voice) =>
+      list.find((voice) =>
         voice.name.toLowerCase().includes("google us english")
       ) ||
-      voices.find((voice) =>
+      list.find((voice) =>
         voice.name.toLowerCase().includes("microsoft aria")
       ) ||
-      voices.find((voice) => voice.lang.startsWith("en")) ||
+      list.find((voice) =>
+        voice.lang.toLowerCase().startsWith("en")
+      ) ||
       null
     );
   };
 
-  const speak = (text, onEndCallback) => {
-    if (!text || !window.speechSynthesis) return;
+  const stopSpeaking = () => {
+    requestIdRef.current += 1;
 
-    window.speechSynthesis.cancel();
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    utteranceRef.current = null;
+    setIsSpeaking(false);
+  };
+
+  // onComplete receives "ended", "error", or "unsupported".
+  const speak = (text, onComplete) => {
+    if (!text?.trim()) {
+      onComplete?.("error");
+      return;
+    }
+
+    if (
+      !("speechSynthesis" in window) ||
+      !("SpeechSynthesisUtterance" in window)
+    ) {
+      onComplete?.("unsupported");
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+    const requestId = ++requestIdRef.current;
+
+    synth.cancel();
+    setIsSpeaking(false);
 
     const utterance = new SpeechSynthesisUtterance(text);
+    utteranceRef.current = utterance;
+
     const selectedVoice = getBestVoice();
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    } else {
+      utterance.lang = "en-US";
     }
 
     utterance.rate = 0.85;
     utterance.pitch = 1.05;
     utterance.volume = 1;
 
-    utterance.onstart = () => setIsSpeaking(true);
+    let completed = false;
 
-    utterance.onend = () => {
+    const finish = (status) => {
+      if (completed || requestId !== requestIdRef.current) return;
+
+      completed = true;
+      utteranceRef.current = null;
       setIsSpeaking(false);
-      if (onEndCallback) onEndCallback();
+
+      onComplete?.(status);
     };
 
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onstart = () => {
+      if (requestId === requestIdRef.current) {
+        setIsSpeaking(true);
+      }
+    };
 
-    window.speechSynthesis.speak(utterance);
-  };
+    utterance.onend = () => finish("ended");
 
-  const stopSpeaking = () => {
-    window.speechSynthesis.cancel();
-    setIsSpeaking(false);
+    utterance.onerror = (event) => {
+      console.warn("Speech synthesis error:", event.error);
+      finish("error");
+    };
+
+    try {
+      synth.speak(utterance);
+    } catch (error) {
+      console.error("Unable to start narration:", error);
+      finish("error");
+    }
   };
 
   const toggleSpeaking = (text) => {
@@ -73,5 +136,10 @@ export function useTextToSpeech() {
     }
   };
 
-  return { speak, stopSpeaking, toggleSpeaking, isSpeaking };
+  return {
+    speak,
+    stopSpeaking,
+    toggleSpeaking,
+    isSpeaking,
+  };
 }

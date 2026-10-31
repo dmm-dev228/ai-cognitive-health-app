@@ -39,7 +39,7 @@ function GamePage() {
 
   const [wordBloomData, setWordBloomData] = useState(null);
 
-  const { speak } = useTextToSpeech();
+  const { speak, stopSpeaking } = useTextToSpeech();
 
   const scrollToGameArea = () => {
     setTimeout(() => {
@@ -241,12 +241,25 @@ function GamePage() {
              * Move to the recall phase only after the story narration finishes.
              * This prevents the answer screen from appearing before the AI is done reading.
              */
-            speak(generatedStoryGame.story, () => {
-              setStoryPhase("RECALL");
-              setIsShowingPrompt(false);
-              setAnswerStartTime(Date.now());
-              scrollToRef(storyRecallRef);
+
+            speak(generatedStoryGame.story, (status) => {
+              if (status === "ended") {
+                setStoryPhase("RECALL");
+                setIsShowingPrompt(false);
+                setAnswerStartTime(Date.now());
+                scrollToRef(storyRecallRef);
+              } else {
+                console.warn(
+                  "Story narration did not finish:",
+                  status
+                );
+                /* Keep the story visible so the user can
+                 * start narration manually or continue.
+                 *
+                 */
+              }
             });
+
           }
         }, 1000);
       } catch (err) {
@@ -276,7 +289,7 @@ function GamePage() {
 
         setAiReflection(
           aiResult.supportiveResponse ||
-            "CogniHaven generated a reflection, but no response text was returned."
+          "CogniHaven generated a reflection, but no response text was returned."
         );
       } catch (reflectionError) {
         console.error("AI reflection failed:", reflectionError);
@@ -362,8 +375,8 @@ function GamePage() {
       score === 100
         ? `Excellent recall! You remembered all ${totalQuestions} items. Score: ${score}%.`
         : `You remembered ${correctAnswers}/${totalQuestions} items. Score: ${score}%. The original items were: ${storyData.targetWords.join(
-            ", "
-          )}.`;
+          ", "
+        )}.`;
 
     await saveResultAndReflect(gameResult, message);
   };
@@ -621,75 +634,48 @@ function GamePage() {
                 </div>
               )}
 
-            {/* ===================================================
-                STORY RECALL
-                =================================================== */}
-            {gameStarted &&
-              isShowingPrompt &&
-              selectedGame === "STORY_RECALL" &&
-              storyData && (
-                <div className="animate-fade-in text-center">
-                  {/* Memorize Words */}
-                  {storyPhase === "WORDS" && (
-                    <div
-                      ref={storyWordsRef}
-                      className="mx-auto max-w-3xl scroll-mt-24 rounded-[1.5rem] bg-gradient-to-br from-emerald-50 to-sky-50 p-4 shadow-inner sm:scroll-mt-28 sm:rounded-[2rem] sm:p-8 lg:p-10"
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 sm:text-sm sm:tracking-[0.25em]">
-                        Memorize These Words
-                      </p>
 
-                      <h3 className="mt-3 text-2xl font-black leading-tight text-slate-900 sm:mt-4 sm:text-3xl">
-                        Remember the original words
-                      </h3>
+            {/* Story Narration */}
+            {storyPhase === "STORY" && (
+              <div
+                ref={storyNarrationRef}
+                className="mx-auto max-w-3xl scroll-mt-24 rounded-[1.5rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-4 shadow-inner sm:scroll-mt-28 sm:rounded-[2rem] sm:p-8 lg:p-10"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 sm:text-sm sm:tracking-[0.25em]">
+                  Listen to the Story
+                </p>
 
-                      <p className="mt-3 text-sm font-semibold text-slate-500">
-                        Words disappear in {countdown} seconds
-                      </p>
+                <p className="mt-4 break-words text-base font-bold leading-7 text-slate-800 sm:mt-6 sm:text-xl sm:leading-9">
+                  {spokenStory}
+                </p>
 
-                      <div className="mt-5 flex flex-wrap justify-center gap-2 sm:mt-8 sm:gap-4">
-                        {storyData.targetWords.map((word) => (
-                          <span
-                            key={word}
-                            className="max-w-full break-words rounded-2xl bg-white px-4 py-3 text-base font-black text-emerald-700 shadow-lg shadow-emerald-100 sm:rounded-3xl sm:px-6 sm:py-4 sm:text-xl"
-                          >
-                            {word}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Story Narration */}
-                  {storyPhase === "STORY" && (
-                    <div
-                      ref={storyNarrationRef}
-                      className="mx-auto max-w-3xl scroll-mt-24 rounded-[1.5rem] bg-gradient-to-br from-indigo-50 to-violet-50 p-4 shadow-inner sm:scroll-mt-28 sm:rounded-[2rem] sm:p-8 lg:p-10"
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 sm:text-sm sm:tracking-[0.25em]">
-                        Listen to the Story
-                      </p>
-
-                      <p className="mt-4 break-words text-base font-bold leading-7 text-slate-800 sm:mt-6 sm:text-xl sm:leading-9">
-                        {spokenStory}
-                      </p>
-
-                      {/*
-                       * Users do not need to click this during the first story reading.
-                       * This is only here in case they want to replay the story audio.
-                       */}
-                      <div className="mt-5 sm:mt-6">
-                        <VoiceControls
-                          textToRead={spokenStory}
-                          showTextToSpeech={true}
-                          showSpeechToText={false}
-                          readButtonLabel="Listen Again"
-                        />
-                      </div>
-                    </div>
-                  )}
+                {/* Listen Again */}
+                <div className="mt-5 sm:mt-6">
+                  <VoiceControls
+                    textToRead={spokenStory}
+                    showTextToSpeech={true}
+                    showSpeechToText={false}
+                    readButtonLabel="Listen Again"
+                  />
                 </div>
-              )}
+
+                {/* Continue to Recall */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    stopSpeaking();
+                    setStoryPhase("RECALL");
+                    setIsShowingPrompt(false);
+                    setAnswerStartTime(Date.now());
+                    scrollToRef(storyRecallRef);
+                  }}
+                  className="mt-4 w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90 sm:w-auto"
+                >
+                  Continue to Recall
+                </button>
+              </div>
+            )}
+
 
             {/* ===================================================
                 RECALL / ANSWER PHASE
@@ -706,24 +692,23 @@ function GamePage() {
                 >
                   <div className="rounded-[1.5rem] border border-violet-100 bg-white p-4 shadow-lg shadow-violet-100 dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-violet-950/50 dark:shadow-none sm:rounded-[2rem] sm:p-6">
                     <div className="text-center">
-  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500 sm:text-sm sm:tracking-[0.25em]">
-    Recall Phase
-  </p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500 sm:text-sm sm:tracking-[0.25em]">
+                        Recall Phase
+                      </p>
 
-  <h3 className="mt-2 text-2xl font-bold leading-tight text-slate-900 dark:text-white sm:mt-3 sm:text-3xl">
-    {selectedGame === "STORY_RECALL"
-      ? `What were the original ${
-          storyData?.targetWords?.length || 3
-        } items?`
-      : "Enter the pattern you remember"}
-  </h3>
+                      <h3 className="mt-2 text-2xl font-bold leading-tight text-slate-900 dark:text-white sm:mt-3 sm:text-3xl">
+                        {selectedGame === "STORY_RECALL"
+                          ? `What were the original ${storyData?.targetWords?.length || 3
+                          } items?`
+                          : "Enter the pattern you remember"}
+                      </h3>
 
-  <p className="mx-auto mt-3 max-w-lg text-sm font-medium leading-6 text-slate-600 dark:text-slate-300 sm:leading-7">
-    {selectedGame === "STORY_RECALL"
-      ? "Type or speak the words you remember. You can also replay the story if needed."
-      : "Type the sequence without spaces."}
-  </p>
-</div>
+                      <p className="mx-auto mt-3 max-w-lg text-sm font-medium leading-6 text-slate-600 dark:text-slate-300 sm:leading-7">
+                        {selectedGame === "STORY_RECALL"
+                          ? "Type or speak the words you remember. You can also replay the story if needed."
+                          : "Type the sequence without spaces."}
+                      </p>
+                    </div>
 
                     <div className="mt-5 space-y-4 sm:mt-6">
                       <div className="relative min-w-0">
@@ -746,11 +731,10 @@ function GamePage() {
                               : "Example: 1234"
                           }
                           disabled={isGeneratingReflection}
-                          className={`w-full min-w-0 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-4 text-center font-bold text-slate-700 shadow-sm transition focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-[1.5rem] sm:px-5 ${
-                            selectedGame === "STORY_RECALL"
-                              ? "pr-14 text-base sm:pr-16 sm:text-lg"
-                              : "text-2xl tracking-[0.25em] min-[390px]:text-3xl min-[390px]:tracking-[0.35em] sm:tracking-[0.5em]"
-                          }`}
+                          className={`w-full min-w-0 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-4 text-center font-bold text-slate-700 shadow-sm transition focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-[1.5rem] sm:px-5 ${selectedGame === "STORY_RECALL"
+                            ? "pr-14 text-base sm:pr-16 sm:text-lg"
+                            : "text-2xl tracking-[0.25em] min-[390px]:text-3xl min-[390px]:tracking-[0.35em] sm:tracking-[0.5em]"
+                            }`}
                         />
 
                         {selectedGame === "STORY_RECALL" && (
@@ -769,31 +753,31 @@ function GamePage() {
                       {selectedGame === "STORY_RECALL" && storyData && (
                         <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
                           <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-violet-50 to-white shadow-sm dark:border-indigo-400/20 dark:from-indigo-950/70 dark:via-violet-950/60 dark:to-slate-900">
-  <div className="flex items-center gap-3 border-b border-indigo-100/80 px-4 py-3 dark:border-white/10">
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
-      🔊
-    </div>
+                            <div className="flex items-center gap-3 border-b border-indigo-100/80 px-4 py-3 dark:border-white/10">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
+                                🔊
+                              </div>
 
-    <div className="min-w-0 text-left">
-      <p className="text-sm font-bold text-slate-900 dark:text-white">
-        Replay Story
-      </p>
+                              <div className="min-w-0 text-left">
+                                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                                  Replay Story
+                                </p>
 
-      <p className="mt-0.5 text-xs leading-5 text-slate-500 dark:text-slate-300">
-        Listen again before submitting your answer.
-      </p>
-    </div>
-  </div>
+                                <p className="mt-0.5 text-xs leading-5 text-slate-500 dark:text-slate-300">
+                                  Listen again before submitting your answer.
+                                </p>
+                              </div>
+                            </div>
 
-  <div className="flex justify-center px-4 py-3">
-    <VoiceControls
-      textToRead={storyData.story}
-      showTextToSpeech={true}
-      showSpeechToText={false}
-      readButtonLabel="Play Story Again"
-    />
-  </div>
-</div>
+                            <div className="flex justify-center px-4 py-3">
+                              <VoiceControls
+                                textToRead={storyData.story}
+                                showTextToSpeech={true}
+                                showSpeechToText={false}
+                                readButtonLabel="Play Story Again"
+                              />
+                            </div>
+                          </div>
 
                           <button
                             onClick={() => setShowClue(true)}

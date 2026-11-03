@@ -742,13 +742,13 @@ function GamePage() {
                   ref={storyRecallRef}
                   className="mx-auto min-w-0 max-w-2xl scroll-mt-24 sm:scroll-mt-28"
                 >
-                  <div className="rounded-[1.5rem] border border-violet-100 bg-white p-4 shadow-lg shadow-violet-100 dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-violet-950/50 dark:shadow-none sm:rounded-[2rem] sm:p-6">
+                  <div className="rounded-[1.5rem] border border-violet-100 bg-white p-4 shadow-lg shadow-violet-100 sm:rounded-[2rem] sm:p-6">
                     <div className="text-center">
   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500 sm:text-sm sm:tracking-[0.25em]">
     Recall Phase
   </p>
 
-  <h3 className="mt-2 text-2xl font-bold leading-tight text-slate-900 dark:text-white sm:mt-3 sm:text-3xl">
+  <h3 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:mt-3 sm:text-3xl">
     {selectedGame === "STORY_RECALL"
       ? `What were the original ${
           storyData?.targetWords?.length || 3
@@ -756,7 +756,7 @@ function GamePage() {
       : "Enter the pattern you remember"}
   </h3>
 
-  <p className="mx-auto mt-3 max-w-lg text-sm font-medium leading-6 text-slate-600 dark:text-slate-300 sm:leading-7">
+  <p className="mx-auto mt-3 max-w-lg text-sm font-medium leading-6 text-slate-600 sm:leading-7">
     {selectedGame === "STORY_RECALL"
       ? "Type or speak the words you remember. You can also replay the story if needed."
       : "Type the sequence without spaces."}
@@ -806,18 +806,18 @@ function GamePage() {
                       {/* Story Recall Helpers */}
                       {selectedGame === "STORY_RECALL" && storyData && (
                         <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
-                          <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-violet-50 to-white shadow-sm dark:border-indigo-400/20 dark:from-indigo-950/70 dark:via-violet-950/60 dark:to-slate-900">
-  <div className="flex items-center gap-3 border-b border-indigo-100/80 px-4 py-3 dark:border-white/10">
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
+                          <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-violet-50 to-white shadow-sm">
+  <div className="flex items-center gap-3 border-b border-indigo-100/80 px-4 py-3">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-lg text-white shadow-md shadow-indigo-200">
       🔊
     </div>
 
     <div className="min-w-0 text-left">
-      <p className="text-sm font-bold text-slate-900 dark:text-white">
+      <p className="text-sm font-bold text-slate-900">
         Replay Story
       </p>
 
-      <p className="mt-0.5 text-xs leading-5 text-slate-500 dark:text-slate-300">
+      <p className="mt-0.5 text-xs leading-5 text-slate-500">
         Listen again before submitting your answer.
       </p>
     </div>

@@ -113,6 +113,7 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
 
   const timerRef = useRef(null);
   const gameContainerRef = useRef(null);
+  const guessInputRef = useRef(null);
 
   const secretWord = wordData?.secretWord?.toUpperCase() || "";
   const hint = wordData?.hint || "";
@@ -146,6 +147,14 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
     // Keyboard-first gameplay: the page listens for letters, Backspace, and Enter.
     const handleGlobalKeyDown = (event) => {
       if (isCompleted || isRevealing) return;
+
+      // A real input handles mobile keyboards and focused desktop typing.
+      // Ignore those keys here to avoid inserting each letter twice.
+      const target = event.target;
+      if (target instanceof HTMLElement &&
+          (target.matches("input, textarea, select") || target.isContentEditable)) {
+        return;
+      }
 
       const key = event.key;
 
@@ -285,8 +294,8 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
           </h3>
 
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            Type letters directly into the board. Press Enter or click Submit
-            Guess when your five-letter word is ready.
+            Tap the active row or the letter input to type on mobile.
+            Press Enter or select Submit Guess when your five-letter word is ready.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -323,7 +332,15 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
           <div>
             <div className="mx-auto grid max-w-sm gap-2">
               {board.map((row, rowIndex) => (
-                <div key={rowIndex} className="grid grid-cols-5 gap-2">
+                <div
+                  key={rowIndex}
+                  className={`grid grid-cols-5 gap-2 ${rowIndex === currentAttempt && !isCompleted && !isRevealing ? "cursor-text" : ""}`}
+                  onClick={() => {
+                    if (rowIndex === currentAttempt && !isCompleted && !isRevealing) {
+                      guessInputRef.current?.focus();
+                    }
+                  }}
+                >
                   {row.map((tile, tileIndex) => {
                     const displayLetter = getDisplayLetter(tile, rowIndex, tileIndex);
 
@@ -352,6 +369,38 @@ function WordBloomGame({ difficulty = "EASY", wordData, onComplete }) {
                   })}
                 </div>
               ))}
+            </div>
+
+            <div className="mx-auto mt-4 max-w-sm">
+              <label htmlFor="word-bloom-guess" className="mb-2 block text-sm font-semibold text-slate-700">
+                Your five-letter guess
+              </label>
+              <input
+                ref={guessInputRef}
+                id="word-bloom-guess"
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                maxLength={WORD_LENGTH}
+                value={currentGuess}
+                onChange={(event) => {
+                  setCurrentGuess(event.target.value.replace(/[^a-z]/gi, "").toUpperCase().slice(0, WORD_LENGTH));
+                  setMessage("");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    submitGuess();
+                  }
+                }}
+                disabled={isCompleted || isRevealing}
+                placeholder="Tap here to type"
+                aria-label="Enter your five-letter Word Bloom guess"
+                className="w-full rounded-2xl border-2 border-violet-200 bg-white px-4 py-3 text-center text-base font-bold uppercase tracking-[0.25em] text-slate-900 shadow-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100 disabled:opacity-50"
+              />
             </div>
 
             {message && (
